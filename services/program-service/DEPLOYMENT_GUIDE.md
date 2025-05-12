@@ -8,12 +8,14 @@ Visafy currently has the following API services:
 
 1. **Quiz Data API (`migratio-quiz-api`)**
    - **Purpose:** Serves quiz questions for the assessment
-   - **Technology:** FastAPI, MongoDB
-   - **Deployed URL:** [https://migratio-quiz-api-frost.onrender.com](https://migratio-quiz-api-frost.onrender.com)
-   - **Live API Docs:** [https://migratio-quiz-api-frost.onrender.com/docs](https://migratio-quiz-api-frost.onrender.com/docs)
-   - **Environment Variables:**
-     - `MONGODB_CONNECTION_STRING`: MongoDB connection string
-     - `PORT`: Port for the FastAPI server
+   - **Technology:** FastAPI, SQLite
+   - **Deployed URL:** [https://migratio-quiz-api.onrender.com](https://migratio-quiz-api.onrender.com)
+   - **Live API Docs:** [https://migratio-quiz-api.onrender.com/docs](https://migratio-quiz-api.onrender.com/docs)
+   - **Key Endpoints:**
+     - `GET /quiz/questions`: Retrieves all quiz questions
+   - **Database:**
+     - Type: SQLite
+     - Data Source: `quiz_data_api/quiz_data.json` (loaded into `quiz_data.db` within the service)
 
 2. **User Authentication API (`migratio-user-auth`)**
    - **Purpose:** Handles user signup, login, and token-based authentication
@@ -28,12 +30,14 @@ Visafy currently has the following API services:
 3. **Program Service (`migratio-program-service`)**
    - **Purpose:** Manages immigration program data and country information
    - **Technology:** Node.js, Express, MongoDB
-   - **To be deployed to:** Render
+   - **GitHub Repository:** [https://github.com/frosttechequities/migratio-program-service](https://github.com/frosttechequities/migratio-program-service)
+   - **Deployed URL:** [https://migratio-program-service.onrender.com](https://migratio-program-service.onrender.com)
+   - **Deployment Status:** Live (Free tier - spins down with inactivity)
    - **Environment Variables:**
      - `MONGODB_URI`: MongoDB connection string
-     - `PROGRAM_SERVICE_PORT`: Port for the Express server
-     - `NODE_ENV`: Environment (development, production)
-     - `CORS_ORIGIN`: CORS configuration
+     - `PROGRAM_SERVICE_PORT`: `10000` (Render uses port 10000 by default)
+     - `NODE_ENV`: `production`
+     - `CORS_ORIGIN`: `*` (to allow requests from any origin during development)
 
 ## Step 1: Set Up MongoDB Atlas (for Program Service)
 
@@ -69,36 +73,36 @@ Visafy currently has the following API services:
 
 ## Step 2: Deploy Program Service to Render
 
-1. **Sign in to Render**:
+1. **Prepare Your GitHub Repository**:
+   - Create a new repository on GitHub: [https://github.com/frosttechequities/migratio-program-service](https://github.com/frosttechequities/migratio-program-service)
+   - Push your code to GitHub using these commands:
+     ```
+     git remote add origin https://github.com/frosttechequities/migratio-program-service.git
+     git branch -M main
+     git push -u origin main
+     ```
+
+2. **Sign in to Render**:
    - Go to [Render Dashboard](https://dashboard.render.com/)
    - Sign in to your account
 
-2. **Create a New Web Service**:
+3. **Create a New Web Service**:
    - Click "New +"
    - Select "Web Service"
 
-3. **Choose Deployment Method**:
+4. **Connect Your GitHub Repository**:
+   - Select "GitHub" as the deployment method
+   - Find and select your repository: `frosttechequities/migratio-program-service`
+   - If you don't see it, click "Configure account" to refresh your repository list
 
-   **Option A: Deploy from GitHub (recommended for continuous deployment)**
-   - Connect your GitHub account if you haven't already
-   - Select your repository (e.g., `frosttechequities/migratio-program-service`)
-   - If you're using a monorepo, you'll specify the subdirectory in the next step
-
-   **Option B: Deploy without Git (manual upload)**
-   - Instead of connecting a repository, click on "Upload Files"
-   - Create a ZIP file of your `services/program-service` directory
-   - Upload the ZIP file to Render
-   - Render will extract the files and use them for deployment
-   - Note: With this method, you'll need to manually upload a new ZIP file each time you want to update your service
-
-4. **Configure the Service**:
+5. **Configure the Service**:
    - Name: `migratio-program-service`
-   - Root Directory: `services/program-service` (this is crucial if using a monorepo)
+   - Root Directory: `services/program-service` (this is crucial - make sure it's exactly this path)
    - Runtime: `Docker`
-   - Branch: `main` (or your deployment branch)
-   - Instance Type: `Free` (for testing)
+   - Branch: `main`
+   - Instance Type: `Free`
 
-5. **Set Environment Variables**:
+6. **Set Environment Variables**:
    - Scroll down to the "Environment" section
    - Add the following environment variables:
      - Key: `MONGODB_URI`, Value: Your MongoDB Atlas connection string (e.g., `mongodb+srv://<username>:<password>@<cluster>.mongodb.net/migratio_program_service?retryWrites=true&w=majority`)
@@ -106,7 +110,7 @@ Visafy currently has the following API services:
      - Key: `NODE_ENV`, Value: `production`
      - Key: `CORS_ORIGIN`, Value: `*` (to allow requests from any origin during development)
 
-6. **Deploy the Service**:
+7. **Deploy the Service**:
    - Click "Create Web Service"
    - Render will start building and deploying your service
 
@@ -167,19 +171,37 @@ If you want to seed program data after deployment:
 
 ## Existing Services Reference
 
+### Program Service API
+
+- **GitHub Repository:** [https://github.com/frosttechequities/migratio-program-service](https://github.com/frosttechequities/migratio-program-service)
+- **Deployed URL:** [https://migratio-program-service.onrender.com](https://migratio-program-service.onrender.com) (after deployment)
+- **Key Endpoints:**
+  - `GET /api/countries`: Retrieves all countries
+  - `GET /api/countries/:countryCode`: Retrieves a specific country by code
+  - `GET /api/programs`: Retrieves all immigration programs
+  - `GET /api/programs/:id`: Retrieves a specific program by ID
+  - `GET /api/programs/country/:countryCode`: Retrieves all programs for a specific country
+- **Environment Variables:**
+  - `MONGODB_URI`: MongoDB connection string
+  - `PROGRAM_SERVICE_PORT`: `10000` (Render uses port 10000 by default)
+  - `NODE_ENV`: `production`
+  - `CORS_ORIGIN`: `*` (to allow requests from any origin during development)
+- **Deployment Platform:** Render (Free Tier)
+
 ### Quiz Data API
 
-- **Deployed URL:** [https://migratio-quiz-api-frost.onrender.com](https://migratio-quiz-api-frost.onrender.com)
-- **Live API Docs:** [https://migratio-quiz-api-frost.onrender.com/docs](https://migratio-quiz-api-frost.onrender.com/docs)
-- **Key Endpoints:**
-  - `GET /questions/`: Retrieves all quiz questions
-- **Database:**
-  - Type: MongoDB
-  - Data Source: Questions are loaded from the database and can be seeded using the `/seed_questions/` endpoint
 - **GitHub Repository:** [https://github.com/frosttechequities/migratio-quiz-service.git](https://github.com/frosttechequities/migratio-quiz-service.git)
+- **Deployed URL:** [https://migratio-quiz-api.onrender.com](https://migratio-quiz-api.onrender.com)
+- **Live API Docs:** [https://migratio-quiz-api.onrender.com/docs](https://migratio-quiz-api.onrender.com/docs)
+- **Key Endpoints:**
+  - `GET /quiz/questions`: Retrieves all quiz questions
+- **Database:**
+  - Type: SQLite
+  - Data Source: `quiz_data_api/quiz_data.json` (loaded into `quiz_data.db` within the service)
 
 ### User Authentication API
 
+- **GitHub Repository:** [https://github.com/frosttechequities/migratio-user-auth-service.git](https://github.com/frosttechequities/migratio-user-auth-service.git)
 - **Deployed URL:** [https://migratio-user-auth.onrender.com](https://migratio-user-auth.onrender.com)
 - **Live API Docs:** [https://migratio-user-auth.onrender.com/docs](https://migratio-user-auth.onrender.com/docs)
 - **Key Endpoints:**
@@ -187,7 +209,6 @@ If you want to seed program data after deployment:
   - `POST /auth/login`: Log in an existing user, returns access/refresh tokens
   - `GET /auth/me`: Get details for the currently authenticated user (requires Bearer token)
   - `POST /auth/logout`: Log out the current user (requires Bearer token)
-- **GitHub Repository:** [https://github.com/frosttechequities/migratio-user-auth-service.git](https://github.com/frosttechequities/migratio-user-auth-service.git)
 - **Supabase Configuration:**
   - Project URL: `https://xcjtfkaigogalnytjybk.supabase.co`
   - Anon Key (public): `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjanRma2FpZ29nYWxueXRqeWJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcwMjQzMTYsImV4cCI6MjA2MjYwMDMxNn0.B5dayJJVA4wFHoCh2TyCbv7p6MDsfIv1BkDki-6ckDA`

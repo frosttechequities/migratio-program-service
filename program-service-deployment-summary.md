@@ -2,24 +2,27 @@
 
 This document summarizes the changes made to prepare the Program Service for deployment to Render and provides an overview of all Visafy API services.
 
+## GitHub Repository
+
+The Program Service code is now available in a dedicated GitHub repository:
+[https://github.com/frosttechequities/migratio-program-service](https://github.com/frosttechequities/migratio-program-service)
+
 ## Existing API Services
 
 Visafy currently has the following API services deployed:
 
 1. **Quiz Data API (`migratio-quiz-api`)**
    - **Purpose:** Serves quiz questions for the assessment
-   - **Technology:** FastAPI, MongoDB
-   - **Deployed URL:** [https://migratio-quiz-api-frost.onrender.com](https://migratio-quiz-api-frost.onrender.com)
-   - **Live API Docs:** [https://migratio-quiz-api-frost.onrender.com/docs](https://migratio-quiz-api-frost.onrender.com/docs)
+   - **Technology:** FastAPI, SQLite
+   - **Deployed URL:** [https://migratio-quiz-api.onrender.com](https://migratio-quiz-api.onrender.com)
+   - **Live API Docs:** [https://migratio-quiz-api.onrender.com/docs](https://migratio-quiz-api.onrender.com/docs)
    - **Key Endpoints:**
-     - `GET /questions/`: Retrieves all quiz questions
+     - `GET /quiz/questions`: Retrieves all quiz questions
    - **Database:**
-     - Type: MongoDB
-     - Data Source: Questions are loaded from the database and can be seeded using the `/seed_questions/` endpoint
-   - **Environment Variables:**
-     - `MONGODB_CONNECTION_STRING`: MongoDB connection string
-     - `PORT`: Port for the FastAPI server
+     - Type: SQLite
+     - Data Source: `quiz_data_api/quiz_data.json` (loaded into `quiz_data.db` within the service)
    - **GitHub Repository:** [https://github.com/frosttechequities/migratio-quiz-service.git](https://github.com/frosttechequities/migratio-quiz-service.git)
+   - **Deployment Platform:** Render (Free Tier)
 
 2. **User Authentication API (`migratio-user-auth`)**
    - **Purpose:** Handles user signup, login, and token-based authentication
@@ -88,28 +91,46 @@ Visafy currently has the following API services deployed:
 
 ## Deployment Steps for Program Service
 
-1. **Set Up MongoDB Atlas**
+1. **GitHub Repository Setup**
+   - Created a new GitHub repository: [https://github.com/frosttechequities/migratio-program-service](https://github.com/frosttechequities/migratio-program-service)
+   - Pushed the code to GitHub using:
+     ```
+     git remote add origin https://github.com/frosttechequities/migratio-program-service.git
+     git branch -M main
+     git push -u origin main
+     ```
+
+2. **Set Up MongoDB Atlas**
    - Create a MongoDB Atlas account
    - Create a new cluster
    - Set up database access
    - Configure network access
    - Get connection string
 
-2. **Deploy to Render**
+3. **Deploy to Render**
    - Create a new Web Service on Render
-   - Choose deployment method:
-     - **Option A**: Deploy from GitHub (connect repository)
-     - **Option B**: Deploy without Git (upload ZIP file of program-service directory)
-   - Configure the service with the correct root directory
-   - Set environment variables (MONGODB_URI, PROGRAM_SERVICE_PORT, NODE_ENV, CORS_ORIGIN)
-   - Deploy the service
+   - Connect to the GitHub repository: `frosttechequities/migratio-program-service`
+   - Configure the service:
+     - Name: `migratio-program-service`
+     - Root Directory: `services/program-service`
+     - Runtime: `Docker`
+     - Branch: `main`
+     - Instance Type: `Free`
+   - Set environment variables:
+     - `MONGODB_URI`: MongoDB Atlas connection string
+     - `PROGRAM_SERVICE_PORT`: `10000`
+     - `NODE_ENV`: `production`
+     - `CORS_ORIGIN`: `*`
 
-3. **Test the Deployment**
-   - Verify the service is running
-   - Test the API endpoints
-   - Check database seeding
+4. **Deployment Status**
+   - The service is now successfully deployed and running at [https://migratio-program-service.onrender.com](https://migratio-program-service.onrender.com)
+   - The database has been successfully seeded with country data
+   - The service is on Render's free tier, which will spin down with inactivity
+   - API endpoints are accessible:
+     - `/api/countries`
+     - `/api/programs`
 
-4. **Integrate with Frontend**
+5. **Integrate with Frontend**
    - Update the frontend to use the deployed Program Service API
    - Test the integration
 
@@ -139,8 +160,8 @@ Visafy currently has the following API services deployed:
 
 ## Conclusion
 
-The Program Service is now ready for deployment to Render. The changes made improve error handling, database seeding, and overall reliability of the service. The documentation provides clear instructions for deployment and troubleshooting.
+The Program Service has been successfully prepared for deployment to Render. The code is now available in a dedicated GitHub repository at [https://github.com/frosttechequities/migratio-program-service](https://github.com/frosttechequities/migratio-program-service). The changes made improve error handling, database seeding, and overall reliability of the service. The documentation provides clear instructions for deployment and troubleshooting.
 
 With the Quiz API, User Auth API, and Program Service deployed, Visafy will have the core backend services needed to support the assessment, user management, and program recommendation features of the platform.
 
-Follow the step-by-step guide in DEPLOYMENT_GUIDE.md to deploy the service to Render.
+The deployment guide in DEPLOYMENT_GUIDE.md has been updated with actual details and values, making it easier for future deployments and maintenance.
