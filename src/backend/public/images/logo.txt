@@ -1,0 +1,3 @@
+Migratio Logo
+This is a placeholder for the actual logo image.
+In a production environment, you would use a real PNG or SVG logo file.

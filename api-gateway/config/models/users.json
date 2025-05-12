@@ -1,0 +1,19 @@
+{
+  "$id": "https://migratio.com/schemas/users.json",
+  "type": "object",
+  "properties": {
+    "users": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "email": { "type": "string" },
+          "role": { "type": "string" }
+        },
+        "required": ["id", "email"]
+      }
+    }
+  },
+  "required": ["users"]
+}

@@ -1,0 +1,148 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  labels:
+    app: api-gateway
+    component: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api-gateway
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "8000"
+    spec:
+      containers:
+      - name: api-gateway
+        image: migratio/api-gateway:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+          name: http
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        env:
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: api-gateway-config
+              key: NODE_ENV
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: api-gateway-config
+              key: PORT
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: api-gateway-config
+              key: LOG_LEVEL
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: api-gateway-secrets
+              key: JWT_SECRET
+        - name: JWT_EXPIRATION
+          valueFrom:
+            configMapKeyRef:
+              name: api-gateway-config
+              key: JWT_EXPIRATION
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: redis-config
+              key: REDIS_HOST
+        - name: REDIS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: redis-config
+              key: REDIS_PORT
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-secrets
+              key: REDIS_PASSWORD
+        - name: USER_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: service-endpoints
+              key: USER_SERVICE_URL
+        - name: ASSESSMENT_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: service-endpoints
+              key: ASSESSMENT_SERVICE_URL
+        - name: RECOMMENDATION_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: service-endpoints
+              key: RECOMMENDATION_SERVICE_URL
+        - name: PROGRAM_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: service-endpoints
+              key: PROGRAM_SERVICE_URL
+        - name: ROADMAP_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: service-endpoints
+              key: ROADMAP_SERVICE_URL
+        - name: PDF_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: service-endpoints
+              key: PDF_SERVICE_URL
+        - name: RATE_LIMIT_WINDOW_MS
+          valueFrom:
+            configMapKeyRef:
+              name: api-gateway-config
+              key: RATE_LIMIT_WINDOW_MS
+        - name: RATE_LIMIT_MAX_REQUESTS
+          valueFrom:
+            configMapKeyRef:
+              name: api-gateway-config
+              key: RATE_LIMIT_MAX_REQUESTS
+        - name: CORS_ORIGINS
+          valueFrom:
+            configMapKeyRef:
+              name: api-gateway-config
+              key: CORS_ORIGINS
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 2
+          successThreshold: 1
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 15
+          periodSeconds: 20
+          timeoutSeconds: 2
+          successThreshold: 1
+          failureThreshold: 3
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      terminationGracePeriodSeconds: 30

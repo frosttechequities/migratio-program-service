@@ -1,0 +1,41 @@
+[build]
+  command = "CI= npm run build"  # CI=false prevents treating warnings as errors
+  publish = "build"
+
+# Handle React Router
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Proxy API requests to backend (update with your actual backend URL when deployed)
+[[redirects]]
+  from = "/api/*"
+  to = "https://your-backend-api.com/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/auth/*"
+  to = "https://your-backend-api.com/auth/:splat"
+  status = 200
+  force = true
+
+# Environment variables can be set here or in the Netlify dashboard
+[build.environment]
+  REACT_APP_API_URL = "https://your-backend-api.com"  # Replace with your actual backend URL when deployed
+
+# Optimize build cache
+[build.processing]
+  skip_processing = false
+
+[build.processing.css]
+  bundle = true
+  minify = true
+
+[build.processing.js]
+  bundle = true
+  minify = true
+
+[build.processing.images]
+  compress = true

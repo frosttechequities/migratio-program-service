@@ -1,0 +1,18 @@
+{
+  "$id": "https://migratio.com/schemas/applications.json",
+  "type": "object",
+  "properties": {
+    "applications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" }
+        },
+        "required": ["id", "name"]
+      }
+    }
+  },
+  "required": ["applications"]
+}

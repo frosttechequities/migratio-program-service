@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200px" height="60px" viewBox="0 0 200 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Visafy Logo</title>
+    <defs>
+        <linearGradient x1="0%" y1="0%" x2="100%" y2="100%" id="visafyGradient">
+            <stop stop-color="#0066FF" offset="0%"></stop>
+            <stop stop-color="#5271FF" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Visafy-Logo" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Logo-Mark" transform="translate(10, 10)">
+            <rect id="Background" fill="url(#visafyGradient)" x="0" y="0" width="40" height="40" rx="8"></rect>
+            <path d="M10,10 L17.5,30 L20,30 L27.5,10 L24,10 L18.5,25 L13,10 L10,10 Z" id="V-Shape" fill="#FFFFFF" fill-rule="nonzero"></path>
+            <path d="M30,17.5 L30,20 L32.5,20 L32.5,17.5 L30,17.5 Z M30,22.5 L30,30 L32.5,30 L32.5,22.5 L30,22.5 Z" id="i-Shape" fill="#FFFFFF" fill-rule="nonzero"></path>
+        </g>
+        <g id="Logo-Text" transform="translate(60, 20)" fill="#0066FF">
+            <path d="M0,20 L3.5,20 L10.5,0 L7,0 L1.75,15 L-3.5,0 L-7,0 L0,20 Z" id="V" fill-rule="nonzero"></path>
+            <path d="M13,0 L13,20 L16,20 L16,0 L13,0 Z" id="i" fill-rule="nonzero"></path>
+            <path d="M19,20 L22,20 L22,13 C22,10.5 23.5,9 26,9 C26.5,9 27,9 27.5,9.5 L27.5,6.5 C27,6 26.5,6 26,6 C24,6 22.5,7 22,8.5 L22,6.5 L19,6.5 L19,20 Z" id="s" fill-rule="nonzero"></path>
+            <path d="M30,13.25 C30,17.5 33,20.5 37.25,20.5 C39.75,20.5 41.75,19.5 43,17.5 L40.5,16 C39.75,17.25 38.5,18 37.25,18 C34.75,18 33,16.25 33,13.25 C33,10.25 34.75,8.5 37.25,8.5 C38.5,8.5 39.75,9.25 40.5,10.5 L43,9 C41.75,7 39.75,6 37.25,6 C33,6 30,9 30,13.25 Z" id="a" fill-rule="nonzero"></path>
+            <path d="M45,20 L48,20 L48,15 L50.5,12.5 L55,20 L58.5,20 L52.5,10.5 L58,6.5 L54,6.5 L48,11.5 L48,0 L45,0 L45,20 Z" id="f" fill-rule="nonzero"></path>
+            <path d="M60,13.25 C60,17.5 63,20.5 67.25,20.5 C71.5,20.5 74.5,17.5 74.5,13.25 C74.5,9 71.5,6 67.25,6 C63,6 60,9 60,13.25 Z M63,13.25 C63,10.25 64.75,8.5 67.25,8.5 C69.75,8.5 71.5,10.25 71.5,13.25 C71.5,16.25 69.75,18 67.25,18 C64.75,18 63,16.25 63,13.25 Z" id="y" fill-rule="nonzero"></path>
+        </g>
+    </g>
+</svg>

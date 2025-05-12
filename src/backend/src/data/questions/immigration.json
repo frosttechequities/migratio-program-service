@@ -1,0 +1,394 @@
+[
+  {
+    "questionId": "immigration_001",
+    "text": "Have you ever applied for immigration to any country before?",
+    "helpText": "Previous immigration applications, whether successful or not, may be relevant to your current application.",
+    "section": "immigration",
+    "type": "single_choice",
+    "required": true,
+    "order": 1,
+    "options": [
+      { "value": "yes", "label": "Yes" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "immigration_002",
+    "text": "To which country did you previously apply for immigration?",
+    "helpText": "Select the country where you submitted your most recent immigration application.",
+    "section": "immigration",
+    "type": "single_choice",
+    "required": true,
+    "order": 2,
+    "conditionalDisplay": {
+      "dependsOn": "immigration_001",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "ca", "label": "Canada" },
+      { "value": "au", "label": "Australia" },
+      { "value": "nz", "label": "New Zealand" },
+      { "value": "uk", "label": "United Kingdom" },
+      { "value": "us", "label": "United States" },
+      { "value": "de", "label": "Germany" },
+      { "value": "sg", "label": "Singapore" },
+      { "value": "other", "label": "Other" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "immigration_003",
+    "text": "What was the outcome of your previous immigration application?",
+    "helpText": "The outcome of previous applications may affect your current application strategy.",
+    "section": "immigration",
+    "type": "single_choice",
+    "required": true,
+    "order": 3,
+    "conditionalDisplay": {
+      "dependsOn": "immigration_001",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "approved", "label": "Approved" },
+      { "value": "rejected", "label": "Rejected" },
+      { "value": "withdrawn", "label": "Withdrawn" },
+      { "value": "pending", "label": "Still pending" },
+      { "value": "other", "label": "Other" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "immigration_004",
+    "text": "If your previous application was rejected, what was the reason?",
+    "helpText": "Understanding the reason for rejection can help address those issues in your current application.",
+    "section": "immigration",
+    "type": "text",
+    "required": true,
+    "order": 4,
+    "conditionalDisplay": {
+      "dependsOn": "immigration_003",
+      "condition": "equals",
+      "value": "rejected"
+    },
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "immigration_005",
+    "text": "Do you have any family members who are citizens or permanent residents of your destination country?",
+    "helpText": "Family connections may qualify you for family-sponsored immigration programs.",
+    "section": "immigration",
+    "type": "single_choice",
+    "required": true,
+    "order": 5,
+    "options": [
+      { "value": "yes", "label": "Yes" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "immigration_006",
+    "text": "What is your relationship to your family member in the destination country?",
+    "helpText": "Different family relationships may qualify for different immigration programs.",
+    "section": "immigration",
+    "type": "multiple_choice",
+    "required": true,
+    "order": 6,
+    "conditionalDisplay": {
+      "dependsOn": "immigration_005",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "spouse", "label": "Spouse or partner" },
+      { "value": "parent", "label": "Parent" },
+      { "value": "child", "label": "Child (over 18)" },
+      { "value": "sibling", "label": "Sibling" },
+      { "value": "grandparent", "label": "Grandparent" },
+      { "value": "aunt_uncle", "label": "Aunt or Uncle" },
+      { "value": "cousin", "label": "Cousin" },
+      { "value": "other", "label": "Other" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "immigration_007",
+    "text": "What is your family member's immigration status in the destination country?",
+    "helpText": "Your family member's status affects their ability to sponsor you and the type of program you can apply for.",
+    "section": "immigration",
+    "type": "single_choice",
+    "required": true,
+    "order": 7,
+    "conditionalDisplay": {
+      "dependsOn": "immigration_005",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "citizen", "label": "Citizen" },
+      { "value": "permanent_resident", "label": "Permanent resident" },
+      { "value": "temporary", "label": "Temporary resident" },
+      { "value": "not_sure", "label": "Not sure" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "immigration_008",
+    "text": "Are you willing to live in a rural or remote area of your destination country?",
+    "helpText": "Many countries offer special immigration pathways for individuals willing to settle in rural or underserved regions.",
+    "section": "immigration",
+    "type": "single_choice",
+    "required": true,
+    "order": 8,
+    "options": [
+      { "value": "yes", "label": "Yes, I'm willing to live anywhere" },
+      { "value": "yes_temporary", "label": "Yes, but only temporarily (1-3 years)" },
+      { "value": "maybe", "label": "Maybe, depending on the location and opportunities" },
+      { "value": "no", "label": "No, I prefer urban areas" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "immigration_009",
+    "text": "How soon do you plan to immigrate?",
+    "helpText": "Your timeline may affect which immigration programs are most suitable for you.",
+    "section": "immigration",
+    "type": "single_choice",
+    "required": true,
+    "order": 9,
+    "options": [
+      { "value": "immediately", "label": "As soon as possible (within 6 months)" },
+      { "value": "6_to_12", "label": "Within 6-12 months" },
+      { "value": "1_to_2", "label": "Within 1-2 years" },
+      { "value": "2_to_5", "label": "Within 2-5 years" },
+      { "value": "no_timeline", "label": "No specific timeline" }
+    ],
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "immigration_010",
+    "text": "Are you planning to immigrate alone or with family members?",
+    "helpText": "Including family members in your application may affect eligibility, processing times, and settlement fund requirements.",
+    "section": "immigration",
+    "type": "single_choice",
+    "required": true,
+    "order": 10,
+    "options": [
+      { "value": "alone", "label": "Alone" },
+      { "value": "spouse", "label": "With spouse/partner only" },
+      { "value": "spouse_children", "label": "With spouse/partner and children" },
+      { "value": "children", "label": "With children only" },
+      { "value": "parents", "label": "With parents" },
+      { "value": "extended", "label": "With extended family" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "immigration_011",
+    "text": "How many family members will be included in your immigration application?",
+    "helpText": "The number of dependents affects settlement fund requirements and may impact processing times.",
+    "section": "immigration",
+    "type": "number",
+    "required": true,
+    "order": 11,
+    "conditionalDisplay": {
+      "dependsOn": "immigration_010",
+      "condition": "not_equals",
+      "value": "alone"
+    },
+    "validation": {
+      "min": 1,
+      "max": 20
+    },
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "immigration_012",
+    "text": "Have you ever visited your destination country before?",
+    "helpText": "Previous visits may demonstrate ties to the country and familiarity with its culture, which can be beneficial for some immigration programs.",
+    "section": "immigration",
+    "type": "single_choice",
+    "required": true,
+    "order": 12,
+    "options": [
+      { "value": "yes", "label": "Yes" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "immigration_013",
+    "text": "How many times have you visited your destination country?",
+    "helpText": "Multiple visits may demonstrate stronger ties to the country.",
+    "section": "immigration",
+    "type": "single_choice",
+    "required": true,
+    "order": 13,
+    "conditionalDisplay": {
+      "dependsOn": "immigration_012",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "once", "label": "Once" },
+      { "value": "2_to_5", "label": "2-5 times" },
+      { "value": "more_than_5", "label": "More than 5 times" }
+    ],
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "immigration_014",
+    "text": "What was the purpose of your visits to your destination country?",
+    "helpText": "The purpose of your visits may be relevant for certain immigration programs.",
+    "section": "immigration",
+    "type": "multiple_choice",
+    "required": true,
+    "order": 14,
+    "conditionalDisplay": {
+      "dependsOn": "immigration_012",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "tourism", "label": "Tourism/Vacation" },
+      { "value": "business", "label": "Business" },
+      { "value": "education", "label": "Education/Study" },
+      { "value": "work", "label": "Work" },
+      { "value": "family", "label": "Visiting family/friends" },
+      { "value": "medical", "label": "Medical treatment" },
+      { "value": "other", "label": "Other" }
+    ],
+    "relevanceScore": 6,
+    "isActive": true
+  },
+  {
+    "questionId": "immigration_015",
+    "text": "Are you interested in temporary immigration first, or direct permanent residence?",
+    "helpText": "Some countries offer pathways that begin with temporary status before transitioning to permanent residence.",
+    "section": "immigration",
+    "type": "single_choice",
+    "required": true,
+    "order": 15,
+    "options": [
+      { "value": "permanent", "label": "Direct permanent residence" },
+      { "value": "temporary_to_permanent", "label": "Temporary first, then transition to permanent" },
+      { "value": "either", "label": "Either option is acceptable" },
+      { "value": "temporary_only", "label": "Temporary only (no intention for permanent residence)" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "immigration_016",
+    "text": "Are you interested in eventually obtaining citizenship in your destination country?",
+    "helpText": "Citizenship requirements and timelines vary by country.",
+    "section": "immigration",
+    "type": "single_choice",
+    "required": true,
+    "order": 16,
+    "options": [
+      { "value": "yes", "label": "Yes, as soon as eligible" },
+      { "value": "maybe", "label": "Maybe in the future" },
+      { "value": "no", "label": "No, permanent residence is sufficient" },
+      { "value": "not_sure", "label": "Not sure" }
+    ],
+    "relevanceScore": 6,
+    "isActive": true
+  },
+  {
+    "questionId": "immigration_017",
+    "text": "Would you consider studying in your destination country as a pathway to immigration?",
+    "helpText": "Many countries offer post-graduation work permits and immigration pathways for international students.",
+    "section": "immigration",
+    "type": "single_choice",
+    "required": true,
+    "order": 17,
+    "options": [
+      { "value": "yes", "label": "Yes, I would consider studying" },
+      { "value": "maybe", "label": "Maybe, depending on the program and costs" },
+      { "value": "no", "label": "No, I'm not interested in studying" }
+    ],
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "immigration_018",
+    "text": "What level of education would you consider pursuing in your destination country?",
+    "helpText": "Different levels of education may offer different immigration benefits.",
+    "section": "immigration",
+    "type": "multiple_choice",
+    "required": true,
+    "order": 18,
+    "conditionalDisplay": {
+      "dependsOn": "immigration_017",
+      "condition": "not_equals",
+      "value": "no"
+    },
+    "options": [
+      { "value": "language", "label": "Language courses" },
+      { "value": "certificate", "label": "Certificate/Diploma (less than 1 year)" },
+      { "value": "diploma", "label": "Diploma/Associate degree (1-2 years)" },
+      { "value": "bachelor", "label": "Bachelor's degree (3-4 years)" },
+      { "value": "post_grad_cert", "label": "Post-graduate certificate (1 year)" },
+      { "value": "master", "label": "Master's degree (1-2 years)" },
+      { "value": "doctoral", "label": "Doctoral degree (3+ years)" }
+    ],
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "immigration_019",
+    "text": "Are you working with an immigration consultant, lawyer, or agency?",
+    "helpText": "Professional assistance can be helpful for complex immigration cases.",
+    "section": "immigration",
+    "type": "single_choice",
+    "required": true,
+    "order": 19,
+    "options": [
+      { "value": "yes_consultant", "label": "Yes, an immigration consultant" },
+      { "value": "yes_lawyer", "label": "Yes, an immigration lawyer" },
+      { "value": "yes_agency", "label": "Yes, an immigration agency" },
+      { "value": "no_but_planning", "label": "No, but planning to hire one" },
+      { "value": "no", "label": "No, handling the process myself" }
+    ],
+    "relevanceScore": 5,
+    "isActive": true
+  },
+  {
+    "questionId": "immigration_020",
+    "text": "What is your primary motivation for immigration?",
+    "helpText": "Understanding your motivation helps us recommend the most suitable immigration pathways.",
+    "section": "immigration",
+    "type": "single_choice",
+    "required": true,
+    "order": 20,
+    "options": [
+      { "value": "career", "label": "Career opportunities" },
+      { "value": "education", "label": "Education" },
+      { "value": "family", "label": "Family reunification" },
+      { "value": "lifestyle", "label": "Quality of life" },
+      { "value": "safety", "label": "Safety and security" },
+      { "value": "economic", "label": "Economic stability" },
+      { "value": "retirement", "label": "Retirement" },
+      { "value": "business", "label": "Business or investment opportunities" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  }
+]

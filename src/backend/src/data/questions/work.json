@@ -1,0 +1,424 @@
+[
+  {
+    "questionId": "work_001",
+    "text": "How many years of full-time work experience do you have in total?",
+    "helpText": "Include all full-time work experience (30+ hours per week). Part-time work should be calculated proportionally (e.g., 15 hours per week for 2 years = 1 year full-time equivalent).",
+    "section": "work",
+    "type": "single_choice",
+    "required": true,
+    "order": 1,
+    "options": [
+      { "value": "none", "label": "No work experience" },
+      { "value": "less_than_1", "label": "Less than 1 year" },
+      { "value": "1_to_3", "label": "1-3 years" },
+      { "value": "3_to_5", "label": "3-5 years" },
+      { "value": "5_to_10", "label": "5-10 years" },
+      { "value": "more_than_10", "label": "More than 10 years" }
+    ],
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "work_002",
+    "text": "What is your current occupation or job title?",
+    "helpText": "Provide your current job title or most recent one if you're not currently employed.",
+    "section": "work",
+    "type": "text",
+    "required": true,
+    "order": 2,
+    "conditionalDisplay": {
+      "dependsOn": "work_001",
+      "condition": "not_equals",
+      "value": "none"
+    },
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "work_003",
+    "text": "Which occupational category best describes your current or most recent job?",
+    "helpText": "This helps us match your occupation to official classification systems used in immigration programs.",
+    "section": "work",
+    "type": "single_choice",
+    "required": true,
+    "order": 3,
+    "conditionalDisplay": {
+      "dependsOn": "work_001",
+      "condition": "not_equals",
+      "value": "none"
+    },
+    "options": [
+      { "value": "management", "label": "Management occupations" },
+      { "value": "business_finance", "label": "Business, finance, and administration" },
+      { "value": "natural_sciences", "label": "Natural and applied sciences" },
+      { "value": "health", "label": "Health occupations" },
+      { "value": "education_law", "label": "Education, law, social, community and government services" },
+      { "value": "arts_culture", "label": "Art, culture, recreation and sport" },
+      { "value": "sales_service", "label": "Sales and service" },
+      { "value": "trades_transport", "label": "Trades, transport and equipment operators" },
+      { "value": "natural_resources", "label": "Natural resources, agriculture and related production" },
+      { "value": "manufacturing", "label": "Manufacturing and utilities" }
+    ],
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "work_004",
+    "text": "Is your occupation regulated in your destination country of interest?",
+    "helpText": "Regulated occupations require licensing or certification to practice in the destination country (e.g., doctors, nurses, engineers, teachers, electricians).",
+    "section": "work",
+    "type": "single_choice",
+    "required": true,
+    "order": 4,
+    "conditionalDisplay": {
+      "dependsOn": "work_001",
+      "condition": "not_equals",
+      "value": "none"
+    },
+    "options": [
+      { "value": "yes", "label": "Yes" },
+      { "value": "no", "label": "No" },
+      { "value": "not_sure", "label": "I'm not sure" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "work_005",
+    "text": "Have you taken any steps to get your professional credentials recognized in your destination country?",
+    "helpText": "This may include contacting regulatory bodies, applying for license recognition, or researching requirements.",
+    "section": "work",
+    "type": "single_choice",
+    "required": true,
+    "order": 5,
+    "conditionalDisplay": {
+      "dependsOn": "work_004",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "yes_completed", "label": "Yes, and the process is complete" },
+      { "value": "yes_in_progress", "label": "Yes, the process is in progress" },
+      { "value": "yes_researched", "label": "Yes, I've researched the requirements" },
+      { "value": "no", "label": "No, I haven't taken any steps yet" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "work_006",
+    "text": "How many years of work experience do you have in your current occupation?",
+    "helpText": "Include only full-time work experience (30+ hours per week) in your current occupation or field.",
+    "section": "work",
+    "type": "single_choice",
+    "required": true,
+    "order": 6,
+    "conditionalDisplay": {
+      "dependsOn": "work_001",
+      "condition": "not_equals",
+      "value": "none"
+    },
+    "options": [
+      { "value": "less_than_1", "label": "Less than 1 year" },
+      { "value": "1_to_3", "label": "1-3 years" },
+      { "value": "3_to_5", "label": "3-5 years" },
+      { "value": "5_to_10", "label": "5-10 years" },
+      { "value": "more_than_10", "label": "More than 10 years" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "work_007",
+    "text": "Do you have any work experience in your destination country of interest?",
+    "helpText": "Work experience in your destination country may provide additional points or eligibility for certain immigration programs.",
+    "section": "work",
+    "type": "single_choice",
+    "required": true,
+    "order": 7,
+    "conditionalDisplay": {
+      "dependsOn": "work_001",
+      "condition": "not_equals",
+      "value": "none"
+    },
+    "options": [
+      { "value": "yes", "label": "Yes" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "work_008",
+    "text": "In which destination country do you have work experience?",
+    "helpText": "Select the country where you have worked previously.",
+    "section": "work",
+    "type": "single_choice",
+    "required": true,
+    "order": 8,
+    "conditionalDisplay": {
+      "dependsOn": "work_007",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "ca", "label": "Canada" },
+      { "value": "au", "label": "Australia" },
+      { "value": "nz", "label": "New Zealand" },
+      { "value": "uk", "label": "United Kingdom" },
+      { "value": "us", "label": "United States" },
+      { "value": "other", "label": "Other" }
+    ],
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "work_009",
+    "text": "How many years of work experience do you have in your destination country?",
+    "helpText": "Include only full-time work experience (30+ hours per week) in your destination country.",
+    "section": "work",
+    "type": "single_choice",
+    "required": true,
+    "order": 9,
+    "conditionalDisplay": {
+      "dependsOn": "work_007",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "less_than_1", "label": "Less than 1 year" },
+      { "value": "1_to_2", "label": "1-2 years" },
+      { "value": "2_to_3", "label": "2-3 years" },
+      { "value": "3_to_5", "label": "3-5 years" },
+      { "value": "more_than_5", "label": "More than 5 years" }
+    ],
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "work_010",
+    "text": "What was your immigration status when you worked in your destination country?",
+    "helpText": "Your previous immigration status may affect how this work experience is considered in immigration applications.",
+    "section": "work",
+    "type": "single_choice",
+    "required": true,
+    "order": 10,
+    "conditionalDisplay": {
+      "dependsOn": "work_007",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "work_permit", "label": "Work permit/visa" },
+      { "value": "student", "label": "Student with work authorization" },
+      { "value": "working_holiday", "label": "Working holiday visa" },
+      { "value": "permanent_resident", "label": "Permanent resident" },
+      { "value": "citizen", "label": "Citizen" },
+      { "value": "other", "label": "Other" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "work_011",
+    "text": "Do you have any managerial experience?",
+    "helpText": "Managerial experience typically involves supervising staff, making decisions about operations, budgets, or personnel.",
+    "section": "work",
+    "type": "single_choice",
+    "required": true,
+    "order": 11,
+    "conditionalDisplay": {
+      "dependsOn": "work_001",
+      "condition": "not_equals",
+      "value": "none"
+    },
+    "options": [
+      { "value": "yes", "label": "Yes" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "work_012",
+    "text": "How many years of managerial experience do you have?",
+    "helpText": "Include only full-time experience (30+ hours per week) in managerial roles.",
+    "section": "work",
+    "type": "single_choice",
+    "required": true,
+    "order": 12,
+    "conditionalDisplay": {
+      "dependsOn": "work_011",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "less_than_1", "label": "Less than 1 year" },
+      { "value": "1_to_3", "label": "1-3 years" },
+      { "value": "3_to_5", "label": "3-5 years" },
+      { "value": "more_than_5", "label": "More than 5 years" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "work_013",
+    "text": "How many employees did you manage in your most senior managerial role?",
+    "helpText": "Include all employees under your direct and indirect supervision.",
+    "section": "work",
+    "type": "single_choice",
+    "required": true,
+    "order": 13,
+    "conditionalDisplay": {
+      "dependsOn": "work_011",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "1_to_5", "label": "1-5 employees" },
+      { "value": "6_to_15", "label": "6-15 employees" },
+      { "value": "16_to_50", "label": "16-50 employees" },
+      { "value": "51_to_100", "label": "51-100 employees" },
+      { "value": "more_than_100", "label": "More than 100 employees" }
+    ],
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "work_014",
+    "text": "Do you have any experience owning or operating a business?",
+    "helpText": "Business experience may qualify you for entrepreneur or investor immigration programs.",
+    "section": "work",
+    "type": "single_choice",
+    "required": true,
+    "order": 14,
+    "options": [
+      { "value": "yes", "label": "Yes" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "work_015",
+    "text": "How many years of business ownership or operation experience do you have?",
+    "helpText": "Include only years where you were actively involved in managing the business.",
+    "section": "work",
+    "type": "single_choice",
+    "required": true,
+    "order": 15,
+    "conditionalDisplay": {
+      "dependsOn": "work_014",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "less_than_1", "label": "Less than 1 year" },
+      { "value": "1_to_3", "label": "1-3 years" },
+      { "value": "3_to_5", "label": "3-5 years" },
+      { "value": "more_than_5", "label": "More than 5 years" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "work_016",
+    "text": "What was the annual revenue of your business at its peak?",
+    "helpText": "This information helps assess eligibility for business immigration programs, which often have minimum revenue requirements.",
+    "section": "work",
+    "type": "single_choice",
+    "required": true,
+    "order": 16,
+    "conditionalDisplay": {
+      "dependsOn": "work_014",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "less_than_100k", "label": "Less than $100,000 USD" },
+      { "value": "100k_to_500k", "label": "$100,000 - $500,000 USD" },
+      { "value": "500k_to_1m", "label": "$500,000 - $1 million USD" },
+      { "value": "1m_to_5m", "label": "$1 million - $5 million USD" },
+      { "value": "more_than_5m", "label": "More than $5 million USD" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "work_017",
+    "text": "Do you have a job offer or employment prospect in your destination country?",
+    "helpText": "A job offer can significantly impact your immigration options and may qualify you for employer-sponsored pathways.",
+    "section": "work",
+    "type": "single_choice",
+    "required": true,
+    "order": 17,
+    "options": [
+      { "value": "yes_confirmed", "label": "Yes, I have a confirmed job offer" },
+      { "value": "yes_potential", "label": "Yes, I have potential employment prospects" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "work_018",
+    "text": "In which destination country do you have a job offer or employment prospect?",
+    "helpText": "Select the country where you have a job offer or employment prospect.",
+    "section": "work",
+    "type": "single_choice",
+    "required": true,
+    "order": 18,
+    "conditionalDisplay": {
+      "dependsOn": "work_017",
+      "condition": "not_equals",
+      "value": "no"
+    },
+    "options": [
+      { "value": "ca", "label": "Canada" },
+      { "value": "au", "label": "Australia" },
+      { "value": "nz", "label": "New Zealand" },
+      { "value": "uk", "label": "United Kingdom" },
+      { "value": "us", "label": "United States" },
+      { "value": "other", "label": "Other" }
+    ],
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "work_019",
+    "text": "What is the job title of your offer or potential position?",
+    "helpText": "Provide the specific job title as it appears on your offer letter or job description.",
+    "section": "work",
+    "type": "text",
+    "required": true,
+    "order": 19,
+    "conditionalDisplay": {
+      "dependsOn": "work_017",
+      "condition": "not_equals",
+      "value": "no"
+    },
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "work_020",
+    "text": "Is your job offer or potential position in a rural or remote area?",
+    "helpText": "Many countries offer special immigration pathways for individuals willing to work in rural or underserved regions.",
+    "section": "work",
+    "type": "single_choice",
+    "required": true,
+    "order": 20,
+    "conditionalDisplay": {
+      "dependsOn": "work_017",
+      "condition": "not_equals",
+      "value": "no"
+    },
+    "options": [
+      { "value": "yes", "label": "Yes" },
+      { "value": "no", "label": "No" },
+      { "value": "not_sure", "label": "I'm not sure" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  }
+]

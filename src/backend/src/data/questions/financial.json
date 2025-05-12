@@ -1,0 +1,304 @@
+[
+  {
+    "questionId": "financial_001",
+    "text": "What is your approximate total net worth in USD?",
+    "helpText": "Net worth is the total value of your assets (savings, investments, property) minus your liabilities (debts, loans, mortgages).",
+    "section": "financial",
+    "type": "single_choice",
+    "required": true,
+    "order": 1,
+    "options": [
+      { "value": "less_than_10k", "label": "Less than $10,000" },
+      { "value": "10k_to_50k", "label": "$10,000 - $50,000" },
+      { "value": "50k_to_100k", "label": "$50,000 - $100,000" },
+      { "value": "100k_to_250k", "label": "$100,000 - $250,000" },
+      { "value": "250k_to_500k", "label": "$250,000 - $500,000" },
+      { "value": "500k_to_1m", "label": "$500,000 - $1 million" },
+      { "value": "1m_to_2m", "label": "$1 million - $2 million" },
+      { "value": "more_than_2m", "label": "More than $2 million" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "financial_002",
+    "text": "How much liquid assets do you have available for immigration purposes (in USD)?",
+    "helpText": "Liquid assets include cash, savings accounts, and investments that can be quickly converted to cash without significant loss of value.",
+    "section": "financial",
+    "type": "single_choice",
+    "required": true,
+    "order": 2,
+    "options": [
+      { "value": "less_than_5k", "label": "Less than $5,000" },
+      { "value": "5k_to_10k", "label": "$5,000 - $10,000" },
+      { "value": "10k_to_25k", "label": "$10,000 - $25,000" },
+      { "value": "25k_to_50k", "label": "$25,000 - $50,000" },
+      { "value": "50k_to_100k", "label": "$50,000 - $100,000" },
+      { "value": "100k_to_250k", "label": "$100,000 - $250,000" },
+      { "value": "more_than_250k", "label": "More than $250,000" }
+    ],
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "financial_003",
+    "text": "What is your annual income in USD?",
+    "helpText": "Include all sources of income such as salary, business income, investments, and rental income.",
+    "section": "financial",
+    "type": "single_choice",
+    "required": true,
+    "order": 3,
+    "options": [
+      { "value": "less_than_15k", "label": "Less than $15,000" },
+      { "value": "15k_to_30k", "label": "$15,000 - $30,000" },
+      { "value": "30k_to_50k", "label": "$30,000 - $50,000" },
+      { "value": "50k_to_75k", "label": "$50,000 - $75,000" },
+      { "value": "75k_to_100k", "label": "$75,000 - $100,000" },
+      { "value": "100k_to_150k", "label": "$100,000 - $150,000" },
+      { "value": "more_than_150k", "label": "More than $150,000" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "financial_004",
+    "text": "Do you own any real estate?",
+    "helpText": "Real estate ownership may be relevant for certain investor immigration programs and for demonstrating financial stability.",
+    "section": "financial",
+    "type": "single_choice",
+    "required": true,
+    "order": 4,
+    "options": [
+      { "value": "yes", "label": "Yes" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "financial_005",
+    "text": "What is the approximate total value of your real estate holdings in USD?",
+    "helpText": "Include the current market value of all properties you own, whether residential, commercial, or land.",
+    "section": "financial",
+    "type": "single_choice",
+    "required": true,
+    "order": 5,
+    "conditionalDisplay": {
+      "dependsOn": "financial_004",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "less_than_100k", "label": "Less than $100,000" },
+      { "value": "100k_to_250k", "label": "$100,000 - $250,000" },
+      { "value": "250k_to_500k", "label": "$250,000 - $500,000" },
+      { "value": "500k_to_1m", "label": "$500,000 - $1 million" },
+      { "value": "1m_to_2m", "label": "$1 million - $2 million" },
+      { "value": "more_than_2m", "label": "More than $2 million" }
+    ],
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "financial_006",
+    "text": "Do you have any business ownership or investments?",
+    "helpText": "Business ownership or significant investments may qualify you for investor or entrepreneur immigration programs.",
+    "section": "financial",
+    "type": "single_choice",
+    "required": true,
+    "order": 6,
+    "options": [
+      { "value": "yes", "label": "Yes" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "financial_007",
+    "text": "What is the approximate total value of your business ownership or investments in USD?",
+    "helpText": "Include the current market value of your business interests and investment portfolio.",
+    "section": "financial",
+    "type": "single_choice",
+    "required": true,
+    "order": 7,
+    "conditionalDisplay": {
+      "dependsOn": "financial_006",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "less_than_50k", "label": "Less than $50,000" },
+      { "value": "50k_to_100k", "label": "$50,000 - $100,000" },
+      { "value": "100k_to_250k", "label": "$100,000 - $250,000" },
+      { "value": "250k_to_500k", "label": "$250,000 - $500,000" },
+      { "value": "500k_to_1m", "label": "$500,000 - $1 million" },
+      { "value": "1m_to_5m", "label": "$1 million - $5 million" },
+      { "value": "more_than_5m", "label": "More than $5 million" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "financial_008",
+    "text": "Are you willing to make a significant investment as part of your immigration process?",
+    "helpText": "Many countries offer investor immigration programs that provide pathways to permanent residence in exchange for significant investments in the local economy.",
+    "section": "financial",
+    "type": "single_choice",
+    "required": true,
+    "order": 8,
+    "options": [
+      { "value": "yes", "label": "Yes" },
+      { "value": "maybe", "label": "Maybe, depending on the requirements" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "financial_009",
+    "text": "How much are you willing to invest as part of an investor immigration program (in USD)?",
+    "helpText": "Different investor immigration programs have different minimum investment requirements, typically ranging from $100,000 to several million dollars.",
+    "section": "financial",
+    "type": "single_choice",
+    "required": true,
+    "order": 9,
+    "conditionalDisplay": {
+      "dependsOn": "financial_008",
+      "condition": "not_equals",
+      "value": "no"
+    },
+    "options": [
+      { "value": "less_than_100k", "label": "Less than $100,000" },
+      { "value": "100k_to_250k", "label": "$100,000 - $250,000" },
+      { "value": "250k_to_500k", "label": "$250,000 - $500,000" },
+      { "value": "500k_to_1m", "label": "$500,000 - $1 million" },
+      { "value": "1m_to_2m", "label": "$1 million - $2 million" },
+      { "value": "more_than_2m", "label": "More than $2 million" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "financial_010",
+    "text": "What type of investment would you prefer to make?",
+    "helpText": "Different investor immigration programs accept different types of investments.",
+    "section": "financial",
+    "type": "single_choice",
+    "required": true,
+    "order": 10,
+    "conditionalDisplay": {
+      "dependsOn": "financial_008",
+      "condition": "not_equals",
+      "value": "no"
+    },
+    "options": [
+      { "value": "business", "label": "Direct business investment (starting or purchasing a business)" },
+      { "value": "passive", "label": "Passive investment (government bonds, investment funds)" },
+      { "value": "real_estate", "label": "Real estate investment" },
+      { "value": "job_creation", "label": "Job creation investment" },
+      { "value": "any", "label": "Any type that qualifies for immigration" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "financial_011",
+    "text": "Do you have a sponsor who can provide financial support for your immigration?",
+    "helpText": "A sponsor is typically a family member, employer, or organization who agrees to provide financial support during your initial settlement period.",
+    "section": "financial",
+    "type": "single_choice",
+    "required": true,
+    "order": 11,
+    "options": [
+      { "value": "yes_family", "label": "Yes, a family member" },
+      { "value": "yes_employer", "label": "Yes, an employer" },
+      { "value": "yes_other", "label": "Yes, another type of sponsor" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "financial_012",
+    "text": "What is your relationship to your family sponsor?",
+    "helpText": "The relationship to your sponsor may determine eligibility for certain family-based immigration programs.",
+    "section": "financial",
+    "type": "single_choice",
+    "required": true,
+    "order": 12,
+    "conditionalDisplay": {
+      "dependsOn": "financial_011",
+      "condition": "equals",
+      "value": "yes_family"
+    },
+    "options": [
+      { "value": "spouse", "label": "Spouse or partner" },
+      { "value": "parent", "label": "Parent" },
+      { "value": "child", "label": "Child (over 18)" },
+      { "value": "sibling", "label": "Sibling" },
+      { "value": "grandparent", "label": "Grandparent" },
+      { "value": "other", "label": "Other relative" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "financial_013",
+    "text": "What is your sponsor's immigration status in the destination country?",
+    "helpText": "Your sponsor's immigration status may affect their ability to sponsor you and the type of immigration program you can apply for.",
+    "section": "financial",
+    "type": "single_choice",
+    "required": true,
+    "order": 13,
+    "conditionalDisplay": {
+      "dependsOn": "financial_011",
+      "condition": "not_equals",
+      "value": "no"
+    },
+    "options": [
+      { "value": "citizen", "label": "Citizen" },
+      { "value": "permanent_resident", "label": "Permanent resident" },
+      { "value": "temporary", "label": "Temporary resident" },
+      { "value": "not_sure", "label": "Not sure" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "financial_014",
+    "text": "How do you plan to finance your initial settlement period?",
+    "helpText": "The initial settlement period typically refers to the first 3-12 months after arrival in your destination country.",
+    "section": "financial",
+    "type": "multiple_choice",
+    "required": true,
+    "order": 14,
+    "options": [
+      { "value": "savings", "label": "Personal savings" },
+      { "value": "family", "label": "Family support" },
+      { "value": "employment", "label": "Employment income" },
+      { "value": "business", "label": "Business income" },
+      { "value": "investments", "label": "Investment income" },
+      { "value": "loan", "label": "Loan" },
+      { "value": "other", "label": "Other" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "financial_015",
+    "text": "Are you aware of the settlement funds required for your destination country?",
+    "helpText": "Many countries require proof of sufficient funds to support yourself and your family during the initial settlement period.",
+    "section": "financial",
+    "type": "single_choice",
+    "required": true,
+    "order": 15,
+    "options": [
+      { "value": "yes", "label": "Yes, I am aware and have sufficient funds" },
+      { "value": "yes_not_sufficient", "label": "Yes, but I don't have sufficient funds yet" },
+      { "value": "no", "label": "No, I am not aware of the requirements" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  }
+]

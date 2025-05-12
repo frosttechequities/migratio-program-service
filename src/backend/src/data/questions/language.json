@@ -1,0 +1,420 @@
+[
+  {
+    "questionId": "language_001",
+    "text": "What is your native language?",
+    "helpText": "Your native language is the language you learned from birth or at a very young age.",
+    "section": "language",
+    "type": "single_choice",
+    "required": true,
+    "order": 1,
+    "options": [
+      { "value": "english", "label": "English" },
+      { "value": "french", "label": "French" },
+      { "value": "spanish", "label": "Spanish" },
+      { "value": "mandarin", "label": "Mandarin Chinese" },
+      { "value": "hindi", "label": "Hindi" },
+      { "value": "arabic", "label": "Arabic" },
+      { "value": "portuguese", "label": "Portuguese" },
+      { "value": "russian", "label": "Russian" },
+      { "value": "japanese", "label": "Japanese" },
+      { "value": "german", "label": "German" },
+      { "value": "other", "label": "Other" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "language_002",
+    "text": "How would you rate your English language proficiency?",
+    "helpText": "This is your self-assessment. Official language test results will be asked in subsequent questions if applicable.",
+    "section": "language",
+    "type": "single_choice",
+    "required": true,
+    "order": 2,
+    "options": [
+      { "value": "native", "label": "Native/Bilingual proficiency" },
+      { "value": "fluent", "label": "Fluent (Can communicate effectively in most situations)" },
+      { "value": "intermediate", "label": "Intermediate (Can communicate in familiar situations)" },
+      { "value": "basic", "label": "Basic (Limited communication abilities)" },
+      { "value": "none", "label": "None" }
+    ],
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "language_003",
+    "text": "Have you taken an English language proficiency test in the past 2 years?",
+    "helpText": "Most immigration programs require official language test results that are less than 2 years old.",
+    "section": "language",
+    "type": "single_choice",
+    "required": true,
+    "order": 3,
+    "conditionalDisplay": {
+      "dependsOn": "language_002",
+      "condition": "not_equals",
+      "value": "none"
+    },
+    "options": [
+      { "value": "yes", "label": "Yes" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "language_004",
+    "text": "Which English language test have you taken?",
+    "helpText": "Different immigration programs accept different language tests. Select the test you've taken most recently.",
+    "section": "language",
+    "type": "single_choice",
+    "required": true,
+    "order": 4,
+    "conditionalDisplay": {
+      "dependsOn": "language_003",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "ielts_general", "label": "IELTS (General Training)" },
+      { "value": "ielts_academic", "label": "IELTS (Academic)" },
+      { "value": "celpip", "label": "CELPIP" },
+      { "value": "toefl", "label": "TOEFL iBT" },
+      { "value": "pte", "label": "PTE Academic" },
+      { "value": "cambridge", "label": "Cambridge English (B1-C2)" },
+      { "value": "oet", "label": "OET (Occupational English Test)" }
+    ],
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "language_005",
+    "text": "What was your overall score on the IELTS (General Training) test?",
+    "helpText": "Enter your overall band score (e.g., 7.0, 7.5, 8.0).",
+    "section": "language",
+    "type": "single_choice",
+    "required": true,
+    "order": 5,
+    "conditionalDisplay": {
+      "dependsOn": "language_004",
+      "condition": "equals",
+      "value": "ielts_general"
+    },
+    "options": [
+      { "value": "less_than_5", "label": "Less than 5.0" },
+      { "value": "5", "label": "5.0" },
+      { "value": "5.5", "label": "5.5" },
+      { "value": "6", "label": "6.0" },
+      { "value": "6.5", "label": "6.5" },
+      { "value": "7", "label": "7.0" },
+      { "value": "7.5", "label": "7.5" },
+      { "value": "8", "label": "8.0" },
+      { "value": "8.5", "label": "8.5" },
+      { "value": "9", "label": "9.0" }
+    ],
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "language_006",
+    "text": "What were your individual scores on the IELTS (General Training) test?",
+    "helpText": "Enter your band scores for each component. Many immigration programs have minimum requirements for each component.",
+    "section": "language",
+    "type": "text",
+    "required": true,
+    "order": 6,
+    "conditionalDisplay": {
+      "dependsOn": "language_004",
+      "condition": "equals",
+      "value": "ielts_general"
+    },
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "language_007",
+    "text": "What was your overall score on the IELTS (Academic) test?",
+    "helpText": "Enter your overall band score (e.g., 7.0, 7.5, 8.0).",
+    "section": "language",
+    "type": "single_choice",
+    "required": true,
+    "order": 7,
+    "conditionalDisplay": {
+      "dependsOn": "language_004",
+      "condition": "equals",
+      "value": "ielts_academic"
+    },
+    "options": [
+      { "value": "less_than_5", "label": "Less than 5.0" },
+      { "value": "5", "label": "5.0" },
+      { "value": "5.5", "label": "5.5" },
+      { "value": "6", "label": "6.0" },
+      { "value": "6.5", "label": "6.5" },
+      { "value": "7", "label": "7.0" },
+      { "value": "7.5", "label": "7.5" },
+      { "value": "8", "label": "8.0" },
+      { "value": "8.5", "label": "8.5" },
+      { "value": "9", "label": "9.0" }
+    ],
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "language_008",
+    "text": "What were your individual scores on the IELTS (Academic) test?",
+    "helpText": "Enter your band scores for each component (Listening, Reading, Writing, Speaking). Many immigration programs have minimum requirements for each component.",
+    "section": "language",
+    "type": "text",
+    "required": true,
+    "order": 8,
+    "conditionalDisplay": {
+      "dependsOn": "language_004",
+      "condition": "equals",
+      "value": "ielts_academic"
+    },
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "language_009",
+    "text": "What was your overall score on the CELPIP test?",
+    "helpText": "Enter your overall score (levels 1-12).",
+    "section": "language",
+    "type": "single_choice",
+    "required": true,
+    "order": 9,
+    "conditionalDisplay": {
+      "dependsOn": "language_004",
+      "condition": "equals",
+      "value": "celpip"
+    },
+    "options": [
+      { "value": "m", "label": "M (Minimal)" },
+      { "value": "0", "label": "0 (Not enough information)" },
+      { "value": "1", "label": "1" },
+      { "value": "2", "label": "2" },
+      { "value": "3", "label": "3" },
+      { "value": "4", "label": "4" },
+      { "value": "5", "label": "5" },
+      { "value": "6", "label": "6" },
+      { "value": "7", "label": "7" },
+      { "value": "8", "label": "8" },
+      { "value": "9", "label": "9" },
+      { "value": "10", "label": "10" },
+      { "value": "11", "label": "11" },
+      { "value": "12", "label": "12" }
+    ],
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "language_010",
+    "text": "What were your individual scores on the CELPIP test?",
+    "helpText": "Enter your scores for each component (Listening, Reading, Writing, Speaking). Many immigration programs have minimum requirements for each component.",
+    "section": "language",
+    "type": "text",
+    "required": true,
+    "order": 10,
+    "conditionalDisplay": {
+      "dependsOn": "language_004",
+      "condition": "equals",
+      "value": "celpip"
+    },
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "language_011",
+    "text": "How would you rate your French language proficiency?",
+    "helpText": "This is your self-assessment. Official language test results will be asked in subsequent questions if applicable.",
+    "section": "language",
+    "type": "single_choice",
+    "required": true,
+    "order": 11,
+    "options": [
+      { "value": "native", "label": "Native/Bilingual proficiency" },
+      { "value": "fluent", "label": "Fluent (Can communicate effectively in most situations)" },
+      { "value": "intermediate", "label": "Intermediate (Can communicate in familiar situations)" },
+      { "value": "basic", "label": "Basic (Limited communication abilities)" },
+      { "value": "none", "label": "None" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "language_012",
+    "text": "Have you taken a French language proficiency test in the past 2 years?",
+    "helpText": "French language proficiency can provide additional points for immigration to countries like Canada.",
+    "section": "language",
+    "type": "single_choice",
+    "required": true,
+    "order": 12,
+    "conditionalDisplay": {
+      "dependsOn": "language_011",
+      "condition": "not_equals",
+      "value": "none"
+    },
+    "options": [
+      { "value": "yes", "label": "Yes" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "language_013",
+    "text": "Which French language test have you taken?",
+    "helpText": "Select the test you've taken most recently.",
+    "section": "language",
+    "type": "single_choice",
+    "required": true,
+    "order": 13,
+    "conditionalDisplay": {
+      "dependsOn": "language_012",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "tef", "label": "TEF (Test d'évaluation de français)" },
+      { "value": "tef_canada", "label": "TEF Canada" },
+      { "value": "tcf", "label": "TCF (Test de connaissance du français)" },
+      { "value": "tcf_canada", "label": "TCF Canada" },
+      { "value": "delf", "label": "DELF (Diplôme d'études en langue française)" },
+      { "value": "dalf", "label": "DALF (Diplôme approfondi de langue française)" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "language_014",
+    "text": "What were your scores on the TEF Canada or TCF Canada test?",
+    "helpText": "Enter your scores for each component (Listening, Reading, Writing, Speaking). For TEF Canada, scores range from 0-360 for listening, 0-300 for reading, 0-450 for writing, and 0-450 for speaking.",
+    "section": "language",
+    "type": "text",
+    "required": true,
+    "order": 14,
+    "conditionalDisplay": {
+      "dependsOn": "language_013",
+      "condition": "contains",
+      "value": "canada"
+    },
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "language_015",
+    "text": "Do you speak any other languages fluently?",
+    "helpText": "Additional languages may be beneficial for certain immigration programs or for integration in multilingual countries.",
+    "section": "language",
+    "type": "single_choice",
+    "required": true,
+    "order": 15,
+    "options": [
+      { "value": "yes", "label": "Yes" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 6,
+    "isActive": true
+  },
+  {
+    "questionId": "language_016",
+    "text": "Which other languages do you speak fluently?",
+    "helpText": "Select all languages in which you have at least intermediate proficiency.",
+    "section": "language",
+    "type": "multiple_choice",
+    "required": true,
+    "order": 16,
+    "conditionalDisplay": {
+      "dependsOn": "language_015",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "english", "label": "English" },
+      { "value": "french", "label": "French" },
+      { "value": "spanish", "label": "Spanish" },
+      { "value": "mandarin", "label": "Mandarin Chinese" },
+      { "value": "hindi", "label": "Hindi" },
+      { "value": "arabic", "label": "Arabic" },
+      { "value": "portuguese", "label": "Portuguese" },
+      { "value": "russian", "label": "Russian" },
+      { "value": "japanese", "label": "Japanese" },
+      { "value": "german", "label": "German" },
+      { "value": "other", "label": "Other" }
+    ],
+    "relevanceScore": 6,
+    "isActive": true
+  },
+  {
+    "questionId": "language_017",
+    "text": "Are you planning to take or retake a language proficiency test in the next 6 months?",
+    "helpText": "Improving your language test scores can significantly increase your eligibility for various immigration programs.",
+    "section": "language",
+    "type": "single_choice",
+    "required": true,
+    "order": 17,
+    "options": [
+      { "value": "yes_english", "label": "Yes, an English test" },
+      { "value": "yes_french", "label": "Yes, a French test" },
+      { "value": "yes_both", "label": "Yes, both English and French tests" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "language_018",
+    "text": "Have you ever studied in a country where the primary language of instruction was English or French?",
+    "helpText": "Education in English or French may exempt you from language testing requirements for some immigration programs.",
+    "section": "language",
+    "type": "single_choice",
+    "required": true,
+    "order": 18,
+    "options": [
+      { "value": "yes_english", "label": "Yes, in English" },
+      { "value": "yes_french", "label": "Yes, in French" },
+      { "value": "yes_both", "label": "Yes, in both English and French" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "language_019",
+    "text": "How many years did you study in English or French?",
+    "helpText": "The duration of your studies in English or French may be relevant for language proficiency exemptions.",
+    "section": "language",
+    "type": "single_choice",
+    "required": true,
+    "order": 19,
+    "conditionalDisplay": {
+      "dependsOn": "language_018",
+      "condition": "not_equals",
+      "value": "no"
+    },
+    "options": [
+      { "value": "less_than_1", "label": "Less than 1 year" },
+      { "value": "1_to_2", "label": "1-2 years" },
+      { "value": "2_to_4", "label": "2-4 years" },
+      { "value": "more_than_4", "label": "More than 4 years" }
+    ],
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "language_020",
+    "text": "Have you ever worked in a country where the primary language was English or French?",
+    "helpText": "Work experience in English or French environments may be relevant for language proficiency assessments.",
+    "section": "language",
+    "type": "single_choice",
+    "required": true,
+    "order": 20,
+    "options": [
+      { "value": "yes_english", "label": "Yes, in English" },
+      { "value": "yes_french", "label": "Yes, in French" },
+      { "value": "yes_both", "label": "Yes, in both English and French" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 7,
+    "isActive": true
+  }
+]

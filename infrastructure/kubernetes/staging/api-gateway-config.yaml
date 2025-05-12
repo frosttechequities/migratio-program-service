@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-config
+data:
+  NODE_ENV: "staging"
+  PORT: "8000"
+  LOG_LEVEL: "debug"
+  JWT_EXPIRATION: "24h"
+  RATE_LIMIT_WINDOW_MS: "60000"
+  RATE_LIMIT_MAX_REQUESTS: "120"
+  CORS_ORIGINS: "https://staging.migratio.com,http://localhost:3000"

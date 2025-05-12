@@ -1,0 +1,17 @@
+{
+  "name": "api-gateway",
+  "version": "1.0.0",
+  "description": "API Gateway for Migratio Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "express-gateway": "^1.16.11",
+    "express-gateway-plugin-jwt": "*"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}

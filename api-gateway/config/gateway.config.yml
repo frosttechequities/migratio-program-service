@@ -1,0 +1,19 @@
+http:
+  port: 8080
+
+policies:
+  - cors
+  - log
+  - rate-limit
+  - jwt
+  - proxy
+  - expression
+  - request-transformer
+  - response-transformer
+
+# ... rest of the file with JWT_SECRET hardcoded ...
+# Example for one jwt policy:
+# - jwt:
+#     secretOrPublicKey: 'your-jwt-secret-for-api-gateway' # Hardcoded secret
+#     checkCredentialExistence: false
+# ...

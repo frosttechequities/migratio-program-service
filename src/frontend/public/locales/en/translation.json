@@ -1,0 +1,21 @@
+{
+  "dashboard": {
+    "welcome": "Welcome, {{name}}!",
+    "title": "Your Dashboard"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "documents": "Documents",
+    "roadmap": "Roadmap",
+    "resources": "Resources",
+    "comparison": "Compare Programs"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred.",
+    "viewAll": "View All",
+    "save": "Save",
+    "cancel": "Cancel"
+  }
+}

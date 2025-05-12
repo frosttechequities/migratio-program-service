@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: migratio-staging
+  labels:
+    name: migratio-staging
+    environment: staging

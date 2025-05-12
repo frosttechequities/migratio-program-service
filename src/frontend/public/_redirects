@@ -1,0 +1,6 @@
+# Proxy API requests to your backend
+/api/*  https://your-backend-api.com/api/:splat  200
+/auth/*  https://your-backend-api.com/auth/:splat  200
+
+# Handle React Router
+/*    /index.html   200

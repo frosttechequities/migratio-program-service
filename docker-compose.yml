@@ -1,0 +1,299 @@
+version: '3.8'
+
+services:
+  # --- Database ---
+  mongodb:
+    image: mongo:5.0
+    container_name: migratio-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-migratio}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-migratio_password}
+    networks:
+      - migratio-network
+
+  # --- API Gateway ---
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: migratio-api-gateway
+    restart: always
+    ports:
+      - "8080:8080" # Expose gateway on port 8080
+    volumes:
+      - ./api-gateway/config:/app/config
+    env_file:
+      - ./api-gateway/.env.example # Use .env if present, .env.example provides other vars
+    environment:
+      # Ensure gateway config points to internal service names and ports
+      USER_SERVICE_URL: http://user-service:3001
+      PROGRAM_SERVICE_URL: http://program-service:3002
+      ASSESSMENT_SERVICE_URL: http://assessment-service:3003
+      RECOMMENDATION_SERVICE_URL: http://recommendation-service:3004
+      DOCUMENT_SERVICE_URL: http://document-service:3005
+      ROADMAP_SERVICE_URL: http://roadmap-service:3006
+      PDF_GENERATION_SERVICE_URL: http://pdf-generation-service:3007
+      JWT_SECRET: 'your-very-secure-jwt-secret-for-all-services' # Consistent JWT Secret for gateway too
+      # Add ML services if they need direct gateway access (or route via other services)
+      # ML_INSIGHTS_SERVICE_URL: http://ml-insights:5001
+      # DOCUMENT_ANALYSIS_SERVICE_URL: http://document-analysis:5002
+    depends_on:
+      - user-service
+      - program-service
+      - assessment-service
+      - recommendation-service
+      - document-service
+      - roadmap-service
+      - pdf-generation-service
+      - ml-insights
+      - document-analysis
+    networks:
+      - migratio-network
+
+  # --- Backend Services (Node.js) ---
+  user-service:
+    build:
+      context: ./services/user-service
+      dockerfile: Dockerfile
+    container_name: migratio-user-service
+    restart: always
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./services/user-service:/app
+      - /app/node_modules
+    env_file:
+      - ./services/user-service/.env.example
+    environment:
+      MONGODB_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME:-migratio}:${MONGO_INITDB_ROOT_PASSWORD:-migratio_password}@mongodb:27017/migratio_user_service?authSource=admin
+      USER_SERVICE_PORT: 3001
+    depends_on:
+      - mongodb
+    networks:
+      - migratio-network
+
+  program-service:
+    build:
+      context: ./services/program-service
+      dockerfile: Dockerfile
+    container_name: migratio-program-service
+    restart: always
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./services/program-service:/app
+      - /app/node_modules
+    env_file:
+      - ./services/program-service/.env.example
+    environment:
+      MONGODB_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME:-migratio}:${MONGO_INITDB_ROOT_PASSWORD:-migratio_password}@mongodb:27017/migratio_program_service?authSource=admin
+      PROGRAM_SERVICE_PORT: 3002
+    depends_on:
+      - mongodb
+    networks:
+      - migratio-network
+
+  assessment-service:
+    build:
+      context: ./services/assessment-service
+      dockerfile: Dockerfile
+    container_name: migratio-assessment-service
+    restart: always
+    ports:
+      - "3003:3003"
+    volumes:
+      - ./services/assessment-service:/app
+      - /app/node_modules
+    env_file:
+      - ./services/assessment-service/.env.example
+    environment:
+      MONGODB_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME:-migratio}:${MONGO_INITDB_ROOT_PASSWORD:-migratio_password}@mongodb:27017/migratio_assessment_service?authSource=admin
+      ASSESSMENT_SERVICE_PORT: 3003
+    depends_on:
+      - mongodb
+    networks:
+      - migratio-network
+
+  recommendation-service:
+    build:
+      context: ./services/recommendation-service
+      dockerfile: Dockerfile
+    container_name: migratio-recommendation-service
+    restart: always
+    ports:
+      - "3004:3004"
+    volumes:
+      - ./services/recommendation-service:/app
+      - /app/node_modules
+    env_file:
+      - ./services/recommendation-service/.env.example
+    environment:
+      RECOMMENDATION_SERVICE_PORT: 3004
+      USER_PROFILE_SERVICE_URL: http://user-service:3001/api # Internal service URL
+      PROGRAM_SERVICE_URL: http://program-service:3002/api # Internal service URL
+      ML_INSIGHTS_SERVICE_URL: http://ml-insights:5001 # Internal service URL
+    depends_on:
+      - user-service
+      - program-service
+      - ml-insights
+    networks:
+      - migratio-network
+
+  document-service:
+    build:
+      context: ./services/document-service
+      dockerfile: Dockerfile
+    container_name: migratio-document-service
+    restart: always
+    ports:
+      - "3005:3005"
+    volumes:
+      - ./services/document-service:/app
+      - /app/node_modules
+    env_file:
+      - ./services/document-service/.env.example
+    environment:
+      MONGODB_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME:-migratio}:${MONGO_INITDB_ROOT_PASSWORD:-migratio_password}@mongodb:27017/migratio_document_service?authSource=admin
+      DOCUMENT_SERVICE_PORT: 3005
+      DOCUMENT_ANALYSIS_SERVICE_URL: http://document-analysis:5002 # Internal service URL
+      # Add AWS credentials and S3 bucket name here or via host environment
+      # AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      # AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      # AWS_REGION: ${AWS_REGION}
+      # S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+    depends_on:
+      - mongodb
+      - document-analysis
+    networks:
+      - migratio-network
+
+  roadmap-service:
+    build:
+      context: ./services/roadmap-service
+      dockerfile: Dockerfile
+    container_name: migratio-roadmap-service
+    restart: always
+    ports:
+      - "3006:3006"
+    volumes:
+      - ./services/roadmap-service:/app
+      - /app/node_modules
+    env_file:
+      - ./services/roadmap-service/.env.example
+    environment:
+      MONGODB_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME:-migratio}:${MONGO_INITDB_ROOT_PASSWORD:-migratio_password}@mongodb:27017/migratio_roadmap_service?authSource=admin
+      ROADMAP_SERVICE_PORT: 3006
+      PROGRAM_SERVICE_URL: http://program-service:3002/api # Internal service URL
+    depends_on:
+      - mongodb
+      - program-service
+    networks:
+      - migratio-network
+
+  pdf-generation-service:
+    build:
+      context: ./services/pdf-generation-service
+      dockerfile: Dockerfile
+    container_name: migratio-pdf-generation-service
+    restart: always
+    ports:
+      - "3007:3007"
+    volumes:
+      - ./services/pdf-generation-service:/app
+      - /app/node_modules
+    env_file:
+      - ./services/pdf-generation-service/.env.example
+    environment:
+      PDF_SERVICE_PORT: 3007
+      # Add Redis/Queue config if needed
+      # Add AWS S3 config if needed for direct upload from worker
+    # depends_on:
+      # - redis # If using Redis queue
+      # - document-service # If calling doc service to store PDF link
+    networks:
+      - migratio-network
+
+  # --- ML Services (Python) ---
+  ml-insights:
+    build:
+      context: ./services/ml-insights-service
+      dockerfile: Dockerfile
+    container_name: migratio-ml-insights
+    restart: always
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./services/ml-insights-service:/usr/src/app
+    env_file:
+      - ./services/ml-insights-service/.env.example
+    environment:
+      ML_INSIGHTS_SERVICE_PORT: 5001
+      PROGRAM_SERVICE_URL: http://program-service:3002/api # Internal service URL
+    depends_on:
+      - program-service # Needs program data
+    networks:
+      - migratio-network
+
+  document-analysis:
+    build:
+      context: ./services/document-analysis-service
+      dockerfile: Dockerfile
+    container_name: migratio-document-analysis
+    restart: always
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./services/document-analysis-service:/usr/src/app
+    env_file:
+      - ./services/document-analysis-service/.env.example
+    environment:
+      DOCUMENT_ANALYSIS_SERVICE_PORT: 5002
+    networks:
+      - migratio-network
+
+  # --- Frontend Service ---
+  frontend:
+    build:
+      context: ./src/frontend
+      dockerfile: Dockerfile
+    container_name: migratio-frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src/frontend:/app
+      - /app/node_modules
+    environment:
+      REACT_APP_API_URL: http://localhost:8080/api # Old gateway URL, less used now
+      REACT_APP_USER_SERVICE_URL: http://localhost:3001/api
+      REACT_APP_PROGRAM_SERVICE_URL: http://localhost:3004/api
+      REACT_APP_ASSESSMENT_SERVICE_URL: http://localhost:3003/api/quiz # Base URL for assessment quiz routes
+      REACT_APP_DOCUMENT_SERVICE_URL: http://localhost:3005/api
+      REACT_APP_ROADMAP_SERVICE_URL: http://localhost:3006/api
+      REACT_APP_RECOMMENDATION_SERVICE_URL: http://localhost:3004/api # recommendation-service is on 3004
+      # REACT_APP_PDF_SERVICE_URL: http://localhost:3007/api # If PDF service is called from frontend
+      REACT_APP_ENV: development
+      CHOKIDAR_USEPOLLING: "true"
+    depends_on:
+      # No longer directly depends on api-gateway for these direct calls
+      - user-service
+      - program-service
+      - assessment-service
+      - recommendation-service
+      - document-service
+      - roadmap-service
+      - pdf-generation-service
+    networks:
+      - migratio-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  migratio-network:
+    driver: bridge

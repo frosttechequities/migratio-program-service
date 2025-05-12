@@ -1,0 +1,4 @@
+flask
+python-dotenv
+gunicorn
+python-dateutil # For date calculations (e.g., expiry checks)

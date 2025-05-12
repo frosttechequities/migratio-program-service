@@ -1,0 +1,335 @@
+[
+  {
+    "questionId": "education_001",
+    "text": "What is your highest level of education completed?",
+    "helpText": "Select the highest level of education you have fully completed. This is a key factor in many points-based immigration systems.",
+    "section": "education",
+    "type": "single_choice",
+    "required": true,
+    "order": 1,
+    "options": [
+      { "value": "less_than_secondary", "label": "Less than high school/secondary education" },
+      { "value": "secondary", "label": "High school/Secondary education" },
+      { "value": "trade", "label": "Trade certification/Vocational training" },
+      { "value": "associate", "label": "Associate degree/College diploma (1-2 years)" },
+      { "value": "bachelor", "label": "Bachelor's degree (3-4 years)" },
+      { "value": "post_grad_cert", "label": "Post-graduate certificate/diploma" },
+      { "value": "master", "label": "Master's degree" },
+      { "value": "doctoral", "label": "Doctoral degree (PhD)" },
+      { "value": "professional", "label": "Professional degree (MD, JD, etc.)" }
+    ],
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "education_002",
+    "text": "In which field of study did you complete your highest level of education?",
+    "helpText": "Your field of study may impact your eligibility for certain occupation-specific immigration programs.",
+    "section": "education",
+    "type": "single_choice",
+    "required": true,
+    "order": 2,
+    "conditionalDisplay": {
+      "dependsOn": "education_001",
+      "condition": "not_equals",
+      "value": "less_than_secondary"
+    },
+    "options": [
+      { "value": "business", "label": "Business, Management, and Administration" },
+      { "value": "health", "label": "Healthcare and Medicine" },
+      { "value": "engineering", "label": "Engineering and Technology" },
+      { "value": "computer_science", "label": "Computer Science and IT" },
+      { "value": "education", "label": "Education and Teaching" },
+      { "value": "social_sciences", "label": "Social Sciences" },
+      { "value": "natural_sciences", "label": "Natural Sciences" },
+      { "value": "arts_humanities", "label": "Arts and Humanities" },
+      { "value": "law", "label": "Law and Legal Studies" },
+      { "value": "trades", "label": "Trades and Apprenticeships" },
+      { "value": "agriculture", "label": "Agriculture and Environmental Sciences" },
+      { "value": "other", "label": "Other" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "education_003",
+    "text": "In which country did you complete your highest level of education?",
+    "helpText": "The country where you obtained your education may affect credential recognition in your destination country.",
+    "section": "education",
+    "type": "single_choice",
+    "required": true,
+    "order": 3,
+    "conditionalDisplay": {
+      "dependsOn": "education_001",
+      "condition": "not_equals",
+      "value": "less_than_secondary"
+    },
+    "options": [
+      { "value": "us", "label": "United States" },
+      { "value": "ca", "label": "Canada" },
+      { "value": "uk", "label": "United Kingdom" },
+      { "value": "au", "label": "Australia" },
+      { "value": "nz", "label": "New Zealand" },
+      { "value": "in", "label": "India" },
+      { "value": "cn", "label": "China" },
+      { "value": "ph", "label": "Philippines" },
+      { "value": "ng", "label": "Nigeria" },
+      { "value": "pk", "label": "Pakistan" },
+      { "value": "other", "label": "Other" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "education_004",
+    "text": "When did you complete your highest level of education?",
+    "helpText": "The recency of your education may be relevant for certain immigration programs and credential recognition.",
+    "section": "education",
+    "type": "date",
+    "required": true,
+    "order": 4,
+    "conditionalDisplay": {
+      "dependsOn": "education_001",
+      "condition": "not_equals",
+      "value": "less_than_secondary"
+    },
+    "validation": {
+      "min": "1970-01-01",
+      "max": "2023-12-31"
+    },
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "education_005",
+    "text": "Have you had your educational credentials assessed or evaluated for equivalency in any country?",
+    "helpText": "Educational Credential Assessments (ECA) are often required to verify that your foreign education is equivalent to standards in your destination country.",
+    "section": "education",
+    "type": "single_choice",
+    "required": true,
+    "order": 5,
+    "conditionalDisplay": {
+      "dependsOn": "education_001",
+      "condition": "not_equals",
+      "value": "less_than_secondary"
+    },
+    "options": [
+      { "value": "yes", "label": "Yes" },
+      { "value": "no", "label": "No" },
+      { "value": "in_progress", "label": "In progress" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "education_006",
+    "text": "For which country did you have your educational credentials assessed?",
+    "helpText": "Select the country for which your credentials were evaluated. Different countries may have different assessment standards.",
+    "section": "education",
+    "type": "single_choice",
+    "required": true,
+    "order": 6,
+    "conditionalDisplay": {
+      "dependsOn": "education_005",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "ca", "label": "Canada" },
+      { "value": "au", "label": "Australia" },
+      { "value": "nz", "label": "New Zealand" },
+      { "value": "uk", "label": "United Kingdom" },
+      { "value": "us", "label": "United States" },
+      { "value": "other", "label": "Other" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "education_007",
+    "text": "Which organization conducted your educational credential assessment?",
+    "helpText": "Different immigration programs may require assessments from specific organizations.",
+    "section": "education",
+    "type": "single_choice",
+    "required": true,
+    "order": 7,
+    "conditionalDisplay": {
+      "dependsOn": "education_005",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "wes", "label": "World Education Services (WES)" },
+      { "value": "icas", "label": "International Credential Assessment Service (ICAS)" },
+      { "value": "iqas", "label": "International Qualifications Assessment Service (IQAS)" },
+      { "value": "ices", "label": "International Credential Evaluation Service (ICES)" },
+      { "value": "cce", "label": "Comparative Education Service (CES)" },
+      { "value": "vetassess", "label": "VETASSESS" },
+      { "value": "nzqa", "label": "New Zealand Qualifications Authority (NZQA)" },
+      { "value": "naric", "label": "UK NARIC/ENIC" },
+      { "value": "other", "label": "Other" }
+    ],
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "education_008",
+    "text": "Do you have any professional licenses or certifications?",
+    "helpText": "Professional licenses or certifications may be relevant for regulated occupations and certain immigration pathways.",
+    "section": "education",
+    "type": "single_choice",
+    "required": true,
+    "order": 8,
+    "options": [
+      { "value": "yes", "label": "Yes" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "education_009",
+    "text": "Please list your professional licenses or certifications.",
+    "helpText": "Include the name of the license/certification, issuing organization, country, and date of issuance.",
+    "section": "education",
+    "type": "text",
+    "required": true,
+    "order": 9,
+    "conditionalDisplay": {
+      "dependsOn": "education_008",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "education_010",
+    "text": "Have you completed any education or training in your destination country of interest?",
+    "helpText": "Education or training in your destination country may provide additional points or eligibility for certain immigration programs.",
+    "section": "education",
+    "type": "single_choice",
+    "required": true,
+    "order": 10,
+    "options": [
+      { "value": "yes", "label": "Yes" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "education_011",
+    "text": "In which destination country did you complete education or training?",
+    "helpText": "Select the country where you completed your education or training.",
+    "section": "education",
+    "type": "single_choice",
+    "required": true,
+    "order": 11,
+    "conditionalDisplay": {
+      "dependsOn": "education_010",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "ca", "label": "Canada" },
+      { "value": "au", "label": "Australia" },
+      { "value": "nz", "label": "New Zealand" },
+      { "value": "uk", "label": "United Kingdom" },
+      { "value": "us", "label": "United States" },
+      { "value": "other", "label": "Other" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "education_012",
+    "text": "What type of education or training did you complete in your destination country?",
+    "helpText": "The type and duration of education in your destination country may affect your eligibility for certain immigration programs.",
+    "section": "education",
+    "type": "single_choice",
+    "required": true,
+    "order": 12,
+    "conditionalDisplay": {
+      "dependsOn": "education_010",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "high_school", "label": "High school/Secondary education" },
+      { "value": "trade", "label": "Trade certification/Vocational training" },
+      { "value": "college", "label": "College diploma/Associate degree" },
+      { "value": "bachelor", "label": "Bachelor's degree" },
+      { "value": "post_grad_cert", "label": "Post-graduate certificate/diploma" },
+      { "value": "master", "label": "Master's degree" },
+      { "value": "doctoral", "label": "Doctoral degree (PhD)" },
+      { "value": "professional", "label": "Professional degree" },
+      { "value": "short_course", "label": "Short course/Professional development" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "education_013",
+    "text": "Are you currently enrolled in an educational program?",
+    "helpText": "Current enrollment may be relevant for student pathways to immigration or for planning your immigration timeline.",
+    "section": "education",
+    "type": "single_choice",
+    "required": true,
+    "order": 13,
+    "options": [
+      { "value": "yes", "label": "Yes" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "education_014",
+    "text": "What type of educational program are you currently enrolled in?",
+    "helpText": "The type of program you're currently pursuing may affect your immigration options.",
+    "section": "education",
+    "type": "single_choice",
+    "required": true,
+    "order": 14,
+    "conditionalDisplay": {
+      "dependsOn": "education_013",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "options": [
+      { "value": "high_school", "label": "High school/Secondary education" },
+      { "value": "trade", "label": "Trade certification/Vocational training" },
+      { "value": "college", "label": "College diploma/Associate degree" },
+      { "value": "bachelor", "label": "Bachelor's degree" },
+      { "value": "post_grad_cert", "label": "Post-graduate certificate/diploma" },
+      { "value": "master", "label": "Master's degree" },
+      { "value": "doctoral", "label": "Doctoral degree (PhD)" },
+      { "value": "professional", "label": "Professional degree" },
+      { "value": "language", "label": "Language course" },
+      { "value": "short_course", "label": "Short course/Professional development" }
+    ],
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "education_015",
+    "text": "When do you expect to complete your current educational program?",
+    "helpText": "Your expected completion date may be important for planning your immigration timeline.",
+    "section": "education",
+    "type": "date",
+    "required": true,
+    "order": 15,
+    "conditionalDisplay": {
+      "dependsOn": "education_013",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "validation": {
+      "min": "2023-01-01",
+      "max": "2030-12-31"
+    },
+    "relevanceScore": 7,
+    "isActive": true
+  }
+]

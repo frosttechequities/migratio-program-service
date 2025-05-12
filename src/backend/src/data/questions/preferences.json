@@ -1,0 +1,355 @@
+[
+  {
+    "questionId": "preferences_001",
+    "text": "Which factors are most important to you when choosing a destination country?",
+    "helpText": "Select up to 3 factors that are most important in your decision-making process.",
+    "section": "preferences",
+    "type": "multiple_choice",
+    "required": true,
+    "order": 1,
+    "options": [
+      { "value": "job_opportunities", "label": "Job opportunities" },
+      { "value": "education", "label": "Education quality" },
+      { "value": "healthcare", "label": "Healthcare system" },
+      { "value": "safety", "label": "Safety and security" },
+      { "value": "cost_of_living", "label": "Cost of living" },
+      { "value": "climate", "label": "Climate and environment" },
+      { "value": "culture", "label": "Culture and lifestyle" },
+      { "value": "language", "label": "Language compatibility" },
+      { "value": "immigration_ease", "label": "Ease of immigration process" },
+      { "value": "path_to_citizenship", "label": "Path to citizenship" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "preferences_002",
+    "text": "What type of location would you prefer to live in?",
+    "helpText": "Your location preference may affect your immigration options, as some programs are specific to rural or regional areas.",
+    "section": "preferences",
+    "type": "single_choice",
+    "required": true,
+    "order": 2,
+    "options": [
+      { "value": "major_city", "label": "Major city/Metropolitan area" },
+      { "value": "medium_city", "label": "Medium-sized city" },
+      { "value": "small_city", "label": "Small city/Town" },
+      { "value": "rural", "label": "Rural area" },
+      { "value": "any", "label": "No preference" }
+    ],
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "preferences_003",
+    "text": "What climate do you prefer?",
+    "helpText": "Climate preferences may help narrow down regions within your destination country.",
+    "section": "preferences",
+    "type": "single_choice",
+    "required": true,
+    "order": 3,
+    "options": [
+      { "value": "warm", "label": "Warm/Tropical" },
+      { "value": "mild", "label": "Mild/Mediterranean" },
+      { "value": "seasonal", "label": "Seasonal with distinct summers and winters" },
+      { "value": "cool", "label": "Cool/Temperate" },
+      { "value": "cold", "label": "Cold/Northern" },
+      { "value": "any", "label": "No preference" }
+    ],
+    "relevanceScore": 5,
+    "isActive": true
+  },
+  {
+    "questionId": "preferences_004",
+    "text": "How important is proximity to your home country?",
+    "helpText": "Consider factors like travel time and cost for visits home.",
+    "section": "preferences",
+    "type": "single_choice",
+    "required": true,
+    "order": 4,
+    "options": [
+      { "value": "very", "label": "Very important" },
+      { "value": "somewhat", "label": "Somewhat important" },
+      { "value": "not", "label": "Not important" }
+    ],
+    "relevanceScore": 6,
+    "isActive": true
+  },
+  {
+    "questionId": "preferences_005",
+    "text": "How important is having a community from your home country in your destination?",
+    "helpText": "Some immigrants prefer areas with established communities from their home country to ease cultural transition.",
+    "section": "preferences",
+    "type": "single_choice",
+    "required": true,
+    "order": 5,
+    "options": [
+      { "value": "very", "label": "Very important" },
+      { "value": "somewhat", "label": "Somewhat important" },
+      { "value": "not", "label": "Not important" }
+    ],
+    "relevanceScore": 6,
+    "isActive": true
+  },
+  {
+    "questionId": "preferences_006",
+    "text": "What is your preferred timeline for obtaining permanent residence?",
+    "helpText": "Different immigration pathways have different processing times and requirements for permanent residence.",
+    "section": "preferences",
+    "type": "single_choice",
+    "required": true,
+    "order": 6,
+    "options": [
+      { "value": "immediate", "label": "As soon as possible (direct PR)" },
+      { "value": "1_to_2", "label": "Within 1-2 years" },
+      { "value": "2_to_5", "label": "Within 2-5 years" },
+      { "value": "flexible", "label": "Flexible/No specific timeline" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "preferences_007",
+    "text": "How important is the ability to sponsor family members in the future?",
+    "helpText": "Different countries have different policies regarding family sponsorship after you become a permanent resident.",
+    "section": "preferences",
+    "type": "single_choice",
+    "required": true,
+    "order": 7,
+    "options": [
+      { "value": "very", "label": "Very important" },
+      { "value": "somewhat", "label": "Somewhat important" },
+      { "value": "not", "label": "Not important" }
+    ],
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "preferences_008",
+    "text": "Which family members would you like to sponsor in the future?",
+    "helpText": "Different countries have different policies on which family members can be sponsored.",
+    "section": "preferences",
+    "type": "multiple_choice",
+    "required": true,
+    "order": 8,
+    "conditionalDisplay": {
+      "dependsOn": "preferences_007",
+      "condition": "not_equals",
+      "value": "not"
+    },
+    "options": [
+      { "value": "spouse", "label": "Spouse/Partner" },
+      { "value": "children", "label": "Children" },
+      { "value": "parents", "label": "Parents" },
+      { "value": "siblings", "label": "Siblings" },
+      { "value": "grandparents", "label": "Grandparents" },
+      { "value": "other", "label": "Other relatives" }
+    ],
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "preferences_009",
+    "text": "How important is access to public healthcare in your destination country?",
+    "helpText": "Healthcare systems vary by country, with some offering universal public healthcare and others relying more on private insurance.",
+    "section": "preferences",
+    "type": "single_choice",
+    "required": true,
+    "order": 9,
+    "options": [
+      { "value": "very", "label": "Very important" },
+      { "value": "somewhat", "label": "Somewhat important" },
+      { "value": "not", "label": "Not important" }
+    ],
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "preferences_010",
+    "text": "How important is access to free or affordable education in your destination country?",
+    "helpText": "Education systems and costs vary by country, with some offering free or subsidized education and others having significant tuition fees.",
+    "section": "preferences",
+    "type": "single_choice",
+    "required": true,
+    "order": 10,
+    "options": [
+      { "value": "very", "label": "Very important" },
+      { "value": "somewhat", "label": "Somewhat important" },
+      { "value": "not", "label": "Not important" }
+    ],
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "preferences_011",
+    "text": "How important is the cost of living in your destination country?",
+    "helpText": "Cost of living includes housing, food, transportation, healthcare, education, and other daily expenses.",
+    "section": "preferences",
+    "type": "single_choice",
+    "required": true,
+    "order": 11,
+    "options": [
+      { "value": "very", "label": "Very important" },
+      { "value": "somewhat", "label": "Somewhat important" },
+      { "value": "not", "label": "Not important" }
+    ],
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "preferences_012",
+    "text": "What is your preferred cost of living level?",
+    "helpText": "Different regions within countries can have vastly different costs of living.",
+    "section": "preferences",
+    "type": "single_choice",
+    "required": true,
+    "order": 12,
+    "conditionalDisplay": {
+      "dependsOn": "preferences_011",
+      "condition": "not_equals",
+      "value": "not"
+    },
+    "options": [
+      { "value": "low", "label": "Low cost of living (may be in smaller cities or rural areas)" },
+      { "value": "moderate", "label": "Moderate cost of living" },
+      { "value": "high", "label": "High cost of living (typically in major cities with more opportunities)" },
+      { "value": "any", "label": "No preference" }
+    ],
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "preferences_013",
+    "text": "How important is political stability in your destination country?",
+    "helpText": "Political stability can affect long-term security, economic opportunities, and quality of life.",
+    "section": "preferences",
+    "type": "single_choice",
+    "required": true,
+    "order": 13,
+    "options": [
+      { "value": "very", "label": "Very important" },
+      { "value": "somewhat", "label": "Somewhat important" },
+      { "value": "not", "label": "Not important" }
+    ],
+    "relevanceScore": 6,
+    "isActive": true
+  },
+  {
+    "questionId": "preferences_014",
+    "text": "How important is freedom of religion, expression, and personal rights in your destination country?",
+    "helpText": "Countries vary in their protection of civil liberties and personal freedoms.",
+    "section": "preferences",
+    "type": "single_choice",
+    "required": true,
+    "order": 14,
+    "options": [
+      { "value": "very", "label": "Very important" },
+      { "value": "somewhat", "label": "Somewhat important" },
+      { "value": "not", "label": "Not important" }
+    ],
+    "relevanceScore": 6,
+    "isActive": true
+  },
+  {
+    "questionId": "preferences_015",
+    "text": "How important is environmental quality and access to nature in your destination country?",
+    "helpText": "Consider factors like air quality, access to parks and natural areas, and environmental policies.",
+    "section": "preferences",
+    "type": "single_choice",
+    "required": true,
+    "order": 15,
+    "options": [
+      { "value": "very", "label": "Very important" },
+      { "value": "somewhat", "label": "Somewhat important" },
+      { "value": "not", "label": "Not important" }
+    ],
+    "relevanceScore": 5,
+    "isActive": true
+  },
+  {
+    "questionId": "preferences_016",
+    "text": "How important is public transportation in your destination?",
+    "helpText": "Some locations have extensive public transportation systems, while others may require car ownership.",
+    "section": "preferences",
+    "type": "single_choice",
+    "required": true,
+    "order": 16,
+    "options": [
+      { "value": "very", "label": "Very important" },
+      { "value": "somewhat", "label": "Somewhat important" },
+      { "value": "not", "label": "Not important" }
+    ],
+    "relevanceScore": 5,
+    "isActive": true
+  },
+  {
+    "questionId": "preferences_017",
+    "text": "How important is cultural diversity in your destination?",
+    "helpText": "Some locations have more diverse populations and multicultural environments than others.",
+    "section": "preferences",
+    "type": "single_choice",
+    "required": true,
+    "order": 17,
+    "options": [
+      { "value": "very", "label": "Very important" },
+      { "value": "somewhat", "label": "Somewhat important" },
+      { "value": "not", "label": "Not important" }
+    ],
+    "relevanceScore": 5,
+    "isActive": true
+  },
+  {
+    "questionId": "preferences_018",
+    "text": "Are you open to learning a new language if required?",
+    "helpText": "Some countries require language proficiency for immigration or integration.",
+    "section": "preferences",
+    "type": "single_choice",
+    "required": true,
+    "order": 18,
+    "options": [
+      { "value": "yes", "label": "Yes, I'm willing to learn a new language" },
+      { "value": "somewhat", "label": "Somewhat, but I prefer countries where I can speak my language" },
+      { "value": "no", "label": "No, I prefer to immigrate where I can speak my language" }
+    ],
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "preferences_019",
+    "text": "How important is the tax system in your destination country?",
+    "helpText": "Tax systems vary widely, with some countries having higher tax rates but more public services, and others having lower taxes but fewer services.",
+    "section": "preferences",
+    "type": "single_choice",
+    "required": true,
+    "order": 19,
+    "options": [
+      { "value": "very", "label": "Very important" },
+      { "value": "somewhat", "label": "Somewhat important" },
+      { "value": "not", "label": "Not important" }
+    ],
+    "relevanceScore": 6,
+    "isActive": true
+  },
+  {
+    "questionId": "preferences_020",
+    "text": "What type of tax system do you prefer?",
+    "helpText": "Different countries have different approaches to taxation.",
+    "section": "preferences",
+    "type": "single_choice",
+    "required": true,
+    "order": 20,
+    "conditionalDisplay": {
+      "dependsOn": "preferences_019",
+      "condition": "not_equals",
+      "value": "not"
+    },
+    "options": [
+      { "value": "low", "label": "Lower taxes with fewer public services" },
+      { "value": "balanced", "label": "Balanced approach with moderate taxes and services" },
+      { "value": "high", "label": "Higher taxes with comprehensive public services" },
+      { "value": "any", "label": "No preference" }
+    ],
+    "relevanceScore": 6,
+    "isActive": true
+  }
+]

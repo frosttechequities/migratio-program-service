@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-config
+data:
+  NODE_ENV: "production"
+  PORT: "8000"
+  LOG_LEVEL: "info"
+  JWT_EXPIRATION: "24h"
+  RATE_LIMIT_WINDOW_MS: "60000"
+  RATE_LIMIT_MAX_REQUESTS: "60"
+  CORS_ORIGINS: "https://migratio.com,https://www.migratio.com"

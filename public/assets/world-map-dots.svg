@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1000px" height="500px" viewBox="0 0 1000 500" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>World Map Dots</title>
+    <g id="World-Map" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <!-- North America -->
+        <circle id="dot-na-1" fill="#2563EB" cx="250" cy="170" r="4"></circle>
+        <circle id="dot-na-2" fill="#2563EB" cx="230" cy="150" r="4"></circle>
+        <circle id="dot-na-3" fill="#2563EB" cx="270" cy="160" r="4"></circle>
+        <circle id="dot-na-4" fill="#2563EB" cx="210" cy="180" r="4"></circle>
+        <circle id="dot-na-5" fill="#2563EB" cx="240" cy="190" r="4"></circle>
+        <circle id="dot-na-6" fill="#2563EB" cx="200" cy="160" r="4"></circle>
+        <circle id="dot-na-7" fill="#2563EB" cx="180" cy="170" r="4"></circle>
+        <circle id="dot-na-8" fill="#2563EB" cx="220" cy="140" r="4"></circle>
+        <circle id="dot-na-9" fill="#2563EB" cx="260" cy="180" r="4"></circle>
+        <circle id="dot-na-10" fill="#2563EB" cx="280" cy="150" r="4"></circle>
+        
+        <!-- Canada -->
+        <circle id="dot-ca-1" fill="#60A5FA" cx="300" cy="130" r="4"></circle>
+        <circle id="dot-ca-2" fill="#60A5FA" cx="280" cy="120" r="4"></circle>
+        <circle id="dot-ca-3" fill="#60A5FA" cx="320" cy="140" r="4"></circle>
+        <circle id="dot-ca-4" fill="#60A5FA" cx="260" cy="110" r="4"></circle>
+        <circle id="dot-ca-5" fill="#60A5FA" cx="290" cy="100" r="4"></circle>
+        
+        <!-- South America -->
+        <circle id="dot-sa-1" fill="#2563EB" cx="300" cy="300" r="4"></circle>
+        <circle id="dot-sa-2" fill="#2563EB" cx="320" cy="320" r="4"></circle>
+        <circle id="dot-sa-3" fill="#2563EB" cx="280" cy="340" r="4"></circle>
+        <circle id="dot-sa-4" fill="#2563EB" cx="310" cy="360" r="4"></circle>
+        <circle id="dot-sa-5" fill="#2563EB" cx="290" cy="280" r="4"></circle>
+        
+        <!-- Europe -->
+        <circle id="dot-eu-1" fill="#7C3AED" cx="470" cy="150" r="4"></circle>
+        <circle id="dot-eu-2" fill="#7C3AED" cx="490" cy="140" r="4"></circle>
+        <circle id="dot-eu-3" fill="#7C3AED" cx="510" cy="160" r="4"></circle>
+        <circle id="dot-eu-4" fill="#7C3AED" cx="450" cy="170" r="4"></circle>
+        <circle id="dot-eu-5" fill="#7C3AED" cx="480" cy="180" r="4"></circle>
+        <circle id="dot-eu-6" fill="#7C3AED" cx="500" cy="130" r="4"></circle>
+        <circle id="dot-eu-7" fill="#7C3AED" cx="520" cy="150" r="4"></circle>
+        <circle id="dot-eu-8" fill="#7C3AED" cx="460" cy="160" r="4"></circle>
+        
+        <!-- Africa -->
+        <circle id="dot-af-1" fill="#7C3AED" cx="500" cy="250" r="4"></circle>
+        <circle id="dot-af-2" fill="#7C3AED" cx="520" cy="270" r="4"></circle>
+        <circle id="dot-af-3" fill="#7C3AED" cx="480" cy="290" r="4"></circle>
+        <circle id="dot-af-4" fill="#7C3AED" cx="510" cy="310" r="4"></circle>
+        <circle id="dot-af-5" fill="#7C3AED" cx="490" cy="230" r="4"></circle>
+        <circle id="dot-af-6" fill="#7C3AED" cx="530" cy="250" r="4"></circle>
+        
+        <!-- Asia -->
+        <circle id="dot-as-1" fill="#EC4899" cx="650" cy="200" r="4"></circle>
+        <circle id="dot-as-2" fill="#EC4899" cx="670" cy="180" r="4"></circle>
+        <circle id="dot-as-3" fill="#EC4899" cx="690" cy="220" r="4"></circle>
+        <circle id="dot-as-4" fill="#EC4899" cx="630" cy="240" r="4"></circle>
+        <circle id="dot-as-5" fill="#EC4899" cx="650" cy="160" r="4"></circle>
+        <circle id="dot-as-6" fill="#F59E0B" cx="750" cy="180" r="4"></circle>
+        <circle id="dot-as-7" fill="#F59E0B" cx="770" cy="160" r="4"></circle>
+        <circle id="dot-as-8" fill="#F59E0B" cx="730" cy="200" r="4"></circle>
+        <circle id="dot-as-9" fill="#F59E0B" cx="790" cy="180" r="4"></circle>
+        <circle id="dot-as-10" fill="#F59E0B" cx="750" cy="220" r="4"></circle>
+        
+        <!-- Australia -->
+        <circle id="dot-au-1" fill="#A78BFA" cx="800" cy="280" r="4"></circle>
+        <circle id="dot-au-2" fill="#A78BFA" cx="820" cy="300" r="4"></circle>
+        <circle id="dot-au-3" fill="#A78BFA" cx="780" cy="320" r="4"></circle>
+        <circle id="dot-au-4" fill="#A78BFA" cx="810" cy="340" r="4"></circle>
+        <circle id="dot-au-5" fill="#A78BFA" cx="790" cy="260" r="4"></circle>
+    </g>
+</svg>

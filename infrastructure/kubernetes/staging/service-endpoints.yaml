@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-endpoints
+data:
+  USER_SERVICE_URL: "http://user-service.migratio-staging.svc.cluster.local:3001"
+  ASSESSMENT_SERVICE_URL: "http://assessment-service.migratio-staging.svc.cluster.local:3002"
+  RECOMMENDATION_SERVICE_URL: "http://recommendation-service.migratio-staging.svc.cluster.local:3003"
+  PROGRAM_SERVICE_URL: "http://program-service.migratio-staging.svc.cluster.local:3004"
+  ROADMAP_SERVICE_URL: "http://roadmap-service.migratio-staging.svc.cluster.local:3005"
+  PDF_SERVICE_URL: "http://pdf-service.migratio-staging.svc.cluster.local:3006"

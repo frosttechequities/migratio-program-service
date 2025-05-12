@@ -1,0 +1,8 @@
+flask
+scikit-learn
+pandas
+numpy
+joblib
+python-dotenv
+gunicorn
+requests # For calling other services

@@ -1,0 +1,272 @@
+[
+  {
+    "questionId": "personal_001",
+    "text": "What is your current country of residence?",
+    "helpText": "Select the country where you currently live and have legal status.",
+    "section": "personal",
+    "type": "single_choice",
+    "required": true,
+    "order": 1,
+    "options": [
+      { "value": "us", "label": "United States" },
+      { "value": "ca", "label": "Canada" },
+      { "value": "uk", "label": "United Kingdom" },
+      { "value": "au", "label": "Australia" },
+      { "value": "nz", "label": "New Zealand" },
+      { "value": "in", "label": "India" },
+      { "value": "cn", "label": "China" },
+      { "value": "ph", "label": "Philippines" },
+      { "value": "ng", "label": "Nigeria" },
+      { "value": "pk", "label": "Pakistan" },
+      { "value": "other", "label": "Other" }
+    ],
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "personal_002",
+    "text": "What is your country of citizenship?",
+    "helpText": "Select the country or countries where you currently hold citizenship. If you have multiple citizenships, select all that apply.",
+    "section": "personal",
+    "type": "multiple_choice",
+    "required": true,
+    "order": 2,
+    "options": [
+      { "value": "us", "label": "United States" },
+      { "value": "ca", "label": "Canada" },
+      { "value": "uk", "label": "United Kingdom" },
+      { "value": "au", "label": "Australia" },
+      { "value": "nz", "label": "New Zealand" },
+      { "value": "in", "label": "India" },
+      { "value": "cn", "label": "China" },
+      { "value": "ph", "label": "Philippines" },
+      { "value": "ng", "label": "Nigeria" },
+      { "value": "pk", "label": "Pakistan" },
+      { "value": "other", "label": "Other" }
+    ],
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "personal_003",
+    "text": "What is your date of birth?",
+    "helpText": "Your age is an important factor in many immigration programs. Some programs have age restrictions or award points based on age.",
+    "section": "personal",
+    "type": "date",
+    "required": true,
+    "order": 3,
+    "validation": {
+      "min": "1920-01-01",
+      "max": "2006-01-01"
+    },
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "personal_004",
+    "text": "What is your current marital status?",
+    "helpText": "Your marital status may affect your eligibility for certain immigration programs and could impact points calculations in points-based systems.",
+    "section": "personal",
+    "type": "single_choice",
+    "required": true,
+    "order": 4,
+    "options": [
+      { "value": "single", "label": "Single (Never Married)" },
+      { "value": "married", "label": "Married" },
+      { "value": "common_law", "label": "Common-Law Partnership" },
+      { "value": "separated", "label": "Legally Separated" },
+      { "value": "divorced", "label": "Divorced" },
+      { "value": "widowed", "label": "Widowed" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "personal_005",
+    "text": "Do you have any dependent children?",
+    "helpText": "Dependent children typically include biological or adopted children under a certain age who depend on you financially.",
+    "section": "personal",
+    "type": "single_choice",
+    "required": true,
+    "order": 5,
+    "options": [
+      { "value": "yes", "label": "Yes" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "personal_006",
+    "text": "How many dependent children do you have?",
+    "helpText": "The number of dependent children may affect your eligibility and settlement fund requirements for certain immigration programs.",
+    "section": "personal",
+    "type": "number",
+    "required": true,
+    "order": 6,
+    "validation": {
+      "min": 1,
+      "max": 20
+    },
+    "conditionalDisplay": {
+      "dependsOn": "personal_005",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "personal_007",
+    "text": "What are the ages of your dependent children?",
+    "helpText": "In most immigration programs, children under 22 years of age who are not married or in a common-law relationship are considered dependents. Some exceptions may apply for children who are financially dependent due to disability.",
+    "section": "personal",
+    "type": "text",
+    "required": true,
+    "order": 7,
+    "conditionalDisplay": {
+      "dependsOn": "personal_005",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "relevanceScore": 7,
+    "isActive": true
+  },
+  {
+    "questionId": "personal_008",
+    "text": "Have you ever been refused a visa or permit, denied entry, or ordered to leave any country?",
+    "helpText": "Previous immigration issues may affect your eligibility for certain immigration programs. Please be honest as immigration authorities conduct thorough background checks.",
+    "section": "personal",
+    "type": "single_choice",
+    "required": true,
+    "order": 8,
+    "options": [
+      { "value": "yes", "label": "Yes" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "personal_009",
+    "text": "Please provide details about your previous immigration issues.",
+    "helpText": "Include the country, date, type of application, and reason for refusal or removal. This information helps us assess potential admissibility issues.",
+    "section": "personal",
+    "type": "text",
+    "required": true,
+    "order": 9,
+    "conditionalDisplay": {
+      "dependsOn": "personal_008",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "relevanceScore": 9,
+    "isActive": true
+  },
+  {
+    "questionId": "personal_010",
+    "text": "Do you have any criminal convictions in any country?",
+    "helpText": "Criminal convictions may affect your admissibility to certain countries. Minor offenses like traffic violations typically don't need to be reported unless they resulted in a criminal conviction.",
+    "section": "personal",
+    "type": "single_choice",
+    "required": true,
+    "order": 10,
+    "options": [
+      { "value": "yes", "label": "Yes" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "personal_011",
+    "text": "Please provide details about your criminal convictions.",
+    "helpText": "Include the country, date, offense, and sentence. This information helps us assess potential admissibility issues.",
+    "section": "personal",
+    "type": "text",
+    "required": true,
+    "order": 11,
+    "conditionalDisplay": {
+      "dependsOn": "personal_010",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "personal_012",
+    "text": "Do you have any serious medical conditions?",
+    "helpText": "Many countries assess medical admissibility as part of the immigration process. This helps determine if your condition might place excessive demand on health or social services.",
+    "section": "personal",
+    "type": "single_choice",
+    "required": true,
+    "order": 12,
+    "options": [
+      { "value": "yes", "label": "Yes" },
+      { "value": "no", "label": "No" }
+    ],
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "personal_013",
+    "text": "Please provide details about your medical conditions.",
+    "helpText": "Include the condition, when it was diagnosed, current treatment, and how it affects your daily life. This information helps us assess potential medical inadmissibility issues.",
+    "section": "personal",
+    "type": "text",
+    "required": true,
+    "order": 13,
+    "conditionalDisplay": {
+      "dependsOn": "personal_012",
+      "condition": "equals",
+      "value": "yes"
+    },
+    "relevanceScore": 8,
+    "isActive": true
+  },
+  {
+    "questionId": "personal_014",
+    "text": "Which countries are you interested in immigrating to?",
+    "helpText": "Select all countries you're considering for immigration. This helps us provide relevant recommendations based on your profile.",
+    "section": "personal",
+    "type": "multiple_choice",
+    "required": true,
+    "order": 14,
+    "options": [
+      { "value": "ca", "label": "Canada" },
+      { "value": "au", "label": "Australia" },
+      { "value": "nz", "label": "New Zealand" },
+      { "value": "uk", "label": "United Kingdom" },
+      { "value": "us", "label": "United States" },
+      { "value": "de", "label": "Germany" },
+      { "value": "sg", "label": "Singapore" },
+      { "value": "ie", "label": "Ireland" },
+      { "value": "se", "label": "Sweden" },
+      { "value": "no", "label": "Norway" }
+    ],
+    "relevanceScore": 10,
+    "isActive": true
+  },
+  {
+    "questionId": "personal_015",
+    "text": "What is your primary reason for wanting to immigrate?",
+    "helpText": "Understanding your motivation helps us recommend the most suitable immigration pathways for your situation.",
+    "section": "personal",
+    "type": "single_choice",
+    "required": true,
+    "order": 15,
+    "options": [
+      { "value": "work", "label": "Employment Opportunities" },
+      { "value": "education", "label": "Education" },
+      { "value": "family", "label": "Family Reunification" },
+      { "value": "safety", "label": "Safety and Security" },
+      { "value": "lifestyle", "label": "Quality of Life" },
+      { "value": "business", "label": "Business or Investment" },
+      { "value": "retirement", "label": "Retirement" },
+      { "value": "other", "label": "Other" }
+    ],
+    "relevanceScore": 9,
+    "isActive": true
+  }
+]

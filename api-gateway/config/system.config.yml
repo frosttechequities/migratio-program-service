@@ -1,0 +1,10 @@
+# System configuration for Express Gateway
+# Using in-memory database for development/testing
+
+db:
+  redis:
+    emulate: true
+    namespace: EG
+
+# Other system settings like crypto, session, etc., would go here if needed.
+# For now, only db is critical to resolve the startup error.
