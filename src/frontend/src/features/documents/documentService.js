@@ -18,13 +18,24 @@ const getDocuments = async () => {
     }
 
     // Fetch user documents
-    const { data: documentsData, error: documentsError } = await supabase
-      .from('user_documents')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('upload_date', { ascending: false });
+    let documentsData = [];
+    try {
+      const { data, error } = await supabase
+        .from('user_documents')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('upload_date', { ascending: false });
 
-    if (documentsError) throw documentsError;
+      if (!error) {
+        documentsData = data;
+      } else {
+        console.error('Error fetching documents:', error);
+        // Return empty array instead of throwing
+      }
+    } catch (error) {
+      console.error('Exception fetching documents:', error);
+      // Return empty array instead of throwing
+    }
 
     console.log('[documentService] Received documents:', documentsData);
     return {
@@ -105,7 +116,7 @@ const uploadDocument = async (file, metadata, onUploadProgress) => {
     const fileName = `${Date.now()}_${file.name}`;
     const filePath = `documents/${user.id}/${fileName}`;
 
-    const { data: fileData, error: fileError } = await supabase.storage
+    const { error: fileError } = await supabase.storage
       .from('documents')
       .upload(filePath, file);
 

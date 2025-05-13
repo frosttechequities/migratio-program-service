@@ -18,27 +18,38 @@ const getAllRoadmaps = async () => {
     }
 
     // Fetch user roadmaps
-    const { data: roadmapsData, error: roadmapsError } = await supabase
-      .from('user_roadmaps')
-      .select(`
-        id,
-        title,
-        description,
-        status,
-        created_at,
-        updated_at,
-        program_id,
-        immigration_programs (
+    let roadmapsData = [];
+    try {
+      const { data, error } = await supabase
+        .from('user_roadmaps')
+        .select(`
           id,
           title,
-          country,
-          description
-        )
-      `)
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+          description,
+          status,
+          created_at,
+          updated_at,
+          program_id,
+          immigration_programs (
+            id,
+            title,
+            country,
+            description
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
-    if (roadmapsError) throw roadmapsError;
+      if (!error) {
+        roadmapsData = data;
+      } else {
+        console.error('Error fetching roadmaps:', error);
+        // Return empty array instead of throwing
+      }
+    } catch (error) {
+      console.error('Exception fetching roadmaps:', error);
+      // Return empty array instead of throwing
+    }
 
     console.log('[roadmapService] Received roadmaps:', roadmapsData);
     return {
@@ -139,7 +150,7 @@ const updateMilestoneStatus = async (roadmapId, milestoneId, updateData) => {
     }
 
     // Verify the roadmap belongs to the user
-    const { data: roadmap, error: roadmapError } = await supabase
+    const { error: roadmapError } = await supabase
       .from('user_roadmaps')
       .select('id')
       .eq('id', roadmapId)
@@ -194,7 +205,7 @@ const updateDocumentStatus = async (roadmapId, documentId, updateData) => {
     }
 
     // Verify the roadmap belongs to the user
-    const { data: roadmap, error: roadmapError } = await supabase
+    const { error: roadmapError } = await supabase
       .from('user_roadmaps')
       .select('id')
       .eq('id', roadmapId)
@@ -293,7 +304,7 @@ const generateMilestones = async (roadmapId, programId) => {
     console.log(`[roadmapService] Generating milestones for roadmap ${roadmapId} and program ${programId}...`);
 
     // Get the program
-    const { data: program, error: programError } = await supabase
+    const { error: programError } = await supabase
       .from('immigration_programs')
       .select('*')
       .eq('id', programId)

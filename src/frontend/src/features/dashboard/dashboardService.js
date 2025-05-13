@@ -19,14 +19,45 @@ const getDashboardData = async () => {
     }
 
     // Fetch user progress data
+    let userProgressData = null;
+
     const { data: progressData, error: progressError } = await supabase
       .from('user_progress')
       .select('*')
       .eq('user_id', user.id)
       .single();
 
-    if (progressError && progressError.code !== 'PGRST116') {
+    // If no progress data exists, create it
+    if (progressError && progressError.code === 'PGRST116') {
+      console.log('[dashboardService] No progress data found, creating initial progress data');
+
+      const { data: newProgressData, error: createError } = await supabase
+        .from('user_progress')
+        .insert([
+          {
+            user_id: user.id,
+            current_stage: 1,
+            total_stages: 8,
+            completed_steps: 0,
+            total_steps: 20,
+            first_login_at: new Date().toISOString(),
+            last_active_at: new Date().toISOString()
+          }
+        ])
+        .select()
+        .single();
+
+      if (createError) {
+        console.error('Error creating progress data:', createError);
+        throw createError;
+      }
+
+      // Use the newly created progress data
+      userProgressData = newProgressData;
+    } else if (progressError) {
       throw progressError;
+    } else {
+      userProgressData = progressData;
     }
 
     // Fetch user tasks
@@ -68,10 +99,10 @@ const getDashboardData = async () => {
 
     // Calculate document statistics
     const documentStats = {
-      total: documentsData.length,
-      verified: documentsData.filter(doc => doc.status === 'verified').length,
-      pending: documentsData.filter(doc => doc.status === 'pending').length,
-      rejected: documentsData.filter(doc => doc.status === 'rejected').length
+      total: documentsData ? documentsData.length : 0,
+      verified: documentsData ? documentsData.filter(doc => doc.status === 'verified').length : 0,
+      pending: documentsData ? documentsData.filter(doc => doc.status === 'pending').length : 0,
+      rejected: documentsData ? documentsData.filter(doc => doc.status === 'rejected').length : 0
     };
 
     // Format the data for the frontend
@@ -79,42 +110,50 @@ const getDashboardData = async () => {
       status: 'success',
       data: {
         overview: {
-          completedSteps: progressData?.completed_steps || 0,
-          totalSteps: progressData?.total_steps || 0,
-          currentStageIndex: progressData?.current_stage || 1,
-          daysActive: progressData ? Math.ceil((new Date() - new Date(progressData.first_login_at)) / (1000 * 60 * 60 * 24)) : 0,
-          documentsUploaded: documentsData.length,
-          tasksCompleted: tasksData.filter(task => task.status === 'completed').length
+          completedSteps: userProgressData?.completed_steps || 0,
+          totalSteps: userProgressData?.total_steps || 0,
+          currentStageIndex: userProgressData?.current_stage || 1,
+          daysActive: userProgressData ? Math.ceil((new Date() - new Date(userProgressData.first_login_at)) / (1000 * 60 * 60 * 24)) : 0,
+          documentsUploaded: documentsData ? documentsData.length : 0,
+          tasksCompleted: tasksData ? tasksData.filter(task => task.status === 'completed').length : 0
         },
-        nextSteps: tasksData.slice(0, 3).map(task => ({
-          id: task.id,
-          title: task.title,
-          priority: task.priority,
-          dueDate: task.due_date
-        })),
-        recommendations: recommendationsData.map(rec => ({
-          id: rec.id,
-          title: rec.immigration_programs.title,
-          country: rec.immigration_programs.country,
-          score: rec.score,
-          description: rec.reasoning
-        })),
-        tasks: tasksData.map(task => ({
-          id: task.id,
-          title: task.title,
-          dueDate: task.due_date,
-          status: task.status,
-          priority: task.priority,
-          category: task.category
-        })),
+        nextSteps: tasksData && tasksData.length > 0
+          ? tasksData.slice(0, 3).map(task => ({
+              id: task.id,
+              title: task.title,
+              priority: task.priority,
+              dueDate: task.due_date
+            }))
+          : [],
+        recommendations: recommendationsData && recommendationsData.length > 0
+          ? recommendationsData.map(rec => ({
+              id: rec.id,
+              title: rec.immigration_programs?.title || 'Program',
+              country: rec.immigration_programs?.country || 'Unknown',
+              score: rec.score || 0,
+              description: rec.reasoning || 'Recommended based on your profile'
+            }))
+          : [],
+        tasks: tasksData && tasksData.length > 0
+          ? tasksData.map(task => ({
+              id: task.id,
+              title: task.title,
+              dueDate: task.due_date,
+              status: task.status,
+              priority: task.priority,
+              category: task.category
+            }))
+          : [],
         documents: {
-          recent: documentsData.slice(0, 5).map(doc => ({
-            id: doc.id,
-            name: doc.name,
-            uploadDate: doc.upload_date,
-            type: doc.document_type,
-            status: doc.status
-          })),
+          recent: documentsData && documentsData.length > 0
+            ? documentsData.slice(0, 5).map(doc => ({
+                id: doc.id,
+                name: doc.name,
+                uploadDate: doc.upload_date,
+                type: doc.document_type,
+                status: doc.status
+              }))
+            : [],
           stats: documentStats
         }
       }

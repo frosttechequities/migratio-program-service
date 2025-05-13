@@ -89,13 +89,25 @@ const startQuiz = async () => {
     }
 
     // Check if user already has a quiz session
-    const { data: existingSession, error: sessionError } = await supabase
-      .from('quiz_sessions')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
+    let existingSession = null;
+    try {
+      const { data, error } = await supabase
+        .from('quiz_sessions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (!error) {
+        existingSession = data;
+      } else if (error.code !== 'PGRST116') {
+        console.error('Error fetching quiz session:', error);
+      }
+    } catch (error) {
+      console.error('Error checking for existing quiz session:', error);
+      // Continue with creating a new session
+    }
 
     // If there's an existing incomplete session, return it
     if (existingSession && !existingSession.is_complete) {
