@@ -1,114 +1,155 @@
-import axios from 'axios';
-import { getTokenFromLocalStorage } from '../../utils/authUtils';
-
-// Define base URLs for different parts of the user service
-const BASE_USER_SERVICE_API = process.env.REACT_APP_USER_SERVICE_URL || 'http://localhost:3001/api';
-const AUTH_API_URL = `${BASE_USER_SERVICE_API}/auth`; // For /auth specific routes (e.g., /login, /signup)
-const USERS_API_URL = `${BASE_USER_SERVICE_API}/users`;   // For /users specific routes (e.g., /me)
-
-const getAuthHeaders = () => {
-  const token = getTokenFromLocalStorage();
-  const headers = {
-    'Content-Type': 'application/json',
-  };
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-  return headers;
-};
+import supabase from '../../utils/supabaseClient';
 
 // Register user
 const register = async (userData) => {
   try {
-    const response = await axios.post(`${AUTH_API_URL}/signup`, userData);
-    return response.data;
+    const { data, error } = await supabase.auth.signUp({
+      email: userData.email,
+      password: userData.password,
+      options: {
+        data: {
+          first_name: userData.firstName || '',
+          last_name: userData.lastName || '',
+        }
+      }
+    });
+
+    if (error) throw error;
+
+    return {
+      user: data.user,
+      session: data.session
+    };
   } catch (error) {
-    const message =
-      (error.response?.data?.message) || error.message || error.toString();
-    console.error('Registration Service Error:', message);
-    throw new Error(message);
+    console.error('Registration Service Error:', error.message);
+    throw new Error(error.message);
   }
 };
 
 // Login user
 const login = async (userData) => {
-   try {
-    const loginUrl = `${AUTH_API_URL}/login`;
-    console.log('[AuthService] Attempting login to URL:', loginUrl); // Log the URL
-    const response = await axios.post(loginUrl, userData);
-    return response.data;
+  try {
+    console.log('[AuthService] Attempting login with Supabase');
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: userData.email,
+      password: userData.password
+    });
+
+    if (error) throw error;
+
+    // Store the session in localStorage
+    localStorage.setItem('token', data.session.access_token);
+
+    return {
+      user: data.user,
+      token: data.session.access_token
+    };
   } catch (error) {
-    const message =
-      (error.response?.data?.message) || error.message || error.toString();
-    console.error('Login Service Error:', message);
-    throw new Error(message);
+    console.error('Login Service Error:', error.message);
+    throw new Error(error.message);
   }
 };
 
 // Logout user
 const logout = async () => {
-  console.log('Logout service called - clearing all authentication data');
+  try {
+    console.log('Logout service called - clearing all authentication data');
 
-  // Clear all authentication-related data from localStorage
-  localStorage.removeItem('user');
-  localStorage.removeItem('token');
-  localStorage.removeItem('auth');
+    // Sign out from Supabase
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
 
-  // Clear any session cookies that might be persisting the session
-  document.cookie.split(';').forEach(cookie => {
-    const [name] = cookie.trim().split('=');
-    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
-  });
+    // Clear all authentication-related data from localStorage
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('auth');
 
-  // Force a reload of the page to ensure all state is cleared
-  setTimeout(() => {
-    window.location.href = '/';
-  }, 100);
+    // Clear any session cookies that might be persisting the session
+    document.cookie.split(';').forEach(cookie => {
+      const [name] = cookie.trim().split('=');
+      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+    });
 
-  return { success: true };
+    // Force a reload of the page to ensure all state is cleared
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 100);
+
+    return { success: true };
+  } catch (error) {
+    console.error('Logout Service Error:', error.message);
+    return { success: false, message: error.message };
+  }
 };
 
 // Check Auth Status
 const checkAuth = async () => {
-    const token = getTokenFromLocalStorage();
-    if (token) {
-      try {
-         const response = await axios.get(`${USERS_API_URL}/me`, { headers: getAuthHeaders() });
-         return response.data.data?.user || response.data.user || response.data;
-      } catch (error) {
-         console.error('Auth check failed:', error.response?.data?.message || error.message);
-         return null;
-      }
+  try {
+    const { data, error } = await supabase.auth.getSession();
+
+    if (error) throw error;
+
+    if (data.session) {
+      const { data: userData } = await supabase.auth.getUser();
+      return userData.user;
     }
+
     return null;
+  } catch (error) {
+    console.error('Auth check failed:', error.message);
+    return null;
+  }
 };
 
-// --- Placeholder functions for other auth operations ---
+// Email verification
 const verifyEmail = async (token) => {
-  console.warn('verifyEmail service function not implemented.');
-  // try {
-  //   const response = await axios.get(`${AUTH_API_URL}/verifyEmail/${token}`);
-  //   return response.data;
-  // } catch (error) { ... }
-  return { success: false, message: 'Not implemented' };
+  try {
+    // Supabase handles email verification automatically
+    // This function is just for compatibility with the existing code
+    console.log('Email verification is handled automatically by Supabase');
+    return { success: true, message: 'Email verification is handled by Supabase' };
+  } catch (error) {
+    console.error('Email verification error:', error.message);
+    return { success: false, message: error.message };
+  }
 };
 
+// Forgot password
 const forgotPassword = async (email) => {
-   console.warn('forgotPassword service function not implemented.');
-  // try {
-  //   const response = await axios.post(`${AUTH_API_URL}/forgotPassword`, { email });
-  //   return response.data;
-  // } catch (error) { ... }
-   return { success: false, message: 'Not implemented' };
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+    if (error) throw error;
+
+    return {
+      success: true,
+      message: 'Password reset instructions sent to your email'
+    };
+  } catch (error) {
+    console.error('Forgot password error:', error.message);
+    return { success: false, message: error.message };
+  }
 };
 
-const resetPassword = async (token, password) => {
-   console.warn('resetPassword service function not implemented.');
-  // try {
-  //   const response = await axios.patch(`${AUTH_API_URL}/resetPassword/${token}`, { password });
-  //   return response.data;
-  // } catch (error) { ... }
-   return { success: false, message: 'Not implemented' };
+// Reset password
+const resetPassword = async (password) => {
+  try {
+    const { error } = await supabase.auth.updateUser({
+      password: password
+    });
+
+    if (error) throw error;
+
+    return {
+      success: true,
+      message: 'Password has been reset successfully'
+    };
+  } catch (error) {
+    console.error('Reset password error:', error.message);
+    return { success: false, message: error.message };
+  }
 };
 
 const authService = {

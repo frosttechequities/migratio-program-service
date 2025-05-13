@@ -8,22 +8,52 @@
   to = "/index.html"
   status = 200
 
-# Proxy API requests to backend (update with your actual backend URL when deployed)
+# Proxy API requests to backend services
 [[redirects]]
-  from = "/api/*"
-  to = "https://your-backend-api.com/api/:splat"
+  from = "/api/countries/*"
+  to = "https://migratio-program-service.onrender.com/api/countries/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/programs/*"
+  to = "https://migratio-program-service.onrender.com/api/programs/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/quiz/*"
+  to = "https://migratio-quiz-api.onrender.com/quiz/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/profiles/*"
+  to = "https://migratio-user-auth.onrender.com/profiles/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/dashboard/*"
+  to = "https://migratio-user-auth.onrender.com/dashboard/:splat"
   status = 200
   force = true
 
 [[redirects]]
   from = "/auth/*"
-  to = "https://your-backend-api.com/auth/:splat"
+  to = "https://migratio-user-auth.onrender.com/auth/:splat"
   status = 200
   force = true
 
 # Environment variables can be set here or in the Netlify dashboard
 [build.environment]
-  REACT_APP_API_URL = "https://your-backend-api.com"  # Replace with your actual backend URL when deployed
+  REACT_APP_API_URL = "https://remarkable-fairy-b57541.netlify.app"
+  REACT_APP_PROGRAM_SERVICE_URL = "https://migratio-program-service.onrender.com/api"
+  REACT_APP_QUIZ_API_URL = "https://migratio-quiz-api.onrender.com/quiz"
+  REACT_APP_USER_AUTH_URL = "https://migratio-user-auth.onrender.com/auth"
+  REACT_APP_SUPABASE_URL = "https://qyvvrvthalxeibsmckep.supabase.co"
+  REACT_APP_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5dnZydnRoYWx4ZWlic21ja2VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDkxODgsImV4cCI6MjA2MjY4NTE4OH0.l1B9Ew14YyQri9EGsOZd7MJ4XVA7YbgmuNX-w_b0NKc"
+  REACT_APP_USER_SERVICE_URL = "https://remarkable-fairy-b57541.netlify.app/api"
 
 # Optimize build cache
 [build.processing]
