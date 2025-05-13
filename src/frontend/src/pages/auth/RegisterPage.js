@@ -38,6 +38,7 @@ const RegisterPage = () => {
   // Get relevant state from Redux store
   const { isLoading, isError, error: authError, isSuccess } = useSelector((state) => state.auth);
   const [apiError, setApiError] = useState(null); // Local state for displaying API error from Redux
+  const [registeredEmail, setRegisteredEmail] = useState(''); // Store email for redirect
 
   // Effect to handle successful registration or error changes from Redux state
   useEffect(() => {
@@ -48,18 +49,20 @@ const RegisterPage = () => {
     }
     if (isSuccess) {
       // Registration was successful (handled by the thunk/slice)
-      // Navigate to verification prompt page after success message potentially shown by thunk
-      navigate('/verify-email');
+      // Since we've enabled auto-confirmation, we can redirect directly to the login page
+      navigate('/login');
       dispatch(reset()); // Reset auth state (isLoading, isSuccess, isError, error)
     }
-  }, [isError, authError, isSuccess, navigate, dispatch]);
+  }, [isError, authError, isSuccess, navigate, dispatch, registeredEmail]);
 
   const handleSubmit = (values) => {
     // Reset local API error display before new submission
     setApiError(null);
-    // Dispatch the register thunk with form values
     // Destructure to avoid sending confirmPassword to backend if not needed there
     const { firstName, lastName, email, password } = values;
+    // Store the email for redirect after successful registration
+    setRegisteredEmail(email);
+    // Dispatch the register thunk with form values
     dispatch(register({ firstName, lastName, email, password }));
     // Navigation/error display is handled by the useEffect hook based on Redux state changes
   };
