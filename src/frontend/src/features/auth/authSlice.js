@@ -11,7 +11,7 @@ const initialUser = getUserFromLocalStorage();
 const initialState = {
   user: initialUser || null,
   isAuthenticated: !!initialUser, // Tentatively set based on localStorage, confirmed by checkAuth
-  isLoading: false, 
+  isLoading: false,
   isSuccess: false,
   isError: false,
   error: null,
@@ -43,10 +43,10 @@ export const login = createAsyncThunk(
   'auth/login',
   async (userData, thunkAPI) => {
     try {
-      const response = await authService.login(userData); // response = { status, token, data: { user } }
-      if (response.token && response.data?.user) {
-        saveUserToLocalStorage(response.data.user, response.token);
-        return { user: response.data.user, token: response.token }; // Pass user and token to reducer
+      const response = await authService.login(userData); // response = { user, token }
+      if (response.token && response.user) {
+        saveUserToLocalStorage(response.user, response.token);
+        return { user: response.user, token: response.token }; // Pass user and token to reducer
       } else {
         throw new Error('Login response did not include token or user data.');
       }
@@ -178,7 +178,7 @@ const authSlice = createSlice({
         state.isError = true;
         state.error = action.payload;
       })
-      
+
       // Login
       .addCase(login.pending, (state) => {
         state.isLoading = true;
@@ -198,9 +198,9 @@ const authSlice = createSlice({
         state.user = null;
         state.isAuthenticated = false;
         // localStorage was cleared in the thunk if needed, or here
-        removeUserFromLocalStorage(); 
+        removeUserFromLocalStorage();
       })
-      
+
       // Logout
       .addCase(logout.pending, (state) => {
         state.isLoading = true;
@@ -220,7 +220,7 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         // localStorage cleared in thunk
       })
-      
+
       // Verify Email, Forgot Password, Reset Password (pending, fulfilled, rejected similar to register)
       // ... (omitted for brevity, assume standard loading/error handling)
 
@@ -230,8 +230,8 @@ const authSlice = createSlice({
       })
       .addCase(checkAuth.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.isAuthenticated = !!action.payload; 
-        state.user = action.payload; 
+        state.isAuthenticated = !!action.payload;
+        state.user = action.payload;
         // localStorage handled in thunk
       })
       .addCase(checkAuth.rejected, (state) => {
