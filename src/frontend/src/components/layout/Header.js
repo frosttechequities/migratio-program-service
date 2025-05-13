@@ -207,9 +207,10 @@ const Header = () => {
         borderBottom: '1px solid',
         borderColor: 'divider',
         backdropFilter: 'blur(20px)',
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
         zIndex: 1100,
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+        top: 0,
       }}
     >
       <Container maxWidth="xl">
@@ -237,10 +238,12 @@ const Header = () => {
                 <img
                   src={logo}
                   alt="Visafy Logo"
-                  height="90"
+                  height="100"
                   style={{
                     padding: '4px 0',
                     filter: 'drop-shadow(0 6px 8px rgba(0, 0, 0, 0.15))',
+                    marginTop: '4px',
+                    marginBottom: '4px',
                   }}
                 />
               </Box>
@@ -393,10 +396,12 @@ const Header = () => {
                 <img
                   src={logo}
                   alt="Visafy Logo"
-                  height="80"
+                  height="90"
                   style={{
                     padding: '4px 0',
                     filter: 'drop-shadow(0 6px 8px rgba(0, 0, 0, 0.15))',
+                    marginTop: '4px',
+                    marginBottom: '4px',
                   }}
                 />
               </Box>

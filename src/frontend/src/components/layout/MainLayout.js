@@ -4,7 +4,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Box } from '@mui/material';
 
 import { clearMessage } from '../../features/ui/uiSlice';
-import Header from './Header';
 import Footer from './Footer';
 import SkipLink from '../common/SkipLink';
 import ChatbotWidget from '../../features/chatbot/components/ChatbotWidget'; // Import Chatbot
@@ -86,8 +85,6 @@ const MainLayout = () => {
         },
       }}
     >
-      <Header />
-
       <Box sx={{ display: 'flex', flex: 1, position: 'relative', zIndex: 1 }}>
         {/* Main content */}
         <Box
@@ -115,8 +112,8 @@ const MainLayout = () => {
       </Box>
 
       <Footer />
-      {/* Render Chatbot Widget (conditionally based on auth?) */}
-      {isAuthenticated && <ChatbotWidget />}
+      {/* Render Chatbot Widget for all users */}
+      <ChatbotWidget />
     </Box>
     </>
   );
