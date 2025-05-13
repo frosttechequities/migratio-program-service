@@ -4,7 +4,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Box } from '@mui/material';
 
 import { clearMessage } from '../../features/ui/uiSlice';
-import Footer from './Footer';
 import SkipLink from '../common/SkipLink';
 import ChatbotWidget from '../../features/chatbot/components/ChatbotWidget'; // Import Chatbot
 import { useToast } from '../../contexts/ToastContext';
@@ -111,7 +110,6 @@ const MainLayout = () => {
         </Box>
       </Box>
 
-      <Footer />
       {/* Render Chatbot Widget for all users */}
       <ChatbotWidget />
     </Box>

@@ -2,12 +2,12 @@ import supabase from '../../utils/supabaseClient';
 
 /**
  * Get dashboard data
- * Fetches aggregated data needed for the main dashboard view.
- * @returns {Promise<Object>} Dashboard data aggregated by the backend
+ * Fetches aggregated data needed for the main dashboard view from Supabase.
+ * @returns {Promise<Object>} Dashboard data aggregated from Supabase
  */
 const getDashboardData = async () => {
   try {
-    console.log('[dashboardService] Fetching dashboard data...');
+    console.log('[dashboardService] Fetching dashboard data from Supabase...');
 
     // Get the current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -18,52 +18,110 @@ const getDashboardData = async () => {
       throw new Error('User not authenticated');
     }
 
-    // For now, return mock data since we don't have a real dashboard API yet
-    // In a real implementation, you would fetch this data from Supabase
-    const mockData = {
+    // Fetch user progress data
+    const { data: progressData, error: progressError } = await supabase
+      .from('user_progress')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+
+    if (progressError && progressError.code !== 'PGRST116') {
+      throw progressError;
+    }
+
+    // Fetch user tasks
+    const { data: tasksData, error: tasksError } = await supabase
+      .from('user_tasks')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('due_date', { ascending: true });
+
+    if (tasksError) throw tasksError;
+
+    // Fetch user documents
+    const { data: documentsData, error: documentsError } = await supabase
+      .from('user_documents')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('upload_date', { ascending: false });
+
+    if (documentsError) throw documentsError;
+
+    // Fetch user recommendations
+    const { data: recommendationsData, error: recommendationsError } = await supabase
+      .from('user_recommendations')
+      .select(`
+        id,
+        score,
+        reasoning,
+        immigration_programs (
+          id,
+          title,
+          country,
+          description
+        )
+      `)
+      .eq('user_id', user.id)
+      .order('score', { ascending: false });
+
+    if (recommendationsError) throw recommendationsError;
+
+    // Calculate document statistics
+    const documentStats = {
+      total: documentsData.length,
+      verified: documentsData.filter(doc => doc.status === 'verified').length,
+      pending: documentsData.filter(doc => doc.status === 'pending').length,
+      rejected: documentsData.filter(doc => doc.status === 'rejected').length
+    };
+
+    // Format the data for the frontend
+    const dashboardData = {
       status: 'success',
       data: {
         overview: {
-          completedSteps: 2,
-          totalSteps: 8,
-          currentStageIndex: 1,
-          daysActive: 7,
-          documentsUploaded: 3,
-          tasksCompleted: 5
+          completedSteps: progressData?.completed_steps || 0,
+          totalSteps: progressData?.total_steps || 0,
+          currentStageIndex: progressData?.current_stage || 1,
+          daysActive: progressData ? Math.ceil((new Date() - new Date(progressData.first_login_at)) / (1000 * 60 * 60 * 24)) : 0,
+          documentsUploaded: documentsData.length,
+          tasksCompleted: tasksData.filter(task => task.status === 'completed').length
         },
-        nextSteps: [
-          { id: 1, title: "Complete your profile", priority: "high", dueDate: "2023-12-15" },
-          { id: 2, title: "Upload your passport", priority: "medium", dueDate: "2023-12-20" },
-          { id: 3, title: "Take language test", priority: "medium", dueDate: "2024-01-10" }
-        ],
-        recommendations: [
-          { id: 1, title: "Express Entry Program", score: 85, description: "Based on your profile, you have a high chance of qualifying for Express Entry." },
-          { id: 2, title: "Provincial Nominee Program", score: 72, description: "Your work experience matches in-demand occupations in several provinces." },
-          { id: 3, title: "Study Permit", score: 68, description: "Consider furthering your education in Canada to improve immigration chances." }
-        ],
-        tasks: [
-          { id: 1, title: "Update personal information", dueDate: "2023-12-10", status: "pending" },
-          { id: 2, title: "Upload education documents", dueDate: "2023-12-12", status: "pending" },
-          { id: 3, title: "Schedule language test", dueDate: "2023-12-15", status: "pending" }
-        ],
+        nextSteps: tasksData.slice(0, 3).map(task => ({
+          id: task.id,
+          title: task.title,
+          priority: task.priority,
+          dueDate: task.due_date
+        })),
+        recommendations: recommendationsData.map(rec => ({
+          id: rec.id,
+          title: rec.immigration_programs.title,
+          country: rec.immigration_programs.country,
+          score: rec.score,
+          description: rec.reasoning
+        })),
+        tasks: tasksData.map(task => ({
+          id: task.id,
+          title: task.title,
+          dueDate: task.due_date,
+          status: task.status,
+          priority: task.priority,
+          category: task.category
+        })),
         documents: {
-          recent: [
-            { id: 1, name: "Passport.pdf", uploadDate: "2023-12-01", type: "identification" },
-            { id: 2, name: "Degree_Certificate.pdf", uploadDate: "2023-12-02", type: "education" },
-            { id: 3, name: "Resume.pdf", uploadDate: "2023-12-03", type: "employment" }
-          ],
-          stats: {
-            total: 3,
-            verified: 1,
-            pending: 2,
-            rejected: 0
-          }
+          recent: documentsData.slice(0, 5).map(doc => ({
+            id: doc.id,
+            name: doc.name,
+            uploadDate: doc.upload_date,
+            type: doc.document_type,
+            status: doc.status
+          })),
+          stats: documentStats
         }
       }
     };
 
-    console.log('[dashboardService] Received dashboard data:', mockData.data);
-    return mockData;
+    console.log('[dashboardService] Received dashboard data:', dashboardData.data);
+    return dashboardData;
   } catch (error) {
     console.error('Get Dashboard Data Service Error:', error.message);
     throw new Error(error.message);
@@ -88,12 +146,36 @@ const updateDashboardPreferences = async (preferences) => {
       throw new Error('User not authenticated');
     }
 
-    // For now, just return a success response
-    // In a real implementation, you would update the preferences in Supabase
+    // Check if the user has a profile
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, preferences')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError && profileError.code !== 'PGRST116') {
+      throw profileError;
+    }
+
+    // Update the profile with the new preferences
+    const { data: updatedProfile, error: updateError } = await supabase
+      .from('profiles')
+      .update({
+        preferences: {
+          ...profile?.preferences,
+          dashboard: preferences
+        }
+      })
+      .eq('id', user.id)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
+
     return {
       success: true,
       message: 'Dashboard preferences updated successfully',
-      data: preferences
+      data: updatedProfile.preferences.dashboard
     };
   } catch (error) {
     console.error('Update Dashboard Preferences Error:', error.message);
