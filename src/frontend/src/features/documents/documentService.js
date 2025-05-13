@@ -1,174 +1,333 @@
-import axios from 'axios';
-import { getTokenFromLocalStorage } from '../../utils/authUtils';
+import supabase from '../../utils/supabaseClient';
 
-// Pointing to Document Service directly
-const API_URL = process.env.REACT_APP_DOCUMENT_SERVICE_URL || 'http://localhost:3005/api';
-
-const getAuthHeaders = () => {
-  const token = getTokenFromLocalStorage();
-  const headers = {
-    'Content-Type': 'application/json', // Default, will be overridden for multipart
-  };
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-  return headers;
-};
-
-// Get all documents
+/**
+ * Get all documents for the current user
+ * @returns {Promise<Object>} Documents data
+ */
 const getDocuments = async () => {
   try {
-    const response = await axios.get(`${API_URL}/documents`, { headers: getAuthHeaders() });
-    // Expect backend to return { status: 'success', results: number, data: { documents: [] } }
-    if (response.data?.status === 'success') {
-        return response.data; // Return the full response object
-    } else {
-        throw new Error(response.data?.message || 'Failed to fetch documents');
-    }
-  } catch (error) {
-    const message = error.response?.data?.message || error.message || 'Failed to fetch documents';
-    console.error('Get Documents Service Error:', message);
-    throw new Error(message); // Re-throw for the slice to handle
-  }
-};
+    console.log('[documentService] Fetching all documents...');
 
-// Get document by ID
-const getDocumentById = async (documentId) => {
-  if (!documentId) throw new Error('Document ID is required');
-  try {
-    const response = await axios.get(`${API_URL}/documents/${documentId}`, { headers: getAuthHeaders() });
-     // Expect backend to return { status: 'success', data: { document: {} } }
-    if (response.data?.status === 'success') {
-        return response.data; // Return the full response object
-    } else {
-        throw new Error(response.data?.message || `Failed to fetch document ${documentId}`);
-    }
-  } catch (error) {
-    const message = error.response?.data?.message || error.message || `Failed to fetch document ${documentId}`;
-    console.error(`Get Document By ID Service Error (${documentId}):`, message);
-    throw new Error(message);
-  }
-};
+    // Get the current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-// Upload document
-const uploadDocument = async (file, metadata, onUploadProgress) => {
-  if (!file) throw new Error('File is required for upload');
+    if (userError) throw userError;
 
-  try {
-    const formData = new FormData();
-    formData.append('documentFile', file); // Match the field name expected by backend (multer)
-
-    // Add metadata fields to formData
-    // Ensure metadata keys match backend expectations (e.g., documentTypeCode)
-    if (metadata) {
-      Object.keys(metadata).forEach(key => {
-        // Handle potential objects/arrays in metadata if needed (e.g., JSON.stringify)
-        if (typeof metadata[key] === 'object' && metadata[key] !== null) {
-             formData.append(key, JSON.stringify(metadata[key]));
-        } else {
-             formData.append(key, metadata[key]);
-        }
-      });
+    if (!user) {
+      throw new Error('User not authenticated');
     }
 
-    const config = {
-      headers: {
-        // Interceptor should add Authorization
-        'Content-Type': 'multipart/form-data'
-      },
-      onUploadProgress // Pass the progress callback to axios
+    // Fetch user documents
+    const { data: documentsData, error: documentsError } = await supabase
+      .from('user_documents')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('upload_date', { ascending: false });
+
+    if (documentsError) throw documentsError;
+
+    console.log('[documentService] Received documents:', documentsData);
+    return {
+      status: 'success',
+      data: documentsData || []
     };
-
-    const response = await axios.post(`${API_URL}/documents`, formData, config);
-     // Expect backend to return { status: 'success', data: { document: {} } }
-    if (response.data?.status === 'success') {
-        return response.data; // Return the full response object
-    } else {
-        throw new Error(response.data?.message || 'Failed to upload document');
-    }
   } catch (error) {
-     const message = error.response?.data?.message || error.message || 'Failed to upload document';
-    console.error('Upload Document Service Error:', message);
-    throw new Error(message);
+    console.error('Get All Documents Service Error:', error.message);
+    throw new Error(error.message);
   }
 };
 
-// Update document
+/**
+ * Get a document by ID
+ * @param {string} documentId - Document ID
+ * @returns {Promise<Object>} Document data
+ */
+const getDocumentById = async (documentId) => {
+  try {
+    console.log(`[documentService] Fetching document ${documentId}...`);
+
+    // Get the current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError) throw userError;
+
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
+    // Fetch the document
+    const { data: document, error: documentError } = await supabase
+      .from('user_documents')
+      .select('*')
+      .eq('id', documentId)
+      .eq('user_id', user.id)
+      .single();
+
+    if (documentError) throw documentError;
+
+    console.log('[documentService] Received document:', document);
+    return {
+      status: 'success',
+      data: document
+    };
+  } catch (error) {
+    console.error(`Get Document By ID Service Error (${documentId}):`, error.message);
+    throw new Error(error.message);
+  }
+};
+
+/**
+ * Upload a document
+ * @param {File} file - File to upload
+ * @param {Object} metadata - Document metadata
+ * @param {Function} onUploadProgress - Progress callback
+ * @returns {Promise<Object>} Uploaded document data
+ */
+const uploadDocument = async (file, metadata, onUploadProgress) => {
+  try {
+    console.log('[documentService] Uploading document...');
+
+    // Get the current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError) throw userError;
+
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
+    // Call progress callback if provided
+    if (onUploadProgress) {
+      onUploadProgress({ loaded: 10, total: 100 }); // Initial progress
+    }
+
+    // Upload the file to storage
+    const fileName = `${Date.now()}_${file.name}`;
+    const filePath = `documents/${user.id}/${fileName}`;
+
+    const { data: fileData, error: fileError } = await supabase.storage
+      .from('documents')
+      .upload(filePath, file);
+
+    if (fileError) throw fileError;
+
+    // Call progress callback if provided
+    if (onUploadProgress) {
+      onUploadProgress({ loaded: 50, total: 100 }); // Mid progress
+    }
+
+    // Create a record in the user_documents table
+    const { data: document, error: documentError } = await supabase
+      .from('user_documents')
+      .insert([
+        {
+          user_id: user.id,
+          name: metadata.name || file.name,
+          file_path: filePath,
+          file_type: file.type,
+          document_type: metadata.documentType || 'other',
+          status: 'pending',
+          upload_date: new Date().toISOString()
+        }
+      ])
+      .select()
+      .single();
+
+    if (documentError) throw documentError;
+
+    // Call progress callback if provided
+    if (onUploadProgress) {
+      onUploadProgress({ loaded: 100, total: 100 }); // Complete
+    }
+
+    console.log('[documentService] Document uploaded successfully:', document);
+    return {
+      status: 'success',
+      data: document
+    };
+  } catch (error) {
+    console.error('Upload Document Service Error:', error.message);
+    throw new Error(error.message);
+  }
+};
+
+/**
+ * Update a document
+ * @param {string} documentId - Document ID
+ * @param {Object} data - Updated document data
+ * @returns {Promise<Object>} Updated document data
+ */
 const updateDocument = async (documentId, data) => {
-   if (!documentId) throw new Error('Document ID is required for update');
-   if (!data || Object.keys(data).length === 0) throw new Error('Update data is required');
-
   try {
-    // Use PATCH for partial updates, PUT could also be used if replacing the whole resource metadata
-    const response = await axios.patch(`${API_URL}/documents/${documentId}`, data, { headers: getAuthHeaders() });
-     // Expect backend to return { status: 'success', data: { document: {} } }
-     if (response.data?.status === 'success') {
-        return response.data; // Return the full response object
-    } else {
-        throw new Error(response.data?.message || `Failed to update document ${documentId}`);
+    console.log(`[documentService] Updating document ${documentId}...`);
+
+    // Get the current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError) throw userError;
+
+    if (!user) {
+      throw new Error('User not authenticated');
     }
+
+    // Update the document
+    const { data: updatedDocument, error: updateError } = await supabase
+      .from('user_documents')
+      .update(data)
+      .eq('id', documentId)
+      .eq('user_id', user.id)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
+
+    console.log('[documentService] Document updated successfully:', updatedDocument);
+    return {
+      status: 'success',
+      data: updatedDocument
+    };
   } catch (error) {
-     const message = error.response?.data?.message || error.message || `Failed to update document ${documentId}`;
-    console.error(`Update Document Service Error (${documentId}):`, message);
-    throw new Error(message);
+    console.error(`Update Document Service Error (${documentId}):`, error.message);
+    throw new Error(error.message);
   }
 };
 
-// Delete document
+/**
+ * Delete a document
+ * @param {string} documentId - Document ID
+ * @returns {Promise<Object>} Success status
+ */
 const deleteDocument = async (documentId) => {
-   if (!documentId) throw new Error('Document ID is required for deletion');
   try {
-    const response = await axios.delete(`${API_URL}/documents/${documentId}`, { headers: getAuthHeaders() });
-     // Expect backend to return 204 No Content on success, or maybe { status: 'success', data: null }
-     // Check for 204 status or success status in body
-     if (response.status === 204 || response.data?.status === 'success') {
-        return { success: true, documentId }; // Return ID for slice reducer
-    } else {
-        throw new Error(response.data?.message || `Failed to delete document ${documentId}`);
+    console.log(`[documentService] Deleting document ${documentId}...`);
+
+    // Get the current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError) throw userError;
+
+    if (!user) {
+      throw new Error('User not authenticated');
     }
+
+    // Get the document to find the file path
+    const { data: document, error: documentError } = await supabase
+      .from('user_documents')
+      .select('file_path')
+      .eq('id', documentId)
+      .eq('user_id', user.id)
+      .single();
+
+    if (documentError) throw documentError;
+
+    // Delete the file from storage
+    if (document.file_path) {
+      const { error: storageError } = await supabase.storage
+        .from('documents')
+        .remove([document.file_path]);
+
+      if (storageError) throw storageError;
+    }
+
+    // Delete the document record
+    const { error: deleteError } = await supabase
+      .from('user_documents')
+      .delete()
+      .eq('id', documentId)
+      .eq('user_id', user.id);
+
+    if (deleteError) throw deleteError;
+
+    console.log(`[documentService] Document ${documentId} deleted successfully`);
+    return {
+      success: true,
+      documentId
+    };
   } catch (error) {
-     const message = error.response?.data?.message || error.message || `Failed to delete document ${documentId}`;
-    console.error(`Delete Document Service Error (${documentId}):`, message);
-    throw new Error(message);
+    console.error(`Delete Document Service Error (${documentId}):`, error.message);
+    throw new Error(error.message);
   }
 };
 
-// Get document categories/types (assuming an endpoint exists)
+/**
+ * Get document categories/types
+ * @returns {Promise<Object>} Document categories data
+ */
 const getDocumentCategories = async () => {
   try {
-    // Assuming an endpoint like /api/document-types exists (needs backend implementation)
-    const response = await axios.get(`${API_URL}/document-types`, { headers: getAuthHeaders() }); // Adjust endpoint if needed
-     // Expect backend to return { status: 'success', results: number, data: { documentTypes: [] } }
-    if (response.data?.status === 'success') {
-        return response.data; // Return the full response object
-    } else {
-        throw new Error(response.data?.message || 'Failed to fetch document types/categories');
+    console.log('[documentService] Fetching document categories...');
+
+    // Get the current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError) throw userError;
+
+    if (!user) {
+      throw new Error('User not authenticated');
     }
+
+    // Define standard document categories
+    const documentCategories = [
+      { id: 1, name: 'Identification', code: 'identification' },
+      { id: 2, name: 'Education', code: 'education' },
+      { id: 3, name: 'Employment', code: 'employment' },
+      { id: 4, name: 'Financial', code: 'financial' },
+      { id: 5, name: 'Medical', code: 'medical' },
+      { id: 6, name: 'Legal', code: 'legal' },
+      { id: 7, name: 'Other', code: 'other' }
+    ];
+
+    return {
+      status: 'success',
+      data: documentCategories
+    };
   } catch (error) {
-     const message = error.response?.data?.message || error.message || 'Failed to fetch document types/categories';
-    console.error('Get Document Categories Service Error:', message);
-    // Don't throw here? Or let slice handle it? For now, re-throw.
-    throw new Error(message);
+    console.error('Get Document Categories Service Error:', error.message);
+    throw new Error(error.message);
   }
 };
 
-// Update document verification status
+/**
+ * Update document verification status
+ * @param {string} documentId - Document ID
+ * @param {Object} verificationData - Verification data
+ * @returns {Promise<Object>} Updated document data
+ */
 const updateDocumentVerification = async (documentId, verificationData) => {
-  if (!documentId) throw new Error('Document ID is required for verification update');
-  if (!verificationData || !verificationData.verificationStatus) throw new Error('Verification status is required');
-
   try {
-    const response = await axios.patch(`${API_URL}/documents/${documentId}/verification`, verificationData, { headers: getAuthHeaders() });
-    // Expect backend to return { status: 'success', data: { document: {} } }
-    if (response.data?.status === 'success') {
-        return response.data; // Return the full response object
-    } else {
-        throw new Error(response.data?.message || `Failed to update verification for document ${documentId}`);
+    console.log(`[documentService] Updating document verification ${documentId}...`);
+
+    // Get the current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError) throw userError;
+
+    if (!user) {
+      throw new Error('User not authenticated');
     }
+
+    // Update the document verification status
+    const { data: updatedDocument, error: updateError } = await supabase
+      .from('user_documents')
+      .update({
+        status: verificationData.verificationStatus,
+        verified_at: verificationData.verificationStatus === 'verified' ? new Date().toISOString() : null
+      })
+      .eq('id', documentId)
+      .eq('user_id', user.id)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
+
+    console.log('[documentService] Document verification updated successfully:', updatedDocument);
+    return {
+      status: 'success',
+      data: updatedDocument
+    };
   } catch (error) {
-     const message = error.response?.data?.message || error.message || `Failed to update verification for document ${documentId}`;
-    console.error(`Update Document Verification Service Error (${documentId}):`, message);
-    throw new Error(message);
+    console.error(`Update Document Verification Service Error (${documentId}):`, error.message);
+    throw new Error(error.message);
   }
 };
 
@@ -180,7 +339,7 @@ const documentService = {
   updateDocument,
   deleteDocument,
   getDocumentCategories,
-  updateDocumentVerification, // Include the function defined above
+  updateDocumentVerification
 };
 
-export default documentService; // Export the single service object
+export default documentService;
