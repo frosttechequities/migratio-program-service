@@ -13,6 +13,7 @@ import ContactPage from './pages/ContactPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import VerifyEmailPage from './pages/auth/VerifyEmailPage';
+import VerificationPage from './pages/auth/VerificationPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
@@ -92,6 +93,7 @@ function App() {
           isAuthenticated ? <Navigate to="/dashboard" replace /> : <RegisterPage />
         } />
         <Route path="verify-email/:token" element={<VerifyEmailPage />} />
+        <Route path="verify" element={<VerificationPage />} />
         <Route path="forgot-password" element={<ForgotPasswordPage />} />
         <Route path="reset-password/:token" element={<ResetPasswordPage />} />
 
