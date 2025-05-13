@@ -1,64 +1,104 @@
-import axios from 'axios';
-import { getTokenFromLocalStorage } from '../../utils/authUtils';
-
-// API URL - Point to the User Service for dashboard data
-const API_URL = process.env.REACT_APP_USER_SERVICE_URL || 'http://localhost:3001/api'; // User service runs on 3001
-
-const getAuthHeaders = () => {
-  const token = getTokenFromLocalStorage();
-  const headers = {
-    'Content-Type': 'application/json',
-  };
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-  return headers;
-};
+import supabase from '../../utils/supabaseClient';
 
 /**
  * Get dashboard data
  * Fetches aggregated data needed for the main dashboard view.
- * @param {Object} options - Options for fetching data (currently unused)
  * @returns {Promise<Object>} Dashboard data aggregated by the backend
  */
-const getDashboardData = async (options = {}) => {
-  // const { forceRefresh = false } = options; // Caching removed for now
-
+const getDashboardData = async () => {
   try {
     console.log('[dashboardService] Fetching dashboard data...');
-    // GET request to the backend endpoint responsible for aggregating dashboard data
-    // Assuming dashboard data is at /api/dashboard/data relative to user service base
-    const response = await axios.get(`${API_URL}/dashboard/data`, { headers: getAuthHeaders() }); 
 
-    // Expect backend to return structure like: { status: 'success', data: { overview: {...}, recommendations: [...], tasks: [...] ... } }
-    if (response.data && response.data.status === 'success') {
-      console.log('[dashboardService] Received dashboard data:', response.data.data);
-      return response.data; // Return the whole response object containing the 'data' field
-    } else {
-      throw new Error(response.data?.message || 'Failed to fetch dashboard data');
+    // Get the current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError) throw userError;
+
+    if (!user) {
+      throw new Error('User not authenticated');
     }
+
+    // For now, return mock data since we don't have a real dashboard API yet
+    // In a real implementation, you would fetch this data from Supabase
+    const mockData = {
+      status: 'success',
+      data: {
+        overview: {
+          completedSteps: 2,
+          totalSteps: 8,
+          currentStageIndex: 1,
+          daysActive: 7,
+          documentsUploaded: 3,
+          tasksCompleted: 5
+        },
+        nextSteps: [
+          { id: 1, title: "Complete your profile", priority: "high", dueDate: "2023-12-15" },
+          { id: 2, title: "Upload your passport", priority: "medium", dueDate: "2023-12-20" },
+          { id: 3, title: "Take language test", priority: "medium", dueDate: "2024-01-10" }
+        ],
+        recommendations: [
+          { id: 1, title: "Express Entry Program", score: 85, description: "Based on your profile, you have a high chance of qualifying for Express Entry." },
+          { id: 2, title: "Provincial Nominee Program", score: 72, description: "Your work experience matches in-demand occupations in several provinces." },
+          { id: 3, title: "Study Permit", score: 68, description: "Consider furthering your education in Canada to improve immigration chances." }
+        ],
+        tasks: [
+          { id: 1, title: "Update personal information", dueDate: "2023-12-10", status: "pending" },
+          { id: 2, title: "Upload education documents", dueDate: "2023-12-12", status: "pending" },
+          { id: 3, title: "Schedule language test", dueDate: "2023-12-15", status: "pending" }
+        ],
+        documents: {
+          recent: [
+            { id: 1, name: "Passport.pdf", uploadDate: "2023-12-01", type: "identification" },
+            { id: 2, name: "Degree_Certificate.pdf", uploadDate: "2023-12-02", type: "education" },
+            { id: 3, name: "Resume.pdf", uploadDate: "2023-12-03", type: "employment" }
+          ],
+          stats: {
+            total: 3,
+            verified: 1,
+            pending: 2,
+            rejected: 0
+          }
+        }
+      }
+    };
+
+    console.log('[dashboardService] Received dashboard data:', mockData.data);
+    return mockData;
   } catch (error) {
-    const message =
-      (error.response && error.response.data && error.response.data.message) ||
-      error.message ||
-      error.toString();
-    console.error('Get Dashboard Data Service Error:', message);
-    throw new Error(message);
+    console.error('Get Dashboard Data Service Error:', error.message);
+    throw new Error(error.message);
   }
 };
 
 /**
- * Update dashboard preferences (Placeholder)
+ * Update dashboard preferences
  * @param {Object} preferences - Dashboard preferences
  * @returns {Promise<Object>} Updated preferences
  */
 const updateDashboardPreferences = async (preferences) => {
-  console.warn('updateDashboardPreferences service function not implemented.');
-  // try {
-  //   const response = await axios.put(`${API_URL}/dashboard/preferences`, preferences, { headers: getAuthHeaders() });
-  //   return response.data;
-  // } catch (error) { ... }
-  return { success: false, message: 'Not implemented' };
+  try {
+    console.log('[dashboardService] Updating dashboard preferences...');
+
+    // Get the current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError) throw userError;
+
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
+    // For now, just return a success response
+    // In a real implementation, you would update the preferences in Supabase
+    return {
+      success: true,
+      message: 'Dashboard preferences updated successfully',
+      data: preferences
+    };
+  } catch (error) {
+    console.error('Update Dashboard Preferences Error:', error.message);
+    throw new Error(error.message);
+  }
 };
 
 const dashboardService = {

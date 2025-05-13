@@ -87,7 +87,7 @@ export const clearDashboardCache = createAsyncThunk(
   'dashboard/clearCache',
   async (_, thunkAPI) => {
     try {
-      dashboardService.clearCache();
+      // Since we're not using a cache anymore, just return success
       return { success: true };
     } catch (error) {
       return thunkAPI.rejectWithValue('Failed to clear dashboard cache');
