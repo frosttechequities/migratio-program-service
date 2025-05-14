@@ -62,6 +62,60 @@ const generateEmbedding = async (text) => {
   }
 };
 
+// Mock data for search and chat
+const mockDocuments = [
+  {
+    id: 1,
+    content: "The Express Entry system is Canada's flagship immigration management system for key economic immigration programs. Launched in January 2015, Express Entry is not an immigration program itself but rather a system used to manage applications for permanent residence under three federal economic immigration programs: Federal Skilled Worker Program (FSWP), Federal Skilled Trades Program (FSTP), and Canadian Experience Class (CEC).",
+    metadata: {
+      title: "Express Entry Program Guide",
+      source: "Immigration Canada",
+      tags: ["canada", "express entry", "immigration"]
+    },
+    similarity: 0.92
+  },
+  {
+    id: 2,
+    content: "When applying for immigration to any country, proper documentation is crucial for a successful application. Essential identity documents include a valid passport (must be valid for at least 6 months beyond your intended period of stay), previous passports, birth certificate, marriage certificate (if applicable), divorce certificate/decree (if previously married), and national identity documents.",
+    metadata: {
+      title: "Document Requirements for Immigration",
+      source: "Immigration Resources",
+      tags: ["documents", "requirements", "immigration"]
+    },
+    similarity: 0.85
+  },
+  {
+    id: 3,
+    content: "Language proficiency is a critical component of the immigration process for many countries. Demonstrating adequate language skills is not only a requirement for most immigration pathways but also a key factor in successful integration and employment prospects in a new country.",
+    metadata: {
+      title: "Language Testing for Immigration",
+      source: "Immigration Resources",
+      tags: ["language testing", "proficiency", "immigration"]
+    },
+    similarity: 0.78
+  },
+  {
+    id: 4,
+    content: "Medical examinations are a mandatory component of most immigration processes worldwide. These examinations serve to ensure that applicants do not pose a public health risk to the destination country and that they will not place excessive demands on health and social services.",
+    metadata: {
+      title: "Medical Examinations for Immigration",
+      source: "Immigration Resources",
+      tags: ["medical", "health", "immigration"]
+    },
+    similarity: 0.75
+  },
+  {
+    id: 5,
+    content: "Points-based immigration systems are structured frameworks used by many countries to select skilled immigrants based on their potential to contribute economically and integrate successfully into society. These systems assign points for various attributes such as age, education, work experience, language proficiency, and adaptability factors.",
+    metadata: {
+      title: "Points-Based Immigration Systems",
+      source: "Immigration Resources",
+      tags: ["points system", "skilled immigration", "immigration"]
+    },
+    similarity: 0.72
+  }
+];
+
 // Search endpoint
 app.post('/search', async (req, res) => {
   try {
@@ -102,42 +156,8 @@ app.post('/search', async (req, res) => {
     } catch (error) {
       console.log('Using mock implementation for search');
 
-      // Mock implementation
-      const mockResults = [
-        {
-          id: 1,
-          content: "The Express Entry system is Canada's flagship immigration management system for key economic immigration programs. Launched in January 2015, Express Entry is not an immigration program itself but rather a system used to manage applications for permanent residence under three federal economic immigration programs: Federal Skilled Worker Program (FSWP), Federal Skilled Trades Program (FSTP), and Canadian Experience Class (CEC).",
-          metadata: {
-            title: "Express Entry Program Guide",
-            source: "Immigration Canada",
-            tags: ["canada", "express entry", "immigration"]
-          },
-          similarity: 0.92
-        },
-        {
-          id: 2,
-          content: "When applying for immigration to any country, proper documentation is crucial for a successful application. Essential identity documents include a valid passport (must be valid for at least 6 months beyond your intended period of stay), previous passports, birth certificate, marriage certificate (if applicable), divorce certificate/decree (if previously married), and national identity documents.",
-          metadata: {
-            title: "Document Requirements for Immigration",
-            source: "Immigration Resources",
-            tags: ["documents", "requirements", "immigration"]
-          },
-          similarity: 0.85
-        },
-        {
-          id: 3,
-          content: "Language proficiency is a critical component of the immigration process for many countries. Demonstrating adequate language skills is not only a requirement for most immigration pathways but also a key factor in successful integration and employment prospects in a new country.",
-          metadata: {
-            title: "Language Testing for Immigration",
-            source: "Immigration Resources",
-            tags: ["language testing", "proficiency", "immigration"]
-          },
-          similarity: 0.78
-        }
-      ];
-
       // Filter mock results based on the query
-      const filteredResults = mockResults.filter(result =>
+      const filteredResults = mockDocuments.filter(result =>
         result.content.toLowerCase().includes(query.toLowerCase()) ||
         result.metadata.title.toLowerCase().includes(query.toLowerCase()) ||
         (result.metadata.tags && result.metadata.tags.some(tag =>
@@ -145,8 +165,31 @@ app.post('/search', async (req, res) => {
         ))
       );
 
+      // Sort by relevance (simple keyword matching)
+      const scoredResults = filteredResults.map(result => {
+        let score = result.similarity;
+
+        // Boost score based on keyword matches
+        if (result.content.toLowerCase().includes(query.toLowerCase())) {
+          score += 0.1;
+        }
+        if (result.metadata.title.toLowerCase().includes(query.toLowerCase())) {
+          score += 0.2;
+        }
+        if (result.metadata.tags && result.metadata.tags.some(tag =>
+          tag.toLowerCase() === query.toLowerCase()
+        )) {
+          score += 0.3;
+        }
+
+        return { ...result, similarity: Math.min(score, 0.99) };
+      }).sort((a, b) => b.similarity - a.similarity);
+
+      // Limit results
+      const limitedResults = scoredResults.slice(0, limit);
+
       res.json({
-        results: filteredResults.length > 0 ? filteredResults : mockResults,
+        results: limitedResults.length > 0 ? limitedResults : mockDocuments.slice(0, limit),
         note: "Using mock data due to database connection issues"
       });
     }
@@ -240,13 +283,44 @@ app.post('/chat', async (req, res) => {
     } catch (error) {
       console.log('Using mock implementation for chat');
 
-      // Mock implementation
-      let mockResponse = '';
+      // Find relevant mock documents for context
+      let relevantDocs = [];
 
       if (lastUserMessage) {
         const query = lastUserMessage.content.toLowerCase();
 
-        // Generate a response based on the query
+        // Find relevant documents based on the query
+        relevantDocs = mockDocuments.filter(doc =>
+          doc.content.toLowerCase().includes(query.toLowerCase()) ||
+          doc.metadata.title.toLowerCase().includes(query.toLowerCase()) ||
+          (doc.metadata.tags && doc.metadata.tags.some(tag =>
+            tag.toLowerCase().includes(query.toLowerCase())
+          ))
+        ).sort((a, b) => b.similarity - a.similarity).slice(0, 2);
+      }
+
+      // Generate a response based on the relevant documents
+      let mockResponse = '';
+
+      if (relevantDocs.length > 0) {
+        // Use the content from the most relevant document
+        const mostRelevantDoc = relevantDocs[0];
+
+        if (mostRelevantDoc.metadata.title === "Express Entry Program Guide") {
+          mockResponse = "Express Entry is Canada's immigration system that manages applications for permanent residence under three federal economic immigration programs: the Federal Skilled Worker Program, the Federal Skilled Trades Program, and the Canadian Experience Class. It uses a Comprehensive Ranking System (CRS) to score candidates based on factors like age, education, work experience, and language skills. The highest-scoring candidates receive invitations to apply for permanent residence through regular draws.";
+        } else if (mostRelevantDoc.metadata.title === "Document Requirements for Immigration") {
+          mockResponse = "For most immigration applications, you'll need several key documents: a valid passport, birth certificate, marriage certificate (if applicable), police clearance certificates from countries where you've lived, proof of language proficiency (like IELTS or CELPIP test results), educational credential assessments, proof of funds to support yourself, and medical examination results. Make sure all documents are properly translated and certified if they're not in English or French.";
+        } else if (mostRelevantDoc.metadata.title === "Language Testing for Immigration") {
+          mockResponse = "Language proficiency is crucial for most immigration programs. For English, accepted tests include IELTS (International English Language Testing System) and CELPIP (Canadian English Language Proficiency Index Program). For French, you can take the TEF (Test d'Évaluation de Français) or TCF (Test de Connaissance du Français). Test results are typically valid for 2 years, and higher scores can significantly improve your chances in points-based immigration systems.";
+        } else if (mostRelevantDoc.metadata.title === "Medical Examinations for Immigration") {
+          mockResponse = "Immigration medical examinations must be performed by approved physicians (often called panel physicians). The exam typically includes a physical examination, chest X-ray, blood tests for conditions like HIV and syphilis, and urinalysis. Results are usually valid for 12 months. You should only undergo the medical exam after being instructed to do so by immigration authorities, as timing is important.";
+        } else if (mostRelevantDoc.metadata.title === "Points-Based Immigration Systems") {
+          mockResponse = "Points-based immigration systems assign scores to candidates based on factors like age, education, work experience, language proficiency, and adaptability. Canada's Express Entry uses the Comprehensive Ranking System (CRS), Australia has the SkillSelect points test, and New Zealand uses the Skilled Migrant Category (SMC) points system. Each system has different criteria and minimum score requirements for eligibility.";
+        }
+      } else if (lastUserMessage) {
+        const query = lastUserMessage.content.toLowerCase();
+
+        // Generate a generic response based on keywords in the query
         if (query.includes('express entry') || query.includes('canada')) {
           mockResponse = "Express Entry is Canada's immigration system that manages applications for permanent residence under three federal economic immigration programs: the Federal Skilled Worker Program, the Federal Skilled Trades Program, and the Canadian Experience Class. It uses a Comprehensive Ranking System (CRS) to score candidates based on factors like age, education, work experience, and language skills. The highest-scoring candidates receive invitations to apply for permanent residence through regular draws.";
         } else if (query.includes('document') || query.includes('requirement')) {
@@ -267,7 +341,7 @@ app.post('/chat', async (req, res) => {
       res.json({
         response: mockResponse,
         model: 'mock',
-        hasContext: false,
+        hasContext: relevantDocs.length > 0,
         note: "Using mock data due to API connection issues"
       });
     }
