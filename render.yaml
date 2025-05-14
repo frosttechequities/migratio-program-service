@@ -2,6 +2,7 @@ services:
   - type: web
     name: visafy-chatbot
     env: node
+    plan: free
     buildCommand: npm install
     startCommand: npm start
     envVars:
@@ -24,6 +25,7 @@ services:
   - type: web
     name: visafy-vector-search-service
     env: node
+    plan: free
     buildCommand: cd src/services/vector-search-service && npm install
     startCommand: cd src/services/vector-search-service && npm start
     envVars:
