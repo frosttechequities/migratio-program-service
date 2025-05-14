@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getTokenFromLocalStorage } from '../../utils/authUtils';
 
 // API URL - Point to the Recommendation service endpoint
-const API_URL = process.env.REACT_APP_RECOMMENDATION_SERVICE_URL || 'http://localhost:3004/api'; // Recommendation service runs on 3004
+const API_URL = process.env.REACT_APP_RECOMMENDATION_SERVICE_URL || 'https://migratio-program-service.onrender.com/api'; // Use deployed backend
 const RECOMMENDATION_API_URL = `${API_URL}/recommendations`;
 
 const getAuthHeaders = () => {
@@ -59,7 +59,7 @@ const simulateProfileChange = async (profileChanges) => {
         console.log('[recommendationService] Simulating profile changes...');
         const response = await axios.post(`${RECOMMENDATION_API_URL}/scenarios/simulate`, { profileChanges }, { headers: getAuthHeaders() });
         if (response.data?.status === 'success') {
-            return response.data.data; 
+            return response.data.data;
         } else {
             throw new Error(response.data?.message || 'Failed to simulate profile changes');
         }

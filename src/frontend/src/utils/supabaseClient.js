@@ -24,6 +24,8 @@ const getSupabaseClient = () => {
     global: {
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Prefer': 'return=representation',
       },
     },
   });
