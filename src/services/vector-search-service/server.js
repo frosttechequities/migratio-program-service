@@ -12,7 +12,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const { createClient } = require('@supabase/supabase-js');
 const { pipeline } = require('@xenova/transformers');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const axios = require('axios');
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL || 'https://qyvvrvthalxeibsmckep.supabase.co';
@@ -23,10 +23,13 @@ console.log('API Key starts with:', supabaseKey ? supabaseKey.substring(0, 10) +
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Initialize Google Gemini API
-const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY || 'AIzaSyDJC5a882ruaJN2HQR9nz_P-8R4dCUP-Ss';
-console.log('Using Google API Key starting with:', GOOGLE_API_KEY.substring(0, 10) + '...');
-const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
+// Initialize OpenRouter API
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || 'sk-or-v1-free-test-key';
+console.log('Using OpenRouter API Key starting with:', OPENROUTER_API_KEY.substring(0, 10) + '...');
+
+// OpenRouter configuration
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const OPENROUTER_MODEL = 'anthropic/claude-3-haiku'; // A good free option
 
 // Initialize the embedding pipeline
 let embeddingPipeline;
@@ -249,49 +252,56 @@ app.post('/chat', async (req, res) => {
         }
       }
 
+      let response;
       try {
-        // Initialize the Gemini model
-        console.log('Initializing Gemini model...');
-        const genModel = genAI.getGenerativeModel({ model: 'gemini-pro' });
-
-        // Prepare the chat history
-        const history = messages.map(msg => ({
-          role: msg.role === 'user' ? 'user' : 'model',
-          parts: [{ text: msg.content }]
-        }));
-
-        console.log('Creating chat session...');
-        // Create a chat session
-        const chat = genModel.startChat({
-          history,
-          generationConfig: {
-            temperature: 0.7,
-            topP: 0.8,
-            topK: 40,
-            maxOutputTokens: 1024,
-          },
-        });
-
-        // Generate a response
-        const systemPrompt = relevantContext
+        // Prepare the system message with context if available
+        const systemMessage = relevantContext
           ? `You are an immigration assistant for the Visafy platform. Use the following information to answer the user's question:\n\n${relevantContext}`
           : 'You are an immigration assistant for the Visafy platform. Provide helpful and accurate information about immigration processes, requirements, and pathways.';
 
-        console.log('Sending message to Gemini...');
+        // Prepare the messages for OpenRouter
+        const openRouterMessages = [
+          { role: 'system', content: systemMessage },
+          ...messages
+        ];
+
+        console.log('Sending request to OpenRouter...');
         console.log('Using context:', !!relevantContext);
-        const result = await chat.sendMessage(systemPrompt);
-        const response = result.response.text();
-        console.log('Received response from Gemini');
+
+        // Make the API call to OpenRouter
+        const result = await axios.post(
+          OPENROUTER_URL,
+          {
+            model: OPENROUTER_MODEL,
+            messages: openRouterMessages,
+            temperature: 0.7,
+            max_tokens: 1024,
+          },
+          {
+            headers: {
+              'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+              'Content-Type': 'application/json',
+              'HTTP-Referer': 'https://visafy-vector-search-service.onrender.com',
+              'X-Title': 'Visafy Immigration Assistant'
+            }
+          }
+        );
+
+        // Extract the response
+        response = result.data.choices[0].message.content;
+        console.log('Received response from OpenRouter');
+
+        res.json({
+          response,
+          model: OPENROUTER_MODEL,
+          hasContext: !!relevantContext
+        });
+        return;
       } catch (error) {
-        console.error('Error using Gemini API:', error);
+        console.error('Error using OpenRouter API:', error);
+        console.error('Error details:', error.response ? error.response.data : error.message);
         throw error;
       }
-
-      res.json({
-        response,
-        model: 'gemini-pro',
-        hasContext: !!relevantContext
-      });
     } catch (error) {
       console.log('Using mock implementation for chat');
 
