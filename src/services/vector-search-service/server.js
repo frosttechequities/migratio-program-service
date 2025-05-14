@@ -23,7 +23,11 @@ console.log('API Key starts with:', supabaseKey ? supabaseKey.substring(0, 10) +
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Initialize Ollama configuration
+// Determine if we're running in production (Render) or development
+const isProduction = process.env.RENDER === 'true';
+console.log('Running in', isProduction ? 'production' : 'development', 'mode');
+
+// Initialize Ollama configuration (only used in development)
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
 console.log('Using Ollama URL:', OLLAMA_URL);
 
@@ -283,6 +287,13 @@ app.post('/chat', async (req, res) => {
           // Continue without context if there's an error
           throw error;
         }
+      }
+
+      // In production, use the mock implementation directly
+      if (isProduction) {
+        console.log('Using mock implementation in production mode');
+        // Skip Ollama and go straight to mock implementation
+        throw new Error('Using mock implementation in production');
       }
 
       let response;
