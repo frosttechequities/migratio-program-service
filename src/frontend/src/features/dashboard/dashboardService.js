@@ -1,4 +1,4 @@
-import supabase from '../../utils/supabaseClient';
+import { getAuthenticatedClient } from '../../utils/supabaseClient';
 
 /**
  * Get dashboard data
@@ -9,19 +9,28 @@ const getDashboardData = async () => {
   try {
     console.log('[dashboardService] Fetching dashboard data from Supabase...');
 
-    // Get the current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    // Get authenticated client
+    const client = await getAuthenticatedClient();
 
-    if (userError) throw userError;
+    // Get the current user
+    const { data: { user }, error: userError } = await client.auth.getUser();
+
+    if (userError) {
+      console.error('[dashboardService] User error:', userError.message);
+      throw userError;
+    }
 
     if (!user) {
+      console.error('[dashboardService] User not authenticated');
       throw new Error('User not authenticated');
     }
+
+    console.log('[dashboardService] User authenticated:', user.id);
 
     // Fetch user progress data
     let userProgressData = null;
 
-    const { data: progressData, error: progressError } = await supabase
+    const { data: progressData, error: progressError } = await client
       .from('user_progress')
       .select('*')
       .eq('user_id', user.id)
@@ -31,7 +40,7 @@ const getDashboardData = async () => {
     if (progressError && progressError.code === 'PGRST116') {
       console.log('[dashboardService] No progress data found, creating initial progress data');
 
-      const { data: newProgressData, error: createError } = await supabase
+      const { data: newProgressData, error: createError } = await client
         .from('user_progress')
         .insert([
           {
@@ -61,25 +70,31 @@ const getDashboardData = async () => {
     }
 
     // Fetch user tasks
-    const { data: tasksData, error: tasksError } = await supabase
+    const { data: tasksData, error: tasksError } = await client
       .from('user_tasks')
       .select('*')
       .eq('user_id', user.id)
       .order('due_date', { ascending: true });
 
-    if (tasksError) throw tasksError;
+    if (tasksError) {
+      console.error('[dashboardService] Error fetching tasks:', tasksError.message);
+      // Don't throw, just log and continue with empty data
+    }
 
     // Fetch user documents
-    const { data: documentsData, error: documentsError } = await supabase
+    const { data: documentsData, error: documentsError } = await client
       .from('user_documents')
       .select('*')
       .eq('user_id', user.id)
       .order('upload_date', { ascending: false });
 
-    if (documentsError) throw documentsError;
+    if (documentsError) {
+      console.error('[dashboardService] Error fetching documents:', documentsError.message);
+      // Don't throw, just log and continue with empty data
+    }
 
     // Fetch user recommendations
-    const { data: recommendationsData, error: recommendationsError } = await supabase
+    const { data: recommendationsData, error: recommendationsError } = await client
       .from('user_recommendations')
       .select(`
         id,
@@ -95,7 +110,10 @@ const getDashboardData = async () => {
       .eq('user_id', user.id)
       .order('score', { ascending: false });
 
-    if (recommendationsError) throw recommendationsError;
+    if (recommendationsError) {
+      console.error('[dashboardService] Error fetching recommendations:', recommendationsError.message);
+      // Don't throw, just log and continue with empty data
+    }
 
     // Calculate document statistics
     const documentStats = {
@@ -176,28 +194,38 @@ const updateDashboardPreferences = async (preferences) => {
   try {
     console.log('[dashboardService] Updating dashboard preferences...');
 
-    // Get the current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    // Get authenticated client
+    const client = await getAuthenticatedClient();
 
-    if (userError) throw userError;
+    // Get the current user
+    const { data: { user }, error: userError } = await client.auth.getUser();
+
+    if (userError) {
+      console.error('[dashboardService] User error:', userError.message);
+      throw userError;
+    }
 
     if (!user) {
+      console.error('[dashboardService] User not authenticated');
       throw new Error('User not authenticated');
     }
 
+    console.log('[dashboardService] User authenticated:', user.id);
+
     // Check if the user has a profile
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile, error: profileError } = await client
       .from('profiles')
       .select('id, preferences')
       .eq('id', user.id)
       .single();
 
     if (profileError && profileError.code !== 'PGRST116') {
+      console.error('[dashboardService] Error fetching profile:', profileError.message);
       throw profileError;
     }
 
     // Update the profile with the new preferences
-    const { data: updatedProfile, error: updateError } = await supabase
+    const { data: updatedProfile, error: updateError } = await client
       .from('profiles')
       .update({
         preferences: {

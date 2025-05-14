@@ -1,4 +1,4 @@
-import supabase from '../../utils/supabaseClient';
+import supabase, { getAuthenticatedClient } from '../../utils/supabaseClient';
 
 // Register user
 const register = async (userData) => {
@@ -10,7 +10,8 @@ const register = async (userData) => {
         data: {
           first_name: userData.firstName || '',
           last_name: userData.lastName || '',
-        }
+        },
+        emailRedirectTo: `${window.location.origin}/verify`
       }
     });
 
@@ -85,18 +86,46 @@ const logout = async () => {
 // Check Auth Status
 const checkAuth = async () => {
   try {
-    const { data, error } = await supabase.auth.getSession();
+    console.log('[AuthService] Checking authentication status');
 
-    if (error) throw error;
+    // Get authenticated client - make sure to await the promise
+    const client = await getAuthenticatedClient();
 
-    if (data.session) {
-      const { data: userData } = await supabase.auth.getUser();
-      return userData.user;
+    if (!client || !client.auth) {
+      console.error('[AuthService] Invalid Supabase client');
+      return null;
     }
 
+    // Try with the authenticated client
+    const { data, error } = await client.auth.getSession();
+
+    if (error) {
+      console.error('[AuthService] Session error:', error.message);
+      throw error;
+    }
+
+    if (data && data.session) {
+      console.log('[AuthService] Session found, getting user data');
+      const { data: userData, error: userError } = await client.auth.getUser();
+
+      if (userError) {
+        console.error('[AuthService] User data error:', userError.message);
+        throw userError;
+      }
+
+      if (userData && userData.user) {
+        // Store the session in localStorage
+        localStorage.setItem('token', data.session.access_token);
+
+        console.log('[AuthService] User authenticated:', userData.user);
+        return userData.user;
+      }
+    }
+
+    console.log('[AuthService] No session found, user not authenticated');
     return null;
   } catch (error) {
-    console.error('Auth check failed:', error.message);
+    console.error('[AuthService] Auth check failed:', error.message);
     return null;
   }
 };
@@ -106,10 +135,10 @@ const verifyEmail = async (token) => {
   try {
     // Supabase handles email verification automatically
     // This function is just for compatibility with the existing code
-    console.log('Email verification is handled automatically by Supabase');
+    console.log('[AuthService] Email verification is handled automatically by Supabase', token ? `(token: ${token})` : '');
     return { success: true, message: 'Email verification is handled by Supabase' };
   } catch (error) {
-    console.error('Email verification error:', error.message);
+    console.error('[AuthService] Email verification error:', error.message);
     return { success: false, message: error.message };
   }
 };

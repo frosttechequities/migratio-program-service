@@ -1,4 +1,4 @@
-import supabase from '../../utils/supabaseClient';
+import supabase, { getAuthenticatedClient } from '../../utils/supabaseClient';
 
 /**
  * Get all documents for the current user
@@ -8,8 +8,11 @@ const getDocuments = async () => {
   try {
     console.log('[documentService] Fetching all documents...');
 
+    // Get authenticated client
+    const client = await getAuthenticatedClient();
+
     // Get the current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const { data: { user }, error: userError } = await client.auth.getUser();
 
     if (userError) throw userError;
 
@@ -20,7 +23,7 @@ const getDocuments = async () => {
     // Fetch user documents
     let documentsData = [];
     try {
-      const { data, error } = await supabase
+      const { data, error } = await client
         .from('user_documents')
         .select('*')
         .eq('user_id', user.id)

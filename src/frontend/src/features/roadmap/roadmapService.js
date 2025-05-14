@@ -1,4 +1,4 @@
-import supabase from '../../utils/supabaseClient';
+import { getAuthenticatedClient } from '../../utils/supabaseClient';
 
 /**
  * Get all roadmaps for the current user
@@ -8,8 +8,11 @@ const getAllRoadmaps = async () => {
   try {
     console.log('[roadmapService] Fetching all roadmaps...');
 
+    // Get authenticated client
+    const client = await getAuthenticatedClient();
+
     // Get the current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const { data: { user }, error: userError } = await client.auth.getUser();
 
     if (userError) throw userError;
 
@@ -20,7 +23,7 @@ const getAllRoadmaps = async () => {
     // Fetch user roadmaps
     let roadmapsData = [];
     try {
-      const { data, error } = await supabase
+      const { data, error } = await client
         .from('user_roadmaps')
         .select(`
           id,
@@ -71,8 +74,11 @@ const getRoadmapById = async (roadmapId) => {
   try {
     console.log(`[roadmapService] Fetching roadmap ${roadmapId}...`);
 
+    // Get authenticated client
+    const client = await getAuthenticatedClient();
+
     // Get the current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const { data: { user }, error: userError } = await client.auth.getUser();
 
     if (userError) throw userError;
 
@@ -81,7 +87,7 @@ const getRoadmapById = async (roadmapId) => {
     }
 
     // Fetch the roadmap
-    const { data: roadmap, error: roadmapError } = await supabase
+    const { data: roadmap, error: roadmapError } = await client
       .from('user_roadmaps')
       .select(`
         id,
@@ -105,7 +111,7 @@ const getRoadmapById = async (roadmapId) => {
     if (roadmapError) throw roadmapError;
 
     // Fetch the roadmap milestones
-    const { data: milestones, error: milestonesError } = await supabase
+    const { data: milestones, error: milestonesError } = await client
       .from('roadmap_milestones')
       .select('*')
       .eq('roadmap_id', roadmapId)
@@ -140,8 +146,11 @@ const updateMilestoneStatus = async (roadmapId, milestoneId, updateData) => {
   try {
     console.log(`[roadmapService] Updating milestone ${milestoneId} status to ${updateData.status}...`);
 
+    // Get authenticated client
+    const client = await getAuthenticatedClient();
+
     // Get the current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const { data: { user }, error: userError } = await client.auth.getUser();
 
     if (userError) throw userError;
 
@@ -150,7 +159,7 @@ const updateMilestoneStatus = async (roadmapId, milestoneId, updateData) => {
     }
 
     // Verify the roadmap belongs to the user
-    const { error: roadmapError } = await supabase
+    const { error: roadmapError } = await client
       .from('user_roadmaps')
       .select('id')
       .eq('id', roadmapId)
@@ -160,7 +169,7 @@ const updateMilestoneStatus = async (roadmapId, milestoneId, updateData) => {
     if (roadmapError) throw roadmapError;
 
     // Update the milestone status
-    const { data: updatedMilestone, error: updateError } = await supabase
+    const { data: updatedMilestone, error: updateError } = await client
       .from('roadmap_milestones')
       .update({
         status: updateData.status,
@@ -195,8 +204,11 @@ const updateDocumentStatus = async (roadmapId, documentId, updateData) => {
   try {
     console.log(`[roadmapService] Updating document ${documentId} status to ${updateData.status}...`);
 
+    // Get authenticated client
+    const client = await getAuthenticatedClient();
+
     // Get the current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const { data: { user }, error: userError } = await client.auth.getUser();
 
     if (userError) throw userError;
 
@@ -205,7 +217,7 @@ const updateDocumentStatus = async (roadmapId, documentId, updateData) => {
     }
 
     // Verify the roadmap belongs to the user
-    const { error: roadmapError } = await supabase
+    const { error: roadmapError } = await client
       .from('user_roadmaps')
       .select('id')
       .eq('id', roadmapId)
@@ -215,7 +227,7 @@ const updateDocumentStatus = async (roadmapId, documentId, updateData) => {
     if (roadmapError) throw roadmapError;
 
     // Update the document status
-    const { data: updatedDocument, error: updateError } = await supabase
+    const { data: updatedDocument, error: updateError } = await client
       .from('user_documents')
       .update({
         status: updateData.status,
@@ -248,8 +260,11 @@ const generateRoadmap = async (roadmapData) => {
   try {
     console.log(`[roadmapService] Generating roadmap for program ${roadmapData.programId}...`);
 
+    // Get authenticated client
+    const client = await getAuthenticatedClient();
+
     // Get the current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const { data: { user }, error: userError } = await client.auth.getUser();
 
     if (userError) throw userError;
 
@@ -258,7 +273,7 @@ const generateRoadmap = async (roadmapData) => {
     }
 
     // Create the roadmap
-    const { data: roadmap, error: roadmapError } = await supabase
+    const { data: roadmap, error: roadmapError } = await client
       .from('user_roadmaps')
       .insert([
         {
@@ -303,8 +318,11 @@ const generateMilestones = async (roadmapId, programId) => {
   try {
     console.log(`[roadmapService] Generating milestones for roadmap ${roadmapId} and program ${programId}...`);
 
+    // Get authenticated client
+    const client = await getAuthenticatedClient();
+
     // Get the program
-    const { error: programError } = await supabase
+    const { error: programError } = await client
       .from('immigration_programs')
       .select('*')
       .eq('id', programId)
@@ -381,7 +399,7 @@ const generateMilestones = async (roadmapId, programId) => {
     ];
 
     // Insert the milestones
-    const { data: milestones, error: milestonesError } = await supabase
+    const { data: milestones, error: milestonesError } = await client
       .from('roadmap_milestones')
       .insert(standardMilestones)
       .select();

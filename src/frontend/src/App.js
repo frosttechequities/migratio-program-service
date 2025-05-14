@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { ToastProvider } from './contexts/ToastContext';
 
@@ -35,16 +35,41 @@ import ProgramDetailPage from './pages/immigration/ProgramDetailPage';
 import ResourcesPage from './pages/resources/ResourcesPage'; // Import ResourcesPage
 import LegalPage from './pages/legal/LegalPage';
 import NotFoundPage from './pages/NotFoundPage';
+import TestAuthPage from './pages/test/TestAuthPage'; // Import TestAuthPage
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
 function App() {
   const dispatch = useDispatch();
+  const location = useLocation();
   const { isAuthenticated, isLoading } = useSelector((state) => state.auth);
 
   // Check if user is authenticated on app load
   useEffect(() => {
     dispatch(checkAuth());
   }, [dispatch]);
+
+  // Set document title based on current route
+  useEffect(() => {
+    const pageTitles = {
+      '/': 'Home',
+      '/dashboard': 'Dashboard',
+      '/assessment': 'Immigration Assessment',
+      '/documents': 'Document Center',
+      '/roadmap': 'Immigration Roadmap',
+      '/profile': 'Your Profile',
+      '/login': 'Login',
+      '/register': 'Register',
+    };
+
+    const pathKey = Object.keys(pageTitles).find(path =>
+      location.pathname === path ||
+      (path !== '/' && location.pathname.startsWith(path))
+    );
+
+    document.title = pathKey
+      ? `${pageTitles[pathKey]} | Visafy`
+      : 'Visafy - Your Immigration Assistant';
+  }, [location]);
 
   // Show loading indicator while checking authentication
   if (isLoading) {
@@ -79,92 +104,94 @@ function App() {
   return (
     <ToastProvider>
       <Routes>
-        {/* Public routes */}
-      <Route path="/" element={<Layout />}>
-        <Route index element={<HomePage />} />
-        <Route path="about" element={<AboutPage />} />
-        <Route path="features" element={<FeaturesPage />} />
-        <Route path="pricing" element={<PricingPage />} />
-        <Route path="contact" element={<ContactPage />} />
-        <Route path="login" element={
-          isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />
-        } />
-        <Route path="register" element={
-          isAuthenticated ? <Navigate to="/dashboard" replace /> : <RegisterPage />
-        } />
-        <Route path="verify-email/:token" element={<VerifyEmailPage />} />
-        <Route path="verify" element={<VerificationPage />} />
-        <Route path="forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="reset-password/:token" element={<ResetPasswordPage />} />
+        <Route path="/" element={<Layout />}>
+          {/* Public routes */}
+          <Route index element={<HomePage />} />
+          <Route path="about" element={<AboutPage />} />
+          <Route path="features" element={<FeaturesPage />} />
+          <Route path="pricing" element={<PricingPage />} />
+          <Route path="contact" element={<ContactPage />} />
+          <Route path="login" element={
+            isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />
+          } />
+          <Route path="register" element={
+            isAuthenticated ? <Navigate to="/dashboard" replace /> : <RegisterPage />
+          } />
+          <Route path="verify-email/:token" element={<VerifyEmailPage />} />
+          <Route path="verify" element={<VerificationPage />} />
+          <Route path="forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="reset-password/:token" element={<ResetPasswordPage />} />
 
-        {/* Protected routes */}
-        <Route path="dashboard" element={
-          <ProtectedRoute>
-            <DashboardPage />
-          </ProtectedRoute>
-        } />
-        <Route path="profile" element={
-          <ProtectedRoute>
-            <ProfilePage />
-          </ProtectedRoute>
-        } />
-        <Route path="assessment" element={
-          <ProtectedRoute>
-            <AssessmentPage />
-          </ProtectedRoute>
-        } />
-        <Route path="assessment/results" element={
-          <ProtectedRoute>
-            <ResultsPage />
-          </ProtectedRoute>
-        } />
-        <Route path="documents" element={
-          <ProtectedRoute>
-            <DocumentsPage />
-          </ProtectedRoute>
-        } />
-        <Route path="roadmap" element={
-          <ProtectedRoute>
-            <RoadmapPage />
-          </ProtectedRoute>
-        } />
-        <Route path="roadmap/create" element={
-          <ProtectedRoute>
-            <CreateRoadmapPage />
-          </ProtectedRoute>
-        } />
-        <Route path="roadmaps/:roadmapId" element={
-          <ProtectedRoute>
-            <RoadmapDetailPage />
-          </ProtectedRoute>
-        } />
-        <Route path="calendar" element={
-          <ProtectedRoute>
-            <CalendarPage />
-          </ProtectedRoute>
-        } />
-        <Route path="pdf/generate" element={
-          <ProtectedRoute>
-            <GeneratePDFPage />
-          </ProtectedRoute>
-        } />
+          {/* Immigration Research routes */}
+          <Route path="research" element={<ResearchHubPage />} />
+          <Route path="resources" element={<ResourcesPage />} />
+          <Route path="immigration/programs" element={<ImmigrationProgramsPage />} />
+          <Route path="immigration/countries" element={<CountryProfilesPage />} />
+          <Route path="immigration/points-calculator" element={<PointsCalculatorPage />} />
+          <Route path="immigration/processing-times" element={<ProcessingTimesPage />} />
+          <Route path="programs/:programId" element={<ProgramDetailPage />} />
 
-        {/* Immigration Research routes */}
-        <Route path="research" element={<ResearchHubPage />} />
-        <Route path="resources" element={<ResourcesPage />} /> {/* Add Resources Page Route */}
-        <Route path="immigration/programs" element={<ImmigrationProgramsPage />} />
-        <Route path="immigration/countries" element={<CountryProfilesPage />} />
-        <Route path="immigration/points-calculator" element={<PointsCalculatorPage />} />
-        <Route path="immigration/processing-times" element={<ProcessingTimesPage />} />
-        <Route path="programs/:programId" element={<ProgramDetailPage />} />
+          {/* Legal routes */}
+          <Route path="legal/:pageType" element={<LegalPage />} />
 
-        {/* Legal routes */}
-        <Route path="legal/:pageType" element={<LegalPage />} />
-        <Route path="contact" element={<ContactPage />} />
+          {/* Test routes */}
+          <Route path="test/auth" element={<TestAuthPage />} />
 
-        {/* 404 route */}
-        <Route path="*" element={<NotFoundPage />} />
-      </Route>
+          {/* Protected routes */}
+          <Route path="dashboard" element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          } />
+          <Route path="profile" element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          } />
+          <Route path="assessment" element={
+            <ProtectedRoute>
+              <AssessmentPage />
+            </ProtectedRoute>
+          } />
+          <Route path="assessment/results" element={
+            <ProtectedRoute>
+              <ResultsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="documents" element={
+            <ProtectedRoute>
+              <DocumentsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="roadmap" element={
+            <ProtectedRoute>
+              <RoadmapPage />
+            </ProtectedRoute>
+          } />
+          <Route path="roadmap/create" element={
+            <ProtectedRoute>
+              <CreateRoadmapPage />
+            </ProtectedRoute>
+          } />
+          <Route path="roadmaps/:roadmapId" element={
+            <ProtectedRoute>
+              <RoadmapDetailPage />
+            </ProtectedRoute>
+          } />
+          <Route path="calendar" element={
+            <ProtectedRoute>
+              <CalendarPage />
+            </ProtectedRoute>
+          } />
+          <Route path="pdf/generate" element={
+            <ProtectedRoute>
+              <GeneratePDFPage />
+            </ProtectedRoute>
+          } />
+
+          {/* 404 route */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
       </Routes>
     </ToastProvider>
   );
