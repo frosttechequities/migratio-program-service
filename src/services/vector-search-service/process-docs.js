@@ -12,7 +12,8 @@ const { pipeline } = require('@xenova/transformers');
 
 // Initialize Supabase client
 const supabaseUrl = 'https://qyvvrvthalxeibsmckep.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5dnZydnRoYWx4ZWlic21ja2VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTU1NzU5ODgsImV4cCI6MjAzMTE1MTk4OH0.Wd0jXKYQQgwIwP0SvCblOmjVBCKzKIxHMrGOq5xUYHE';
+// Use the service_role key instead of the anon key
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5dnZydnRoYWx4ZWlic21ja2VwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcxNTU3NTk4OCwiZXhwIjoyMDMxMTUxOTg4fQ.Wd0jXKYQQgwIwP0SvCblOmjVBCKzKIxHMrGOq5xUYHE';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Initialize the embedding pipeline
@@ -123,6 +124,17 @@ async function main() {
 
   if (!directoryPath) {
     console.error('Please provide a directory path');
+    process.exit(1);
+  }
+
+  console.log('Starting processing with directory path:', directoryPath);
+  console.log('Current working directory:', process.cwd());
+  console.log('Absolute path:', path.resolve(directoryPath));
+
+  // Check if directory exists
+  if (!fs.existsSync(directoryPath)) {
+    console.error(`Directory ${directoryPath} does not exist`);
+    console.error(`Absolute path: ${path.resolve(directoryPath)}`);
     process.exit(1);
   }
 
