@@ -360,22 +360,19 @@ app.post('/chat', async (req, res) => {
               }
             );
 
-              // Extract the response
-              response = fallbackResult.data.choices[0].message.content;
-              console.log('Received response from fallback model');
+            // Extract the response
+            response = fallbackResult.data.choices[0].message.content;
+            console.log('Received response from fallback model');
 
-              res.json({
-                response,
-                model: OPENROUTER_FALLBACK_MODEL,
-                hasContext: !!relevantContext
-              });
-              return;
-            } catch (fallbackError) {
-              console.error('Error using fallback model:', fallbackError.message);
-              throw fallbackError;
-            }
-          } else {
-            throw openRouterError;
+            res.json({
+              response,
+              model: OPENROUTER_FALLBACK_MODEL,
+              hasContext: !!relevantContext
+            });
+            return;
+          } catch (fallbackError) {
+            console.error('Error using fallback model:', fallbackError.message);
+            throw fallbackError;
           }
         }
       } catch (error) {
