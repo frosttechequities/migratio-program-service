@@ -29,7 +29,9 @@ console.log('Using OpenRouter API Key starting with:', OPENROUTER_API_KEY.substr
 
 // OpenRouter configuration
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const OPENROUTER_MODEL = 'gpt-3.5-turbo'; // Using a more widely available model
+// Using free models with :free suffix to ensure they're available on the free tier
+const OPENROUTER_MODEL = 'openai/gpt-3.5-turbo:free'; // Primary free model
+const OPENROUTER_FALLBACK_MODEL = 'mistralai/mistral-7b-instruct:free'; // Fallback free model
 
 // Initialize the embedding pipeline
 let embeddingPipeline;
@@ -337,27 +339,26 @@ app.post('/chat', async (req, res) => {
             console.error('OpenRouter API response data:', openRouterError.response.data);
           }
 
-          // Try a different model if the first one fails
-          if (OPENROUTER_MODEL === 'gpt-3.5-turbo') {
-            console.log('Trying fallback model: mistralai/mistral-7b-instruct');
-            try {
-              const fallbackResult = await axios.post(
-                OPENROUTER_URL,
-                {
-                  model: 'mistralai/mistral-7b-instruct',
-                  messages: openRouterMessages,
-                  temperature: 0.7,
-                  max_tokens: 1024,
-                },
-                {
-                  headers: {
-                    'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-                    'Content-Type': 'application/json',
-                    'HTTP-Referer': 'https://visafy-vector-search-service.onrender.com',
-                    'X-Title': 'Visafy Immigration Assistant'
-                  }
+          // Try the fallback model if the first one fails
+          console.log(`Trying fallback model: ${OPENROUTER_FALLBACK_MODEL}`);
+          try {
+            const fallbackResult = await axios.post(
+              OPENROUTER_URL,
+              {
+                model: OPENROUTER_FALLBACK_MODEL,
+                messages: openRouterMessages,
+                temperature: 0.7,
+                max_tokens: 1024,
+              },
+              {
+                headers: {
+                  'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+                  'Content-Type': 'application/json',
+                  'HTTP-Referer': 'https://visafy-vector-search-service.onrender.com',
+                  'X-Title': 'Visafy Immigration Assistant'
                 }
-              );
+              }
+            );
 
               // Extract the response
               response = fallbackResult.data.choices[0].message.content;
@@ -365,7 +366,7 @@ app.post('/chat', async (req, res) => {
 
               res.json({
                 response,
-                model: 'mistralai/mistral-7b-instruct',
+                model: OPENROUTER_FALLBACK_MODEL,
                 hasContext: !!relevantContext
               });
               return;
