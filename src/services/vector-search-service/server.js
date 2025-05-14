@@ -126,7 +126,7 @@ const mockDocuments = [
 // Search endpoint
 app.post('/search', async (req, res) => {
   try {
-    const { query, limit = 5, threshold = 0.7 } = req.body;
+    const { query, limit = 5, threshold = 0.5 } = req.body;
 
     if (!query) {
       return res.status(400).json({ error: 'Query is required' });
@@ -138,7 +138,7 @@ app.post('/search', async (req, res) => {
       // Generate embedding for the query
       const embedding = await generateEmbedding(query);
 
-      // Search for similar documents in Supabase
+      // Search for similar documents in Supabase with a lower threshold
       const { data: documents, error } = await supabase.rpc('match_documents', {
         query_embedding: embedding,
         match_threshold: threshold,
@@ -317,7 +317,8 @@ app.post('/chat', async (req, res) => {
                 'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
                 'Content-Type': 'application/json',
                 'HTTP-Referer': 'https://visafy-vector-search-service.onrender.com',
-                'X-Title': 'Visafy Immigration Assistant'
+                'X-Title': 'Visafy Immigration Assistant',
+                'OpenAI-Organization': 'org-visafy'
               }
             }
           );
@@ -355,7 +356,8 @@ app.post('/chat', async (req, res) => {
                   'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
                   'Content-Type': 'application/json',
                   'HTTP-Referer': 'https://visafy-vector-search-service.onrender.com',
-                  'X-Title': 'Visafy Immigration Assistant'
+                  'X-Title': 'Visafy Immigration Assistant',
+                  'OpenAI-Organization': 'org-visafy'
                 }
               }
             );
