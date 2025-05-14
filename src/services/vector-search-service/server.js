@@ -24,12 +24,12 @@ console.log('API Key starts with:', supabaseKey ? supabaseKey.substring(0, 10) +
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Initialize OpenRouter API
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || 'sk-or-v1-free-test-key';
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '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';
 console.log('Using OpenRouter API Key starting with:', OPENROUTER_API_KEY.substring(0, 10) + '...');
 
 // OpenRouter configuration
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const OPENROUTER_MODEL = 'anthropic/claude-3-haiku'; // A good free option
+const OPENROUTER_MODEL = 'gpt-3.5-turbo'; // Using a more widely available model
 
 // Initialize the embedding pipeline
 let embeddingPipeline;
@@ -149,13 +149,44 @@ app.post('/search', async (req, res) => {
         throw new Error('Supabase search failed');
       }
 
+      console.log(`Found ${documents ? documents.length : 0} documents in Supabase`);
+
+      // If no documents found, try with a lower threshold
+      if (!documents || documents.length === 0) {
+        console.log('No documents found, trying with lower threshold');
+        const lowerThreshold = 0.5;
+        const { data: moreDocuments, error: moreError } = await supabase.rpc('match_documents', {
+          query_embedding: embedding,
+          match_threshold: lowerThreshold,
+          match_count: limit
+        });
+
+        if (moreError) {
+          console.error('Error searching documents with lower threshold:', moreError);
+          throw new Error('Supabase search failed');
+        }
+
+        console.log(`Found ${moreDocuments ? moreDocuments.length : 0} documents with lower threshold`);
+
+        // Format the results
+        const results = moreDocuments ? moreDocuments.map(doc => ({
+          id: doc.id,
+          content: doc.content,
+          metadata: doc.metadata,
+          similarity: doc.similarity
+        })) : [];
+
+        res.json({ results });
+        return;
+      }
+
       // Format the results
-      const results = documents ? documents.map(doc => ({
+      const results = documents.map(doc => ({
         id: doc.id,
         content: doc.content,
         metadata: doc.metadata,
         similarity: doc.similarity
-      })) : [];
+      }));
 
       res.json({ results });
     } catch (error) {
@@ -267,39 +298,87 @@ app.post('/chat', async (req, res) => {
 
         console.log('Sending request to OpenRouter...');
         console.log('Using context:', !!relevantContext);
+        console.log('Using model:', OPENROUTER_MODEL);
 
-        // Make the API call to OpenRouter
-        const result = await axios.post(
-          OPENROUTER_URL,
-          {
-            model: OPENROUTER_MODEL,
-            messages: openRouterMessages,
-            temperature: 0.7,
-            max_tokens: 1024,
-          },
-          {
-            headers: {
-              'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-              'Content-Type': 'application/json',
-              'HTTP-Referer': 'https://visafy-vector-search-service.onrender.com',
-              'X-Title': 'Visafy Immigration Assistant'
+        try {
+          // Make the API call to OpenRouter
+          const result = await axios.post(
+            OPENROUTER_URL,
+            {
+              model: OPENROUTER_MODEL,
+              messages: openRouterMessages,
+              temperature: 0.7,
+              max_tokens: 1024,
+            },
+            {
+              headers: {
+                'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+                'Content-Type': 'application/json',
+                'HTTP-Referer': 'https://visafy-vector-search-service.onrender.com',
+                'X-Title': 'Visafy Immigration Assistant'
+              }
             }
+          );
+
+          // Extract the response
+          response = result.data.choices[0].message.content;
+          console.log('Received response from OpenRouter');
+
+          res.json({
+            response,
+            model: OPENROUTER_MODEL,
+            hasContext: !!relevantContext
+          });
+          return;
+        } catch (openRouterError) {
+          console.error('Error using OpenRouter API:', openRouterError.message);
+          if (openRouterError.response) {
+            console.error('OpenRouter API response status:', openRouterError.response.status);
+            console.error('OpenRouter API response data:', openRouterError.response.data);
           }
-        );
 
-        // Extract the response
-        response = result.data.choices[0].message.content;
-        console.log('Received response from OpenRouter');
+          // Try a different model if the first one fails
+          if (OPENROUTER_MODEL === 'gpt-3.5-turbo') {
+            console.log('Trying fallback model: mistralai/mistral-7b-instruct');
+            try {
+              const fallbackResult = await axios.post(
+                OPENROUTER_URL,
+                {
+                  model: 'mistralai/mistral-7b-instruct',
+                  messages: openRouterMessages,
+                  temperature: 0.7,
+                  max_tokens: 1024,
+                },
+                {
+                  headers: {
+                    'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+                    'Content-Type': 'application/json',
+                    'HTTP-Referer': 'https://visafy-vector-search-service.onrender.com',
+                    'X-Title': 'Visafy Immigration Assistant'
+                  }
+                }
+              );
 
-        res.json({
-          response,
-          model: OPENROUTER_MODEL,
-          hasContext: !!relevantContext
-        });
-        return;
+              // Extract the response
+              response = fallbackResult.data.choices[0].message.content;
+              console.log('Received response from fallback model');
+
+              res.json({
+                response,
+                model: 'mistralai/mistral-7b-instruct',
+                hasContext: !!relevantContext
+              });
+              return;
+            } catch (fallbackError) {
+              console.error('Error using fallback model:', fallbackError.message);
+              throw fallbackError;
+            }
+          } else {
+            throw openRouterError;
+          }
+        }
       } catch (error) {
-        console.error('Error using OpenRouter API:', error);
-        console.error('Error details:', error.response ? error.response.data : error.message);
+        console.error('All OpenRouter API attempts failed:', error.message);
         throw error;
       }
     } catch (error) {
