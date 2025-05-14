@@ -24,7 +24,9 @@ console.log('API Key starts with:', supabaseKey ? supabaseKey.substring(0, 10) +
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Initialize Google Gemini API
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || 'AIzaSyDJC5a882ruaJN2HQR9nz_P-8R4dCUP-Ss');
+const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY || 'AIzaSyDJC5a882ruaJN2HQR9nz_P-8R4dCUP-Ss';
+console.log('Using Google API Key starting with:', GOOGLE_API_KEY.substring(0, 10) + '...');
+const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
 
 // Initialize the embedding pipeline
 let embeddingPipeline;
@@ -247,33 +249,43 @@ app.post('/chat', async (req, res) => {
         }
       }
 
-      // Initialize the Gemini model
-      const genModel = genAI.getGenerativeModel({ model: 'gemini-pro' });
+      try {
+        // Initialize the Gemini model
+        console.log('Initializing Gemini model...');
+        const genModel = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
-      // Prepare the chat history
-      const history = messages.map(msg => ({
-        role: msg.role === 'user' ? 'user' : 'model',
-        parts: [{ text: msg.content }]
-      }));
+        // Prepare the chat history
+        const history = messages.map(msg => ({
+          role: msg.role === 'user' ? 'user' : 'model',
+          parts: [{ text: msg.content }]
+        }));
 
-      // Create a chat session
-      const chat = genModel.startChat({
-        history,
-        generationConfig: {
-          temperature: 0.7,
-          topP: 0.8,
-          topK: 40,
-          maxOutputTokens: 1024,
-        },
-      });
+        console.log('Creating chat session...');
+        // Create a chat session
+        const chat = genModel.startChat({
+          history,
+          generationConfig: {
+            temperature: 0.7,
+            topP: 0.8,
+            topK: 40,
+            maxOutputTokens: 1024,
+          },
+        });
 
-      // Generate a response
-      const systemPrompt = relevantContext
-        ? `You are an immigration assistant for the Visafy platform. Use the following information to answer the user's question:\n\n${relevantContext}`
-        : 'You are an immigration assistant for the Visafy platform. Provide helpful and accurate information about immigration processes, requirements, and pathways.';
+        // Generate a response
+        const systemPrompt = relevantContext
+          ? `You are an immigration assistant for the Visafy platform. Use the following information to answer the user's question:\n\n${relevantContext}`
+          : 'You are an immigration assistant for the Visafy platform. Provide helpful and accurate information about immigration processes, requirements, and pathways.';
 
-      const result = await chat.sendMessage(systemPrompt);
-      const response = result.response.text();
+        console.log('Sending message to Gemini...');
+        console.log('Using context:', !!relevantContext);
+        const result = await chat.sendMessage(systemPrompt);
+        const response = result.response.text();
+        console.log('Received response from Gemini');
+      } catch (error) {
+        console.error('Error using Gemini API:', error);
+        throw error;
+      }
 
       res.json({
         response,
