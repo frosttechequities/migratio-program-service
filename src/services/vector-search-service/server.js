@@ -23,15 +23,15 @@ console.log('API Key starts with:', supabaseKey ? supabaseKey.substring(0, 10) +
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Initialize OpenRouter API
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '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';
-console.log('Using OpenRouter API Key starting with:', OPENROUTER_API_KEY.substring(0, 10) + '...');
+// Initialize Ollama configuration
+const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
+console.log('Using Ollama URL:', OLLAMA_URL);
 
-// OpenRouter configuration
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-// Using free models with :free suffix to ensure they're available on the free tier
-const OPENROUTER_MODEL = 'openai/gpt-3.5-turbo:free'; // Primary free model
-const OPENROUTER_FALLBACK_MODEL = 'mistralai/mistral-7b-instruct:free'; // Fallback free model
+// Ollama model configuration
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3'; // Primary model
+const OLLAMA_FALLBACK_MODEL = process.env.OLLAMA_FALLBACK_MODEL || 'mistral'; // Fallback model
+
+console.log('Using Ollama models:', OLLAMA_MODEL, 'and', OLLAMA_FALLBACK_MODEL);
 
 // Initialize the embedding pipeline
 let embeddingPipeline;
@@ -292,83 +292,71 @@ app.post('/chat', async (req, res) => {
           ? `You are an immigration assistant for the Visafy platform. Use the following information to answer the user's question:\n\n${relevantContext}`
           : 'You are an immigration assistant for the Visafy platform. Provide helpful and accurate information about immigration processes, requirements, and pathways.';
 
-        // Prepare the messages for OpenRouter
-        const openRouterMessages = [
+        // Prepare the messages for Ollama
+        const ollamaMessages = [
           { role: 'system', content: systemMessage },
           ...messages
         ];
 
-        console.log('Sending request to OpenRouter...');
+        console.log('Sending request to Ollama...');
         console.log('Using context:', !!relevantContext);
-        console.log('Using model:', OPENROUTER_MODEL);
+        console.log('Using model:', OLLAMA_MODEL);
 
         try {
-          // Make the API call to OpenRouter
+          // Make the API call to Ollama
           const result = await axios.post(
-            OPENROUTER_URL,
+            `${OLLAMA_URL}/api/chat`,
             {
-              model: OPENROUTER_MODEL,
-              messages: openRouterMessages,
-              temperature: 0.7,
-              max_tokens: 1024,
-            },
-            {
-              headers: {
-                'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-                'Content-Type': 'application/json',
-                'HTTP-Referer': 'https://visafy-vector-search-service.onrender.com',
-                'X-Title': 'Visafy Immigration Assistant',
-                'OpenAI-Organization': 'org-visafy'
+              model: OLLAMA_MODEL,
+              messages: ollamaMessages,
+              stream: false,
+              options: {
+                temperature: 0.7,
+                num_predict: 1024,
               }
             }
           );
 
           // Extract the response
-          response = result.data.choices[0].message.content;
-          console.log('Received response from OpenRouter');
+          response = result.data.message.content;
+          console.log('Received response from Ollama');
 
           res.json({
             response,
-            model: OPENROUTER_MODEL,
+            model: OLLAMA_MODEL,
             hasContext: !!relevantContext
           });
           return;
-        } catch (openRouterError) {
-          console.error('Error using OpenRouter API:', openRouterError.message);
-          if (openRouterError.response) {
-            console.error('OpenRouter API response status:', openRouterError.response.status);
-            console.error('OpenRouter API response data:', openRouterError.response.data);
+        } catch (ollamaError) {
+          console.error('Error using Ollama API:', ollamaError.message);
+          if (ollamaError.response) {
+            console.error('Ollama API response status:', ollamaError.response.status);
+            console.error('Ollama API response data:', ollamaError.response.data);
           }
 
           // Try the fallback model if the first one fails
-          console.log(`Trying fallback model: ${OPENROUTER_FALLBACK_MODEL}`);
+          console.log(`Trying fallback model: ${OLLAMA_FALLBACK_MODEL}`);
           try {
             const fallbackResult = await axios.post(
-              OPENROUTER_URL,
+              `${OLLAMA_URL}/api/chat`,
               {
-                model: OPENROUTER_FALLBACK_MODEL,
-                messages: openRouterMessages,
-                temperature: 0.7,
-                max_tokens: 1024,
-              },
-              {
-                headers: {
-                  'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-                  'Content-Type': 'application/json',
-                  'HTTP-Referer': 'https://visafy-vector-search-service.onrender.com',
-                  'X-Title': 'Visafy Immigration Assistant',
-                  'OpenAI-Organization': 'org-visafy'
+                model: OLLAMA_FALLBACK_MODEL,
+                messages: ollamaMessages,
+                stream: false,
+                options: {
+                  temperature: 0.7,
+                  num_predict: 1024,
                 }
               }
             );
 
             // Extract the response
-            response = fallbackResult.data.choices[0].message.content;
+            response = fallbackResult.data.message.content;
             console.log('Received response from fallback model');
 
             res.json({
               response,
-              model: OPENROUTER_FALLBACK_MODEL,
+              model: OLLAMA_FALLBACK_MODEL,
               hasContext: !!relevantContext
             });
             return;
@@ -378,7 +366,7 @@ app.post('/chat', async (req, res) => {
           }
         }
       } catch (error) {
-        console.error('All OpenRouter API attempts failed:', error.message);
+        console.error('All Ollama API attempts failed:', error.message);
         throw error;
       }
     } catch (error) {
