@@ -33,6 +33,8 @@ import PointsCalculatorPage from './pages/immigration/PointsCalculatorPage';
 import ProcessingTimesPage from './pages/immigration/ProcessingTimesPage';
 import ProgramDetailPage from './pages/immigration/ProgramDetailPage';
 import ResourcesPage from './pages/resources/ResourcesPage'; // Import ResourcesPage
+import ResearchPage from './pages/research/ResearchPage'; // Import the new Research page
+import StandaloneResearchPage from './pages/research/StandaloneResearchPage'; // Import the standalone Research page
 import LegalPage from './pages/legal/LegalPage';
 import NotFoundPage from './pages/NotFoundPage';
 import TestAuthPage from './pages/test/TestAuthPage'; // Import TestAuthPage
@@ -124,6 +126,8 @@ function App() {
 
           {/* Immigration Research routes */}
           <Route path="research" element={<ResearchHubPage />} />
+          <Route path="research/search" element={<ResearchPage />} />
+          <Route path="research/standalone" element={<StandaloneResearchPage />} />
           <Route path="resources" element={<ResourcesPage />} />
           <Route path="immigration/programs" element={<ImmigrationProgramsPage />} />
           <Route path="immigration/countries" element={<CountryProfilesPage />} />

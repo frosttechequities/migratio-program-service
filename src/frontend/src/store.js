@@ -6,9 +6,13 @@ import documentReducer from './features/documents/documentSlice';
 import roadmapReducer from './features/roadmap/roadmapSlice';
 import dashboardReducer from './features/dashboard/dashboardSlice';
 import uiReducer from './features/ui/uiSlice';
-import calendarReducer from './features/calendar/calendarSlice'; // Import calendarReducer
-
-console.log('[Store] Imported dashboardReducer:', dashboardReducer); // Debug log
+import calendarReducer from './features/calendar/calendarSlice';
+import programReducer from './features/programs/programSlice';
+import recommendationReducer from './features/recommendations/recommendationSlice';
+import pdfReducer from './features/pdf/pdfSlice';
+import immigrationReducer from './features/immigration/immigrationSlice';
+import comparisonReducer from './features/comparison/comparisonSlice';
+import resourceReducer from './features/resources/resourceSlice';
 
 const store = configureStore({
   reducer: {
@@ -19,14 +23,20 @@ const store = configureStore({
     roadmap: roadmapReducer,
     dashboard: dashboardReducer,
     ui: uiReducer,
-    calendar: calendarReducer, // Add calendarReducer
+    calendar: calendarReducer,
+    programs: programReducer,
+    recommendations: recommendationReducer,
+    pdf: pdfReducer,
+    immigration: immigrationReducer,
+    comparison: comparisonReducer,
+    resources: resourceReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
         // Ignore these action types
         ignoredActions: [
-          'auth/login/fulfilled', 
+          'auth/login/fulfilled',
           'auth/register/fulfilled',
           'calendar/setSelectedDate' // If setSelectedDate might receive a Date object
         ],

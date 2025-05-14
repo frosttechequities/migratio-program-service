@@ -1,25 +1,31 @@
-import supabase, { getAuthenticatedClient } from '../../utils/supabaseClient';
+/**
+ * Mock Auth Service
+ *
+ * This is a completely independent mock implementation that doesn't require any external dependencies.
+ */
+
+console.log('[AuthService] Using completely independent mock implementation');
 
 // Register user
 const register = async (userData) => {
   try {
-    const { data, error } = await supabase.auth.signUp({
-      email: userData.email,
-      password: userData.password,
-      options: {
-        data: {
+    console.log('[AuthService] Mock register called with:', userData.email);
+
+    // Mock successful registration
+    return {
+      user: {
+        id: 'mock-user-id',
+        email: userData.email,
+        user_metadata: {
           first_name: userData.firstName || '',
           last_name: userData.lastName || '',
-        },
-        emailRedirectTo: `${window.location.origin}/verify`
+        }
+      },
+      session: {
+        access_token: 'mock-access-token',
+        refresh_token: 'mock-refresh-token',
+        expires_at: Date.now() + 3600000 // 1 hour from now
       }
-    });
-
-    if (error) throw error;
-
-    return {
-      user: data.user,
-      session: data.session
     };
   } catch (error) {
     console.error('Registration Service Error:', error.message);
@@ -30,20 +36,24 @@ const register = async (userData) => {
 // Login user
 const login = async (userData) => {
   try {
-    console.log('[AuthService] Attempting login with Supabase');
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: userData.email,
-      password: userData.password
-    });
+    console.log('[AuthService] Mock login called with:', userData.email);
 
-    if (error) throw error;
+    // Mock successful login
+    const mockToken = 'mock-access-token-' + Date.now();
 
     // Store the session in localStorage
-    localStorage.setItem('token', data.session.access_token);
+    localStorage.setItem('token', mockToken);
 
     return {
-      user: data.user,
-      token: data.session.access_token
+      user: {
+        id: 'mock-user-id',
+        email: userData.email,
+        user_metadata: {
+          first_name: 'Mock',
+          last_name: 'User',
+        }
+      },
+      token: mockToken
     };
   } catch (error) {
     console.error('Login Service Error:', error.message);
@@ -54,11 +64,7 @@ const login = async (userData) => {
 // Logout user
 const logout = async () => {
   try {
-    console.log('Logout service called - clearing all authentication data');
-
-    // Sign out from Supabase
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    console.log('[AuthService] Mock logout called - clearing all authentication data');
 
     // Clear all authentication-related data from localStorage
     localStorage.removeItem('user');
@@ -86,43 +92,26 @@ const logout = async () => {
 // Check Auth Status
 const checkAuth = async () => {
   try {
-    console.log('[AuthService] Checking authentication status');
+    console.log('[AuthService] Mock checking authentication status');
 
-    // Get authenticated client - make sure to await the promise
-    const client = await getAuthenticatedClient();
+    // Check if there's a token in localStorage
+    const token = localStorage.getItem('token');
 
-    if (!client || !client.auth) {
-      console.error('[AuthService] Invalid Supabase client');
-      return null;
+    if (token) {
+      console.log('[AuthService] Mock token found, user is authenticated');
+
+      // Return a mock user
+      return {
+        id: 'mock-user-id',
+        email: 'mock@example.com',
+        user_metadata: {
+          first_name: 'Mock',
+          last_name: 'User',
+        }
+      };
     }
 
-    // Try with the authenticated client
-    const { data, error } = await client.auth.getSession();
-
-    if (error) {
-      console.error('[AuthService] Session error:', error.message);
-      throw error;
-    }
-
-    if (data && data.session) {
-      console.log('[AuthService] Session found, getting user data');
-      const { data: userData, error: userError } = await client.auth.getUser();
-
-      if (userError) {
-        console.error('[AuthService] User data error:', userError.message);
-        throw userError;
-      }
-
-      if (userData && userData.user) {
-        // Store the session in localStorage
-        localStorage.setItem('token', data.session.access_token);
-
-        console.log('[AuthService] User authenticated:', userData.user);
-        return userData.user;
-      }
-    }
-
-    console.log('[AuthService] No session found, user not authenticated');
+    console.log('[AuthService] No token found, user not authenticated');
     return null;
   } catch (error) {
     console.error('[AuthService] Auth check failed:', error.message);
@@ -133,10 +122,8 @@ const checkAuth = async () => {
 // Email verification
 const verifyEmail = async (token) => {
   try {
-    // Supabase handles email verification automatically
-    // This function is just for compatibility with the existing code
-    console.log('[AuthService] Email verification is handled automatically by Supabase', token ? `(token: ${token})` : '');
-    return { success: true, message: 'Email verification is handled by Supabase' };
+    console.log('[AuthService] Mock email verification called', token ? `(token: ${token})` : '');
+    return { success: true, message: 'Email verification successful (mock)' };
   } catch (error) {
     console.error('[AuthService] Email verification error:', error.message);
     return { success: false, message: error.message };
@@ -146,15 +133,11 @@ const verifyEmail = async (token) => {
 // Forgot password
 const forgotPassword = async (email) => {
   try {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-
-    if (error) throw error;
+    console.log('[AuthService] Mock forgot password called with:', email);
 
     return {
       success: true,
-      message: 'Password reset instructions sent to your email'
+      message: 'Password reset instructions sent to your email (mock)'
     };
   } catch (error) {
     console.error('Forgot password error:', error.message);
@@ -163,17 +146,13 @@ const forgotPassword = async (email) => {
 };
 
 // Reset password
-const resetPassword = async (password) => {
+const resetPassword = async (token, password) => {
   try {
-    const { error } = await supabase.auth.updateUser({
-      password: password
-    });
-
-    if (error) throw error;
+    console.log('[AuthService] Mock reset password called with token:', token, 'and password:', password ? '(password provided)' : '(no password)');
 
     return {
       success: true,
-      message: 'Password has been reset successfully'
+      message: 'Password has been reset successfully (mock)'
     };
   } catch (error) {
     console.error('Reset password error:', error.message);

@@ -850,7 +850,7 @@ const HomePage = () => {
 
                     {/* Main Card - Improved Alignment */}
                     <Paper
-                      elevation={24}
+                      elevation={8}
                       sx={{
                         p: 4,
                         borderRadius: 4,
@@ -3037,7 +3037,7 @@ const HomePage = () => {
             </Grid>
             <Grid item xs={12} md={5} sx={{ display: { xs: 'none', md: 'block' } }}>
               <Paper
-                elevation={24}
+                elevation={8}
                 sx={{
                   p: 5,
                   borderRadius: 4,

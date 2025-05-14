@@ -566,55 +566,182 @@ const verifyAuthentication = async () => {
 
 ## Current API Connection Issues
 
-While the blank pages and duplicate headers/footers issues have been resolved, there are still some API connection issues that need to be addressed:
+While the blank pages and duplicate headers/footers issues have been resolved, there are still some API connection issues that need to be addressed. These issues are now visible in the live application:
 
 ### 1. Recommendations API (401 Unauthorized)
 
 **Symptoms:**
 - Calls to `/api/recommendations/destinations` return 401 Unauthorized errors
 - Console shows: "Suggest Destinations Service Error: User not authenticated"
+- UI displays: "Potential Destinations - Could not load suggestions: User not authenticated"
 
-**Potential Causes:**
-- The API endpoint might be expecting a different authentication token format
-- The backend service might not be running or accessible
-- The API might have different authentication requirements
+**Confirmed Causes:**
+- The authentication token is not being properly passed to the API
+- The backend service is running but not recognizing the authentication token
 
-**Debugging Steps:**
-1. Check if the backend service is running
-2. Verify the authentication token is being sent correctly
-3. Check the API endpoint documentation for authentication requirements
+**Solution:**
+1. Update the recommendationService.js file to properly pass the authentication token:
+```jsx
+// src/frontend/src/features/recommendations/recommendationService.js
+const suggestDestinations = async () => {
+  try {
+    console.log('[recommendationService] Fetching destination suggestions...');
 
-### 2. Resources API (Connection Refused)
+    // Get the token from localStorage
+    const token = getTokenFromLocalStorage();
+
+    // Make the API call with the token in the Authorization header
+    const response = await axios.get(`${API_URL}/recommendations/destinations`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Suggest Destinations Service Error:', error.message);
+    throw error;
+  }
+};
+```
+
+2. Ensure the backend API is configured to validate the token correctly
+
+### 2. Resources API (404 Not Found)
 
 **Symptoms:**
-- Calls to `/api/resources?tags=dashboard,post-arrival` fail with connection refused errors
-- Console shows: "Get Resources Service Error: Network Error"
+- Calls to `/api/resources?tags=dashboard,post-arrival` fail with 404 Not Found errors
+- Console shows: "Get Resources Service Error: Request failed with status code 404"
+- UI displays: "Recommended Resources - Could not load resources: Request failed with status code 404"
 
-**Potential Causes:**
-- The backend service might not be running
-- The service might be running on a different port
-- Firewall or network issues might be blocking the connection
+**Confirmed Causes:**
+- The resources endpoint does not exist on the deployed backend service
+- The API path is incorrect or the endpoint hasn't been implemented
 
-**Debugging Steps:**
-1. Verify the backend service is running
-2. Check the service URL and port configuration
-3. Test the API endpoint directly using a tool like Postman
+**Solution:**
+1. Check if the resources endpoint exists in the backend code:
+```bash
+# Check the routes in the backend service
+grep -r "resources" services/
+```
+
+2. Implement the missing endpoint in the backend service:
+```javascript
+// Example implementation for the resources endpoint
+router.get('/resources', authenticateToken, async (req, res) => {
+  try {
+    const { tags } = req.query;
+    const tagArray = tags ? tags.split(',') : [];
+
+    // Query the database for resources with matching tags
+    const resources = await Resource.find({
+      tags: { $in: tagArray }
+    }).limit(10);
+
+    res.json(resources);
+  } catch (error) {
+    console.error('Error fetching resources:', error);
+    res.status(500).json({ message: 'Error fetching resources' });
+  }
+});
+```
+
+3. Update the resourceService.js file to use the correct API path:
+```jsx
+// src/frontend/src/features/resources/resourceService.js
+const getResources = async (tags) => {
+  try {
+    console.log('[resourceService] Fetching resources with tags:', tags);
+
+    // Get the token from localStorage
+    const token = getTokenFromLocalStorage();
+
+    // Make the API call with the token in the Authorization header
+    const response = await axios.get(`${API_URL}/api/resources`, {
+      params: { tags },
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Get Resources Service Error:', error.message);
+    throw error;
+  }
+};
+```
 
 ### 3. Supabase Queries (406 Status Code)
 
 **Symptoms:**
-- Some Supabase queries return 406 status codes
+- Queries to the user_progress table return 406 status codes
 - Console shows: "Failed to load resource: the server responded with a status of 406 ()"
 
-**Potential Causes:**
-- The query might be malformed
-- The Supabase schema might have changed
-- The API might be expecting a different content type
+**Confirmed Causes:**
+- The Accept header is not being set correctly
+- The Supabase API is expecting a specific content type
 
-**Debugging Steps:**
-1. Check the Supabase schema to ensure it matches the query
-2. Verify the content type headers are set correctly
-3. Test the query directly in the Supabase dashboard
+**Solution:**
+1. Update the dashboardService.js file to set the correct headers:
+```jsx
+// src/frontend/src/features/dashboard/dashboardService.js
+const { data: progressData, error: progressError } = await client
+  .from('user_progress')
+  .select('*')
+  .eq('user_id', user.id)
+  .single()
+  .headers({
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  });
+```
+
+2. Alternatively, update the Supabase client configuration:
+```jsx
+// src/frontend/src/utils/supabaseClient.js
+const supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    storageKey: 'sb-qyvvrvthalxeibsmckep-auth-token',
+  },
+  global: {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+  },
+});
+```
+
+### 4. Roadmap Events API (Connection Refused)
+
+**Symptoms:**
+- Calls to `/api/roadmaps/events` fail with connection refused errors
+- Console shows: "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+
+**Confirmed Causes:**
+- The API is trying to connect to localhost:3006 instead of the deployed backend URL
+
+**Solution:**
+1. Update the API URL in the roadmapService.js file:
+```jsx
+// src/frontend/src/features/roadmap/roadmapService.js
+// Replace this:
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3006/api';
+
+// With this:
+const API_URL = process.env.REACT_APP_API_URL || 'https://migratio-program-service.onrender.com/api';
+```
+
+2. Update the .env.production file to set the correct API URL:
+```
+REACT_APP_API_URL=https://migratio-program-service.onrender.com/api
+REACT_APP_SUPABASE_URL=https://qyvvrvthalxeibsmckep.supabase.co
+REACT_APP_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
 
 ## Useful Debugging Commands
 

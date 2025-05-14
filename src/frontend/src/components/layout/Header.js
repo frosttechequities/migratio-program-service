@@ -37,6 +37,7 @@ import PublicIcon from '@mui/icons-material/Public';
 import CalculateIcon from '@mui/icons-material/Calculate';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
+import SearchIcon from '@mui/icons-material/Search'; // Import SearchIcon
 import LanguageIcon from '@mui/icons-material/Language'; // Icon for language switcher
 import { useTranslation } from 'react-i18next'; // Import useTranslation
 
@@ -67,6 +68,7 @@ const Header = () => {
   // Research pages
   const researchPages = [
     { title: 'Research Hub', path: '/research', icon: <LibraryBooksIcon fontSize="small" /> },
+    { title: 'Semantic Search', path: '/research/search', icon: <SearchIcon fontSize="small" /> },
     { title: 'Immigration Programs', path: '/immigration/programs', icon: <PublicIcon fontSize="small" /> },
     { title: 'Country Profiles', path: '/immigration/countries', icon: <PublicIcon fontSize="small" /> },
     { title: 'Points Calculator', path: '/immigration/points-calculator', icon: <CalculateIcon fontSize="small" /> },

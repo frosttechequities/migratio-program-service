@@ -30,11 +30,17 @@ const getDashboardData = async () => {
     // Fetch user progress data
     let userProgressData = null;
 
+    // Set specific headers for this query to fix 406 error
     const { data: progressData, error: progressError } = await client
       .from('user_progress')
       .select('*')
       .eq('user_id', user.id)
-      .single();
+      .single()
+      .headers({
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      });
 
     // If no progress data exists, create it
     if (progressError && progressError.code === 'PGRST116') {
@@ -54,7 +60,12 @@ const getDashboardData = async () => {
           }
         ])
         .select()
-        .single();
+        .single()
+        .headers({
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        });
 
       if (createError) {
         console.error('Error creating progress data:', createError);

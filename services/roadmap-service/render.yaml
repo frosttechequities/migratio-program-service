@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: migratio-roadmap-service
+    env: docker
+    plan: free
+    buildCommand: docker build -t migratio-roadmap-service .
+    startCommand: docker run -p $PORT:$PORT -e PORT=$PORT -e MONGODB_URI=$MONGODB_URI -e JWT_SECRET=$JWT_SECRET -e PROGRAM_SERVICE_URL=$PROGRAM_SERVICE_URL -e ROADMAP_SERVICE_PORT=$PORT -e NODE_ENV=$NODE_ENV -e CORS_ORIGIN=$CORS_ORIGIN migratio-roadmap-service
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: PROGRAM_SERVICE_URL
+        value: https://migratio-program-service.onrender.com/api
+      - key: NODE_ENV
+        value: production
+      - key: CORS_ORIGIN
+        value: "*"

@@ -125,7 +125,8 @@ const dashboardSlice = createSlice({
       .addCase(fetchDashboardData.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.data = action.payload.data;
+        // Make sure we're handling the data correctly
+        state.data = action.payload?.data || action.payload;
       })
       .addCase(fetchDashboardData.rejected, (state, action) => {
         state.isLoading = false;

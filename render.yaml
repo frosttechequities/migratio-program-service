@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: visafy-chatbot
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: SUPABASE_URL
+        value: https://qyvvrvthalxeibsmckep.supabase.co
+      - key: SUPABASE_API_KEY
+        sync: false
+      - key: PORT
+        value: 10000
+      - key: DEFAULT_WEBSITE
+        value: https://astonishing-smakager-d8c61d.netlify.app
+      - key: MAX_URLS
+        value: 20
+    autoDeploy: true
+
+  - type: web
+    name: visafy-vector-search-service
+    env: node
+    buildCommand: cd src/services/vector-search-service && npm install
+    startCommand: cd src/services/vector-search-service && npm start
+    envVars:
+      - key: SUPABASE_URL
+        value: https://qyvvrvthalxeibsmckep.supabase.co
+      - key: SUPABASE_API_KEY
+        sync: false
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+    autoDeploy: true

@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visafy Research Center</title>
+    <!-- Material UI Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!-- Material UI Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header styles */
+        header {
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 16px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 500;
+            color: #1976d2;
+            text-decoration: none;
+        }
+
+        /* Tab styles */
+        .tabs {
+            display: flex;
+            background-color: #fff;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab.active {
+            background-color: #f0f7ff;
+            color: #1976d2;
+            border-bottom: 2px solid #1976d2;
+        }
+
+        .tab-icon {
+            font-size: 24px;
+        }
+
+        /* Tab content styles */
+        .tab-content {
+            display: none;
+            background-color: #fff;
+            border-radius: 4px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Search styles */
+        .search-form {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+            font-size: 16px;
+        }
+
+        .search-button {
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            padding: 0 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Results styles */
+        .results {
+            display: grid;
+            gap: 16px;
+        }
+
+        .result-card {
+            background-color: #fff;
+            border-radius: 4px;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .result-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .result-source {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .result-content {
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag {
+            background-color: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 8px;
+            border-radius: 16px;
+            font-size: 12px;
+        }
+
+        /* Chat styles */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            margin-bottom: 16px;
+        }
+
+        .message {
+            margin-bottom: 16px;
+            max-width: 80%;
+        }
+
+        .message.user {
+            margin-left: auto;
+            background-color: #1976d2;
+            color: white;
+            border-radius: 16px 16px 0 16px;
+            padding: 12px 16px;
+        }
+
+        .message.assistant {
+            margin-right: auto;
+            background-color: #fff;
+            border-radius: 16px 16px 16px 0;
+            padding: 12px 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .chat-input-container {
+            display: flex;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+            font-size: 16px;
+        }
+
+        .chat-button {
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            padding: 0 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Library styles */
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        .category-card {
+            background-color: #fff;
+            border-radius: 4px;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .category-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .category-description {
+            margin-bottom: 16px;
+            color: #666;
+        }
+
+        .category-button {
+            background-color: transparent;
+            color: #1976d2;
+            border: 1px solid #1976d2;
+            border-radius: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border-left-color: #1976d2;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="#" class="logo">Visafy Research Center</a>
+                <div>
+                    <a href="https://github.com/frosttechequities/migratio-program-service" target="_blank" style="text-decoration: none; color: #1976d2; margin-left: 20px;">
+                        <span class="material-icons" style="vertical-align: middle; margin-right: 4px;">code</span>
+                        GitHub
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <h1>Immigration Research Center</h1>
+        <p>Access comprehensive immigration information through our AI-powered search and chat tools. Find accurate, up-to-date information about immigration pathways, requirements, and processes.</p>
+
+        <div style="background-color: #e3f2fd; padding: 16px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #1976d2;">
+            <h3 style="margin-top: 0; color: #1976d2;">Standalone Demo</h3>
+            <p>This is a standalone demo of the Visafy Research Center. It uses mock data for demonstration purposes.</p>
+            <p><strong>To deploy this demo to GitHub Pages:</strong></p>
+            <ol>
+                <li>Create a new repository on GitHub</li>
+                <li>Rename this file to <code>index.html</code></li>
+                <li>Upload the file to the repository</li>
+                <li>Go to Settings > Pages and enable GitHub Pages</li>
+                <li>Select the main branch as the source</li>
+                <li>Click Save and wait for the site to be published</li>
+            </ol>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="search">
+                <span class="tab-icon material-icons">search</span>
+                <span>Semantic Search</span>
+            </div>
+            <div class="tab" data-tab="chat">
+                <span class="tab-icon material-icons">chat</span>
+                <span>AI Assistant</span>
+            </div>
+            <div class="tab" data-tab="library">
+                <span class="tab-icon material-icons">library_books</span>
+                <span>Research Library</span>
+            </div>
+        </div>
+
+        <div id="search-tab" class="tab-content active">
+            <form id="search-form" class="search-form">
+                <input type="text" id="search-input" class="search-input" placeholder="Search for immigration information">
+                <button type="submit" class="search-button">
+                    <span class="material-icons">search</span>
+                </button>
+            </form>
+
+            <div id="search-results" class="results"></div>
+        </div>
+
+        <div id="chat-tab" class="tab-content">
+            <div class="chat-container">
+                <div id="chat-messages" class="chat-messages">
+                    <div class="message assistant">
+                        Hello! I'm your immigration assistant. How can I help you today?
+                    </div>
+                </div>
+
+                <form id="chat-form" class="chat-input-container">
+                    <input type="text" id="chat-input" class="chat-input" placeholder="Type your message">
+                    <button type="submit" class="chat-button">
+                        <span class="material-icons">send</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div id="library-tab" class="tab-content">
+            <h2>Research Library</h2>
+            <p>Browse our curated collection of immigration resources, guides, and articles.</p>
+
+            <div class="categories" id="categories"></div>
+        </div>
+    </main>
+
+    <script>
+        // Mock data
+        const mockSearchData = [
+            {
+                id: 1,
+                content: "The Express Entry system is used to manage applications for permanent residence under these federal economic immigration programs: the Federal Skilled Worker Program, the Federal Skilled Trades Program, and the Canadian Experience Class. Provinces and territories can also recruit candidates from the Express Entry system through their Provincial Nominee Programs to meet local labor market needs.",
+                metadata: {
+                    title: "Express Entry Program Guide",
+                    source: "Immigration Canada",
+                    tags: ["canada", "express entry", "immigration"]
+                },
+                similarity: 0.92
+            },
+            {
+                id: 2,
+                content: "When applying for immigration, you typically need to provide various documents to support your application. These may include: valid passport or travel document, birth certificate, marriage certificate (if applicable), police certificates, proof of language proficiency, educational credentials assessment, proof of funds, medical examination results, and biometric information.",
+                metadata: {
+                    title: "Document Requirements for Immigration",
+                    source: "Immigration Resources",
+                    tags: ["documents", "requirements", "immigration"]
+                },
+                similarity: 0.85
+            },
+            {
+                id: 3,
+                content: "Language proficiency is a key requirement for many immigration programs. Accepted language tests vary by country, but common ones include IELTS, CELPIP, TEF, and PTE. The test results are typically valid for 2 years. The required scores vary depending on the immigration program and the country.",
+                metadata: {
+                    title: "Language Testing for Immigration",
+                    source: "Immigration Resources",
+                    tags: ["language testing", "proficiency", "immigration"]
+                },
+                similarity: 0.78
+            }
+        ];
+
+        const mockChatResponses = {
+            "express entry": "Express Entry is Canada's immigration system that manages applications for permanent residence under three federal economic immigration programs: the Federal Skilled Worker Program, the Federal Skilled Trades Program, and the Canadian Experience Class. It uses a Comprehensive Ranking System (CRS) to score candidates based on factors like age, education, work experience, and language skills. The highest-scoring candidates receive invitations to apply for permanent residence through regular draws.",
+            "document": "For most immigration applications, you'll need several key documents: a valid passport, birth certificate, marriage certificate (if applicable), police clearance certificates from countries where you've lived, proof of language proficiency (like IELTS or CELPIP test results), educational credential assessments, proof of funds to support yourself, and medical examination results. Make sure all documents are properly translated and certified if they're not in English or French.",
+            "language test": "Language proficiency is crucial for most immigration programs. For English, accepted tests include IELTS (International English Language Testing System) and CELPIP (Canadian English Language Proficiency Index Program). For French, you can take the TEF (Test d'Évaluation de Français) or TCF (Test de Connaissance du Français). Test results are typically valid for 2 years, and higher scores can significantly improve your chances in points-based immigration systems.",
+            "medical exam": "Immigration medical examinations must be performed by approved physicians (often called panel physicians). The exam typically includes a physical examination, chest X-ray, blood tests for conditions like HIV and syphilis, and urinalysis. Results are usually valid for 12 months. You should only undergo the medical exam after being instructed to do so by immigration authorities, as timing is important.",
+            "visa": "There are many types of visas depending on your purpose of travel and destination country. Common categories include tourist visas, student visas, work visas, and permanent residence visas. Application requirements, processing times, and fees vary widely. Most visa applications require proof of purpose for your visit, financial means to support yourself, and ties to your home country to demonstrate you'll return.",
+            "points calculator": "Points-based immigration systems assign scores to candidates based on factors like age, education, work experience, language proficiency, and adaptability. Canada's Express Entry uses the Comprehensive Ranking System (CRS), Australia has the SkillSelect points test, and New Zealand uses the Skilled Migrant Category (SMC) points system. Each system has different criteria and minimum score requirements for eligibility."
+        };
+
+        const researchCategories = [
+            {
+                title: 'Immigration Programs',
+                description: 'Information about various immigration programs, including eligibility requirements and application processes.'
+            },
+            {
+                title: 'Document Requirements',
+                description: 'Guides on required documents for different immigration pathways and how to prepare them.'
+            },
+            {
+                title: 'Language Testing',
+                description: 'Information about language proficiency tests, scoring systems, and preparation resources.'
+            },
+            {
+                title: 'Medical Examinations',
+                description: 'Requirements and procedures for immigration medical examinations.'
+            },
+            {
+                title: 'Credential Assessment',
+                description: 'Information about educational credential assessment services and processes.'
+            },
+            {
+                title: 'Job Markets',
+                description: 'Data on job markets, in-demand occupations, and employment opportunities in different countries.'
+            }
+        ];
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+            });
+        });
+
+        // Search functionality
+        document.getElementById('search-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const query = document.getElementById('search-input').value.trim();
+            if (!query) return;
+
+            const resultsContainer = document.getElementById('search-results');
+            resultsContainer.innerHTML = '<div class="spinner"></div>';
+
+            // Simulate API call
+            setTimeout(() => {
+                // Filter mock results based on the query
+                const filteredResults = mockSearchData.filter(result =>
+                    result.content.toLowerCase().includes(query.toLowerCase()) ||
+                    result.metadata.title.toLowerCase().includes(query.toLowerCase()) ||
+                    (result.metadata.tags && result.metadata.tags.some(tag =>
+                        tag.toLowerCase().includes(query.toLowerCase())
+                    ))
+                );
+
+                const results = filteredResults.length > 0 ? filteredResults : mockSearchData;
+
+                // Display results
+                resultsContainer.innerHTML = '';
+                results.forEach(result => {
+                    const resultElement = document.createElement('div');
+                    resultElement.className = 'result-card';
+
+                    resultElement.innerHTML = `
+                        <div class="result-title">${result.metadata.title}</div>
+                        <div class="result-source">Source: ${result.metadata.source}</div>
+                        <div class="result-content">${result.content}</div>
+                        <div class="tags">
+                            ${result.metadata.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                    `;
+
+                    resultsContainer.appendChild(resultElement);
+                });
+            }, 1000);
+        });
+
+        // Chat functionality
+        document.getElementById('chat-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const input = document.getElementById('chat-input').value.trim();
+            if (!input) return;
+
+            const messagesContainer = document.getElementById('chat-messages');
+
+            // Add user message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.textContent = input;
+            messagesContainer.appendChild(userMessage);
+
+            // Clear input
+            document.getElementById('chat-input').value = '';
+
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            // Simulate API call
+            setTimeout(() => {
+                // Generate a response based on the user's message
+                const userMessageLower = input.toLowerCase();
+                let response = '';
+
+                // Check if the user's message contains any of the keywords
+                for (const [keyword, mockResponse] of Object.entries(mockChatResponses)) {
+                    if (userMessageLower.includes(keyword)) {
+                        response = mockResponse;
+                        break;
+                    }
+                }
+
+                // If no specific response was found, provide a general response
+                if (!response) {
+                    response = "I'm an immigration assistant that can help answer questions about immigration processes, requirements, and pathways. You can ask me about specific immigration programs, document requirements, language testing, medical examinations, visa applications, and more. How can I assist you today?";
+                }
+
+                // Add assistant message
+                const assistantMessage = document.createElement('div');
+                assistantMessage.className = 'message assistant';
+                assistantMessage.textContent = response;
+                messagesContainer.appendChild(assistantMessage);
+
+                // Scroll to bottom
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 1000);
+        });
+
+        // Library functionality
+        const categoriesContainer = document.getElementById('categories');
+
+        researchCategories.forEach(category => {
+            const categoryElement = document.createElement('div');
+            categoryElement.className = 'category-card';
+
+            categoryElement.innerHTML = `
+                <div class="category-title">${category.title}</div>
+                <div class="category-description">${category.description}</div>
+                <button class="category-button" data-category="${category.title}">
+                    <span class="material-icons">search</span>
+                    Browse Resources
+                </button>
+            `;
+
+            categoriesContainer.appendChild(categoryElement);
+        });
+
+        // Add event listeners to category buttons
+        document.querySelectorAll('.category-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const category = button.dataset.category;
+
+                // Switch to search tab
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                document.querySelector('.tab[data-tab="search"]').classList.add('active');
+                document.getElementById('search-tab').classList.add('active');
+
+                // Set search input value
+                document.getElementById('search-input').value = category;
+
+                // Trigger search
+                document.getElementById('search-form').dispatchEvent(new Event('submit'));
+            });
+        });
+    </script>
+</body>
+</html>

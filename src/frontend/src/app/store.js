@@ -12,6 +12,7 @@ import immigrationReducer from '../features/immigration/immigrationSlice';
 import comparisonReducer from '../features/comparison/comparisonSlice';
 import profileReducer from '../features/profile/profileSlice';
 import resourceReducer from '../features/resources/resourceSlice'; // Import resource reducer
+import dashboardReducer from '../features/dashboard/dashboardSlice'; // Import dashboard reducer
 
 const store = configureStore({
   reducer: {
@@ -28,6 +29,7 @@ const store = configureStore({
     comparison: comparisonReducer,
     profile: profileReducer,
     resources: resourceReducer, // Add resource reducer
+    dashboard: dashboardReducer, // Add dashboard reducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -42,4 +44,4 @@ const store = configureStore({
     }),
 });
 
-export default store;
+export { store };

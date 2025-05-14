@@ -161,6 +161,16 @@ const authSlice = createSlice({
         state.user = null;
         state.isAuthenticated = false;
         removeUserFromLocalStorage();
+    },
+    // Direct login success action for use by ProtectedRoute
+    loginSuccess: (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.isAuthenticated = true;
+        state.user = action.payload.user;
+        state.error = null;
+        // Save user to localStorage
+        saveUserToLocalStorage(action.payload.user, action.payload.token);
     }
   },
   extraReducers: (builder) => {
@@ -243,5 +253,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { reset, manualLogout } = authSlice.actions;
+export const { reset, manualLogout, loginSuccess } = authSlice.actions;
 export default authSlice.reducer;

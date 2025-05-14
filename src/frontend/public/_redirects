@@ -1,6 +1,8 @@
-# Proxy API requests to your backend
-/api/*  https://your-backend-api.com/api/:splat  200
-/auth/*  https://your-backend-api.com/auth/:splat  200
-
-# Handle React Router
+# Handle React Router (this must be the last rule)
 /*    /index.html   200
+
+# Proxy API requests to backend services
+/api/countries/*  https://migratio-program-service.onrender.com/api/countries/:splat  200
+/api/programs/*  https://migratio-program-service.onrender.com/api/programs/:splat  200
+/api/quiz/*  https://migratio-quiz-api.onrender.com/quiz/:splat  200
+/auth/*  https://migratio-user-auth.onrender.com/auth/:splat  200

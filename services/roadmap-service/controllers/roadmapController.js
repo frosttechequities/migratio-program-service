@@ -98,7 +98,7 @@ exports.createRoadmap = async (req, res, next) => {
             standardPhases.PREPARATION.tasks.push(task); // Default to preparation if phase unknown
         }
     });
-    
+
     // Add standard pre-arrival tasks
      standardPhases.PRE_ARRIVAL.tasks.push({
          taskId: `task_${programId}_std_book_flights`, title: 'Book Flights', description: 'Arrange travel to destination country.', status: 'pending'
@@ -201,10 +201,61 @@ exports.getRoadmap = async (req, res, next) => {
 };
 
 exports.updateRoadmap = async (req, res, next) => {
-  // Placeholder for updating roadmap (e.g., task status, notes, phase updates)
-  // Needs careful handling of nested updates within phases/tasks/documents
-  console.log(`[ROADMAP_SVC] Updating roadmap ${req.params.id}`);
-   res.status(501).json({ status: 'fail', message: 'Not implemented yet' });
+  try {
+    const userId = req.user?.id; // Assuming user ID from auth middleware
+    if (!userId) {
+      return res.status(401).json({ status: 'fail', message: 'User not authenticated' });
+    }
+
+    const roadmapId = req.params.id;
+    const { title, description, status, notes } = req.body;
+
+    console.log(`[ROADMAP_SVC] Updating roadmap ${roadmapId} for user ${userId}`);
+
+    // Find roadmap and check ownership
+    const roadmap = await Roadmap.findOne({ _id: roadmapId, userId });
+
+    if (!roadmap) {
+      return res.status(404).json({ status: 'fail', message: 'Roadmap not found or user unauthorized' });
+    }
+
+    // Update allowed fields
+    if (title !== undefined) roadmap.title = title;
+    if (description !== undefined) roadmap.description = description;
+    if (status !== undefined) {
+      // Validate status
+      const validStatuses = ['draft', 'active', 'on_hold', 'completed', 'abandoned'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({
+          status: 'fail',
+          message: `Invalid status value: ${status}. Must be one of ${validStatuses.join(', ')}.`
+        });
+      }
+      roadmap.status = status;
+    }
+    if (notes !== undefined) roadmap.notes = notes;
+
+    // Save changes
+    await roadmap.save();
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        roadmap
+      }
+    });
+  } catch (err) {
+    console.error("UPDATE ROADMAP ERROR:", err);
+    if (err.name === 'CastError') {
+      return res.status(400).json({ status: 'fail', message: `Invalid roadmap ID format: ${req.params.id}` });
+    }
+    if (err.name === 'ValidationError') {
+      const errors = Object.values(err.errors).map(el => el.message);
+      const message = `Invalid input data. ${errors.join('. ')}`;
+      return res.status(400).json({ status: 'fail', message });
+    }
+    res.status(500).json({ status: 'error', message: 'Error updating roadmap' });
+  }
 };
 
 
@@ -345,7 +396,32 @@ exports.updateRoadmapTaskStatus = async (req, res, next) => {
 };
 
 exports.deleteRoadmap = async (req, res, next) => {
-   // Placeholder for deleting a roadmap (soft delete preferred?)
-   console.log(`[ROADMAP_SVC] Deleting roadmap ${req.params.id}`);
-   res.status(501).json({ status: 'fail', message: 'Not implemented yet' });
+  try {
+    const userId = req.user?.id; // Assuming user ID from auth middleware
+    if (!userId) {
+      return res.status(401).json({ status: 'fail', message: 'User not authenticated' });
+    }
+
+    const roadmapId = req.params.id;
+    console.log(`[ROADMAP_SVC] Deleting roadmap ${roadmapId} for user ${userId}`);
+
+    // Find and delete roadmap (only if owned by user)
+    const roadmap = await Roadmap.findOneAndDelete({ _id: roadmapId, userId });
+
+    if (!roadmap) {
+      return res.status(404).json({ status: 'fail', message: 'Roadmap not found or user unauthorized' });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Roadmap successfully deleted',
+      data: null
+    });
+  } catch (err) {
+    console.error("DELETE ROADMAP ERROR:", err);
+    if (err.name === 'CastError') {
+      return res.status(400).json({ status: 'fail', message: `Invalid roadmap ID format: ${req.params.id}` });
+    }
+    res.status(500).json({ status: 'error', message: 'Error deleting roadmap' });
+  }
 };

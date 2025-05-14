@@ -149,13 +149,50 @@ const ResearchHubPage = () => {
               color="primary"
               size="large"
               component={RouterLink}
-              to="/immigration/programs"
+              to="/research/search"
               sx={{
                 px: 4,
                 py: 1.5,
                 borderRadius: 2,
                 fontWeight: 600,
                 boxShadow: `0 8px 16px ${alpha(theme.palette.primary.main, 0.2)}`
+              }}
+              endIcon={<SearchIcon />}
+            >
+              AI-Powered Search
+            </Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              size="large"
+              component={RouterLink}
+              to="/research/standalone"
+              sx={{
+                px: 4,
+                py: 1.5,
+                borderRadius: 2,
+                fontWeight: 600,
+                boxShadow: `0 8px 16px ${alpha(theme.palette.secondary.main, 0.2)}`
+              }}
+              endIcon={<SearchIcon />}
+            >
+              Standalone Search
+            </Button>
+            <Button
+              variant="outlined"
+              color="primary"
+              size="large"
+              component={RouterLink}
+              to="/immigration/programs"
+              sx={{
+                px: 4,
+                py: 1.5,
+                borderRadius: 2,
+                fontWeight: 600,
+                borderWidth: 2,
+                '&:hover': {
+                  borderWidth: 2
+                }
               }}
               endIcon={<ArrowForwardIcon />}
             >

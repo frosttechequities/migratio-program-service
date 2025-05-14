@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: visafy-vector-search-service
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: SUPABASE_URL
+        value: https://qyvvrvthalxeibsmckep.supabase.co
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: NODE_ENV
+        value: production
+      - key: VECTOR_SEARCH_SERVICE_PORT
+        value: 3005

@@ -1,12 +1,11 @@
 const express = require('express');
 const roadmapController = require('../controllers/roadmapController');
-// Placeholder for auth middleware
-// const { protect } = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
 // Apply authentication middleware to all roadmap routes below
-// router.use(protect); // Uncomment when auth middleware is ready
+router.use(protect);
 
 // POST /api/roadmaps - Create a new roadmap for the authenticated user
 router.post('/', roadmapController.createRoadmap);

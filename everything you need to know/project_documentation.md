@@ -19,11 +19,15 @@ The Visafy Platform is a comprehensive immigration assistance application design
 ### Known API Connection Issues
 The application currently has some API connection issues that need to be addressed:
 
-1. **Recommendations API**: Calls to `/api/recommendations/destinations` return 401 Unauthorized errors.
-2. **Resources API**: Calls to `/api/resources` fail with connection refused errors.
-3. **Supabase Queries**: Some Supabase queries return 406 status codes.
+1. **Recommendations API (401 Unauthorized)**: Calls to `/api/recommendations/destinations` return 401 Unauthorized errors. The authentication token is not being properly passed to the API.
 
-These issues don't affect the core functionality of the application but will need to be resolved for full feature implementation.
+2. **Resources API (404 Not Found)**: Calls to `/api/resources?tags=dashboard,post-arrival` fail with 404 Not Found errors. The resources endpoint does not exist on the deployed backend service or the API path is incorrect.
+
+3. **Supabase Queries (406 Status Code)**: Queries to the user_progress table return 406 status codes. The Accept header is not being set correctly.
+
+4. **Roadmap Events API (Connection Refused)**: Calls to `/api/roadmaps/events` fail with connection refused errors. The API is trying to connect to localhost:3006 instead of the deployed backend URL.
+
+These issues don't affect the core functionality of the application (pages are loading correctly without blank screens or duplicate headers/footers), but they do impact specific features like resource recommendations and destination suggestions.
 
 ### Project Structure
 - **Frontend**: React application with Redux for state management
