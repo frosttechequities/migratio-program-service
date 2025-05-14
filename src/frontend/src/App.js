@@ -38,6 +38,7 @@ import StandaloneResearchPage from './pages/research/StandaloneResearchPage'; //
 import LegalPage from './pages/legal/LegalPage';
 import NotFoundPage from './pages/NotFoundPage';
 import TestAuthPage from './pages/test/TestAuthPage'; // Import TestAuthPage
+import VectorSearchDemo from './components/search/VectorSearchDemo'; // Import VectorSearchDemo
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
 function App() {
@@ -140,6 +141,7 @@ function App() {
 
           {/* Test routes */}
           <Route path="test/auth" element={<TestAuthPage />} />
+          <Route path="test/vector-search" element={<VectorSearchDemo />} />
 
           {/* Protected routes */}
           <Route path="dashboard" element={
