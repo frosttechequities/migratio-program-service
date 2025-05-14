@@ -24,7 +24,7 @@ console.log('API Key starts with:', supabaseKey ? supabaseKey.substring(0, 10) +
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Initialize Google Gemini API
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || 'AIzaSyDJC5a882ruaJN2HQR9nz_P-8R4dCUP-Ss');
 
 // Initialize the embedding pipeline
 let embeddingPipeline;
