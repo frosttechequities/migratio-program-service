@@ -26,7 +26,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Initialize Ollama configuration
 // In production (Render), use the OLLAMA_URL environment variable which should point to your ngrok tunnel
 // In development, use localhost
-const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
+const OLLAMA_URL = process.env.OLLAMA_URL || 'https://a429-102-88-53-133.ngrok-free.app';
 console.log('Using Ollama URL:', OLLAMA_URL);
 
 // Ollama model configuration
