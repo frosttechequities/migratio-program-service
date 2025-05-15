@@ -53,6 +53,7 @@
   REACT_APP_USER_AUTH_URL = "https://migratio-user-auth.onrender.com/auth"
   REACT_APP_SUPABASE_URL = "https://qyvvrvthalxeibsmckep.supabase.co"
   REACT_APP_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5dnZydnRoYWx4ZWlic21ja2VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDkxODgsImV4cCI6MjA2MjY4NTE4OH0.l1B9Ew14YyQri9EGsOZd7MJ4XVA7YbgmuNX-w_b0NKc"
+  REACT_APP_VECTOR_SEARCH_SERVICE_URL = "https://visafy-vector-search-service.onrender.com"
   REACT_APP_USER_SERVICE_URL = "https://remarkable-fairy-b57541.netlify.app/api"
 
 # Optimize build cache
