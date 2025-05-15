@@ -7,7 +7,7 @@
 
 const axios = require('axios');
 
-// Configuration
+// Configuration for Hugging Face API
 const HUGGINGFACE_API_URL = 'https://api-inference.huggingface.co/models';
 const HUGGINGFACE_API_TOKEN = process.env.HUGGINGFACE_API_TOKEN;
 const DEFAULT_MODEL = 'HuggingFaceH4/zephyr-7b-beta'; // Known working model
