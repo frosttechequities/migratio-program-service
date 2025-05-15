@@ -24,8 +24,12 @@ console.log('API Key starts with:', supabaseKey ? supabaseKey.substring(0, 10) +
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Import Ollama API wrapper
-const { generateChatResponse, isOllamaAvailable, OLLAMA_MODEL, OLLAMA_FALLBACK_MODEL } = require('./ollama-api');
+const { generateChatResponse: generateOllamaChatResponse, isOllamaAvailable, OLLAMA_MODEL, OLLAMA_FALLBACK_MODEL } = require('./ollama-api');
 console.log('Using Ollama models:', OLLAMA_MODEL, 'and', OLLAMA_FALLBACK_MODEL);
+
+// Import Hugging Face API wrapper
+const { generateChatResponse: generateHuggingFaceChatResponse, isHuggingFaceAvailable, DEFAULT_MODEL: HF_MODEL, FALLBACK_MODEL: HF_FALLBACK_MODEL } = require('./huggingface-api');
+console.log('Using Hugging Face models:', HF_MODEL, 'and', HF_FALLBACK_MODEL);
 
 // Initialize the embedding pipeline
 let embeddingPipeline;
@@ -234,7 +238,12 @@ app.post('/search', async (req, res) => {
 // Chat endpoint
 app.post('/chat', async (req, res) => {
   try {
-    const { messages, context = '', model = 'gemini-pro' } = req.body;
+    const {
+      messages,
+      context = '',
+      forceHuggingFace = false,
+      disableMockFallback = false  // Parameter to disable mock fallback
+    } = req.body;
 
     if (!messages || !Array.isArray(messages)) {
       return res.status(400).json({ error: 'Messages array is required' });
@@ -279,30 +288,104 @@ app.post('/chat', async (req, res) => {
         }
       }
 
-      // Check if Ollama is available
-      const ollamaAvailable = await isOllamaAvailable();
+      // Prepare the system message with context if available
+      const systemMessage = relevantContext
+        ? `You are an immigration assistant for the Visafy platform. Use the following information to answer the user's question:\n\n${relevantContext}`
+        : 'You are an immigration assistant for the Visafy platform. Provide helpful and accurate information about immigration processes, requirements, and pathways.';
 
-      if (ollamaAvailable) {
+      // Determine which API to try first based on forceHuggingFace parameter
+      if (forceHuggingFace) {
+        console.log('Force using Hugging Face API requested');
+
         try {
-          // Prepare the system message with context if available
-          const systemMessage = relevantContext
-            ? `You are an immigration assistant for the Visafy platform. Use the following information to answer the user's question:\n\n${relevantContext}`
-            : 'You are an immigration assistant for the Visafy platform. Provide helpful and accurate information about immigration processes, requirements, and pathways.';
+          // Try Hugging Face API directly without checking availability
+          console.log('Using Hugging Face API for chat response');
 
-          // Generate response using Ollama API wrapper
-          const result = await generateChatResponse(messages, systemMessage);
+          // Generate response using Hugging Face API wrapper
+          const result = await generateHuggingFaceChatResponse(messages, systemMessage);
 
           // Return the response
           return res.json(result);
-        } catch (error) {
-          console.error('Ollama API failed:', error.message);
-          throw error;
+        } catch (huggingFaceError) {
+          console.error('Hugging Face API failed:', huggingFaceError.message);
+
+          // Fall back to Ollama if Hugging Face fails
+          try {
+            // Check if Ollama is available
+            const ollamaAvailable = await isOllamaAvailable();
+
+            if (ollamaAvailable) {
+              console.log('Falling back to Ollama API for chat response');
+
+              // Generate response using Ollama API wrapper
+              const result = await generateOllamaChatResponse(messages, systemMessage);
+
+              // Return the response
+              return res.json(result);
+            } else {
+              console.log('Ollama is not available, using mock implementation');
+              throw new Error('Ollama is not available');
+            }
+          } catch (ollamaError) {
+            console.error('Ollama API failed:', ollamaError.message);
+            throw ollamaError;
+          }
         }
       } else {
-        console.log('Ollama is not available, using mock implementation');
-        throw new Error('Ollama is not available');
+        // Default behavior: try Hugging Face first, then Ollama
+        try {
+          // Check if Hugging Face API is available
+          const huggingFaceAvailable = await isHuggingFaceAvailable();
+
+          if (huggingFaceAvailable) {
+            console.log('Using Hugging Face API for chat response');
+
+            // Generate response using Hugging Face API wrapper
+            const result = await generateHuggingFaceChatResponse(messages, systemMessage);
+
+            // Return the response
+            return res.json(result);
+          } else {
+            console.log('Hugging Face API is not available, trying Ollama');
+            throw new Error('Hugging Face API is not available');
+          }
+        } catch (huggingFaceError) {
+          console.error('Hugging Face API failed:', huggingFaceError.message);
+
+          // Fall back to Ollama if Hugging Face fails
+          try {
+            // Check if Ollama is available
+            const ollamaAvailable = await isOllamaAvailable();
+
+            if (ollamaAvailable) {
+              console.log('Using Ollama API for chat response');
+
+              // Generate response using Ollama API wrapper
+              const result = await generateOllamaChatResponse(messages, systemMessage);
+
+              // Return the response
+              return res.json(result);
+            } else {
+              console.log('Ollama is not available, using mock implementation');
+              throw new Error('Ollama is not available');
+            }
+          } catch (ollamaError) {
+            console.error('Ollama API failed:', ollamaError.message);
+            throw ollamaError;
+          }
+        }
       }
     } catch (error) {
+      // Check if mock fallback is disabled
+      if (disableMockFallback) {
+        console.error('All AI providers failed and mock fallback is disabled');
+        return res.status(503).json({
+          error: 'Service unavailable',
+          message: 'All AI providers failed and mock fallback is disabled',
+          details: error.message
+        });
+      }
+
       console.log('Using mock implementation for chat');
 
       // Find relevant mock documents for context
@@ -374,16 +457,35 @@ app.post('/chat', async (req, res) => {
 });
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'ok',
-    message: 'Vector search service is running',
-    timestamp: new Date().toISOString()
-  });
+app.get('/health', async (_, res) => {
+  try {
+    // Check if Hugging Face API is available
+    const huggingFaceAvailable = await isHuggingFaceAvailable();
+
+    // Check if Ollama is available
+    const ollamaAvailable = await isOllamaAvailable();
+
+    res.status(200).json({
+      status: 'ok',
+      message: 'Vector search service is running',
+      huggingFaceAvailable,
+      ollamaAvailable,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(200).json({
+      status: 'ok',
+      message: 'Vector search service is running, but AI services are unavailable',
+      huggingFaceAvailable: false,
+      ollamaAvailable: false,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // Root endpoint
-app.get('/', (req, res) => {
+app.get('/', (_, res) => {
   res.json({
     name: 'Visafy Vector Search Service',
     version: '0.1.0',
@@ -397,7 +499,7 @@ app.get('/', (req, res) => {
 });
 
 // Error handling middleware
-app.use((err, req, res, next) => {
+app.use((err, _, res) => {
   console.error(err.stack);
   res.status(500).json({
     message: err.message || 'Something went wrong on the server',
