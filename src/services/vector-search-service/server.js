@@ -23,9 +23,15 @@ console.log('API Key starts with:', supabaseKey ? supabaseKey.substring(0, 10) +
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Initialize Local Ollama API configuration
-const LOCAL_OLLAMA_API_URL = process.env.LOCAL_OLLAMA_API_URL || 'http://localhost:3008';
-console.log('Using Local Ollama API URL:', LOCAL_OLLAMA_API_URL);
+// Initialize Ollama configuration
+const OLLAMA_URL = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
+console.log('Using Ollama URL:', OLLAMA_URL);
+
+// Ollama model configuration
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3'; // Primary model
+const OLLAMA_FALLBACK_MODEL = process.env.OLLAMA_FALLBACK_MODEL || 'mistral'; // Fallback model
+
+console.log('Using Ollama models:', OLLAMA_MODEL, 'and', OLLAMA_FALLBACK_MODEL);
 
 // Initialize the embedding pipeline
 let embeddingPipeline;
@@ -279,29 +285,88 @@ app.post('/chat', async (req, res) => {
         }
       }
 
-      // Try to use the Local Ollama API
+      // Try to use Ollama directly
       try {
-        console.log('Sending request to Local Ollama API...');
+        // Prepare the system message with context if available
+        const systemMessage = relevantContext
+          ? `You are an immigration assistant for the Visafy platform. Use the following information to answer the user's question:\n\n${relevantContext}`
+          : 'You are an immigration assistant for the Visafy platform. Provide helpful and accurate information about immigration processes, requirements, and pathways.';
+
+        // Prepare the messages for Ollama
+        const ollamaMessages = [
+          { role: 'system', content: systemMessage },
+          ...messages
+        ];
+
+        console.log('Sending request to Ollama...');
         console.log('Using context:', !!relevantContext);
+        console.log('Using model:', OLLAMA_MODEL);
 
-        // Make the API call to the Local Ollama API
-        const result = await axios.post(
-          `${LOCAL_OLLAMA_API_URL}/api/chat`,
-          {
-            messages: messages,
-            context: relevantContext || ''
+        try {
+          // Make the API call to Ollama
+          const result = await axios.post(
+            `${OLLAMA_URL}/api/chat`,
+            {
+              model: OLLAMA_MODEL,
+              messages: ollamaMessages,
+              stream: false,
+              options: {
+                temperature: 0.7,
+                num_predict: 1024,
+              }
+            }
+          );
+
+          // Extract the response
+          const response = result.data.message.content;
+          console.log('Received response from Ollama');
+
+          res.json({
+            response,
+            model: OLLAMA_MODEL,
+            hasContext: !!relevantContext
+          });
+          return;
+        } catch (ollamaError) {
+          console.error('Error using Ollama API:', ollamaError.message);
+          if (ollamaError.response) {
+            console.error('Ollama API response status:', ollamaError.response.status);
+            console.error('Ollama API response data:', ollamaError.response.data);
           }
-        );
 
-        // Return the response from the Local Ollama API
-        console.log('Received response from Local Ollama API');
-        return res.json(result.data);
-      } catch (error) {
-        console.error('Local Ollama API failed:', error.message);
-        if (error.response) {
-          console.error('Response status:', error.response.status);
-          console.error('Response data:', error.response.data);
+          // Try the fallback model if the first one fails
+          console.log(`Trying fallback model: ${OLLAMA_FALLBACK_MODEL}`);
+          try {
+            const fallbackResult = await axios.post(
+              `${OLLAMA_URL}/api/chat`,
+              {
+                model: OLLAMA_FALLBACK_MODEL,
+                messages: ollamaMessages,
+                stream: false,
+                options: {
+                  temperature: 0.7,
+                  num_predict: 1024,
+                }
+              }
+            );
+
+            // Extract the response
+            const response = fallbackResult.data.message.content;
+            console.log('Received response from fallback model');
+
+            res.json({
+              response,
+              model: OLLAMA_FALLBACK_MODEL,
+              hasContext: !!relevantContext
+            });
+            return;
+          } catch (fallbackError) {
+            console.error('Error using fallback model:', fallbackError.message);
+            throw fallbackError;
+          }
         }
+      } catch (error) {
+        console.error('All Ollama API attempts failed:', error.message);
         throw error;
       }
     } catch (error) {
