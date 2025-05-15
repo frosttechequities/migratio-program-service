@@ -1,5 +1,126 @@
 # Visafy Platform - Integrations and APIs
 
+## Ollama Integration
+
+### Overview
+Ollama is used for local Large Language Model (LLM) integration, allowing the Visafy platform to generate AI-powered responses without relying on external API services.
+
+### Configuration
+- **API Endpoint**: `http://127.0.0.1:11434`
+- **Models Used**:
+  - Primary: `deepseek-r1:1.5b` (1.1 GB, faster responses)
+  - Fallback: `mistral` (4.1 GB, more powerful)
+  - Additional: `llama3` (4.7 GB, strongest reasoning)
+
+### Implementation
+The Ollama integration is implemented in the vector search service. The service uses Ollama to generate responses to user queries based on relevant context from the vector search.
+
+```javascript
+// Ollama configuration
+const OLLAMA_URL = 'http://127.0.0.1:11434';
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'deepseek-r1:1.5b';
+const OLLAMA_FALLBACK_MODEL = process.env.OLLAMA_FALLBACK_MODEL || 'mistral';
+
+// Make the API call to Ollama
+const result = await axios.post(
+  `${OLLAMA_URL}/api/chat`,
+  {
+    model: OLLAMA_MODEL,
+    messages: ollamaMessages,
+    stream: false,
+    options: {
+      temperature: 0.7,
+      num_predict: 1024,
+    }
+  },
+  {
+    timeout: 60000 // 1 minute timeout
+  }
+);
+```
+
+### Fallback Mechanism
+If the primary model fails, the service falls back to the secondary model. If both models fail, the service uses a mock implementation with predefined responses.
+
+```javascript
+try {
+  // Check if Ollama is available
+  const ollamaAvailable = await isOllamaAvailable();
+
+  if (ollamaAvailable) {
+    try {
+      // Try primary model
+      // ...
+    } catch (error) {
+      try {
+        // Try fallback model
+        // ...
+      } catch (fallbackError) {
+        // Use mock implementation
+        // ...
+      }
+    }
+  } else {
+    // Use mock implementation
+    // ...
+  }
+} catch (error) {
+  // Use mock implementation
+  // ...
+}
+```
+
+### CLI Integration
+For cases where the API has issues, the service can also use the Ollama CLI directly:
+
+```javascript
+const { spawn } = require('child_process');
+
+function runOllamaCLI(model, prompt, systemPrompt = '') {
+  return new Promise((resolve, reject) => {
+    // Prepare the command
+    let command = ['run', model];
+
+    // Add system prompt if provided
+    if (systemPrompt) {
+      command.push('--system');
+      command.push(systemPrompt);
+    }
+
+    // Add the prompt
+    command.push(prompt);
+
+    // Use spawn to run the command and capture streaming output
+    const ollamaProcess = spawn('ollama', command, {
+      shell: true
+    });
+
+    let fullOutput = '';
+
+    // Handle streaming output
+    ollamaProcess.stdout.on('data', (data) => {
+      const chunk = data.toString();
+      fullOutput += chunk;
+    });
+
+    // Handle process completion
+    ollamaProcess.on('close', (code) => {
+      if (code !== 0) {
+        reject(new Error(`Ollama process exited with code ${code}`));
+      } else {
+        // Clean up the output
+        const cleanedOutput = fullOutput
+          .replace(/⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏/g, '') // Remove spinner characters
+          .replace(/<think>[\s\S]*?<\/think>/g, '') // Remove thinking sections
+          .trim();
+
+        resolve(cleanedOutput);
+      }
+    });
+  });
+}
+```
+
 ## Supabase Integration
 
 ### Overview
@@ -93,9 +214,9 @@ Supabase Real-time is used for real-time updates with the following channels:
 // Subscribe to changes
 const subscription = supabase
   .channel('public:user_tasks')
-  .on('postgres_changes', { 
-    event: '*', 
-    schema: 'public', 
+  .on('postgres_changes', {
+    event: '*',
+    schema: 'public',
     table: 'user_tasks',
     filter: `user_id=eq.${user.id}`
   }, (payload) => {
@@ -261,7 +382,7 @@ import { useTranslation } from 'react-i18next';
 
 function MyComponent() {
   const { t } = useTranslation();
-  
+
   return (
     <div>
       <h1>{t('common.welcome')}</h1>

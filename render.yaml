@@ -12,8 +12,14 @@ services:
         sync: false
       - key: GOOGLE_API_KEY
         sync: false
+      - key: HUGGINGFACE_API_TOKEN
+        value: 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
       - key: PORT
         value: 10000
       - key: NODE_ENV
         value: production
+      - key: USE_MOCK_IN_PRODUCTION
+        value: "true"
+      - key: USE_PRE_COMPUTED
+        value: "true"
     autoDeploy: true

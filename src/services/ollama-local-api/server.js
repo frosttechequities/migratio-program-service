@@ -1,6 +1,6 @@
 /**
  * Local API server for Ollama
- * 
+ *
  * This server runs locally and connects to your local Ollama instance.
  * It exposes an API that can be called from your deployed service.
  */
@@ -19,7 +19,7 @@ app.use(cors());
 app.use(express.json());
 
 // Ollama configuration
-const OLLAMA_URL = 'http://localhost:11434';
+const OLLAMA_URL = 'http://127.0.0.1:11434';
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3';
 const OLLAMA_FALLBACK_MODEL = process.env.OLLAMA_FALLBACK_MODEL || 'mistral';
 
@@ -33,20 +33,20 @@ app.post('/api/chat', async (req, res) => {
     }
 
     console.log(`Chat request with ${messages.length} messages`);
-    
+
     // Prepare the system message with context if available
-    const systemMessage = context 
+    const systemMessage = context
       ? `You are an immigration assistant for the Visafy platform. Use the following information to answer the user's question:\n\n${context}`
       : 'You are an immigration assistant for the Visafy platform. Provide helpful and accurate information about immigration processes, requirements, and pathways.';
-    
+
     // Prepare the messages for Ollama
     const ollamaMessages = [
       { role: 'system', content: systemMessage },
       ...messages
     ];
-    
+
     console.log('Using model:', OLLAMA_MODEL);
-    
+
     try {
       // Make the API call to Ollama
       const result = await axios.post(
@@ -61,12 +61,12 @@ app.post('/api/chat', async (req, res) => {
           }
         }
       );
-      
+
       // Extract the response
       const response = result.data.message.content;
       console.log('Received response from Ollama');
-      
-      res.json({ 
+
+      res.json({
         response,
         model: OLLAMA_MODEL,
         hasContext: !!context
@@ -77,7 +77,7 @@ app.post('/api/chat', async (req, res) => {
         console.error('Ollama API response status:', ollamaError.response.status);
         console.error('Ollama API response data:', ollamaError.response.data);
       }
-      
+
       // Try the fallback model if the first one fails
       console.log(`Trying fallback model: ${OLLAMA_FALLBACK_MODEL}`);
       try {
@@ -93,11 +93,11 @@ app.post('/api/chat', async (req, res) => {
             }
           }
         );
-        
+
         // Extract the response
         const response = fallbackResult.data.message.content;
         console.log('Received response from fallback model');
-        
+
         res.json({
           response,
           model: OLLAMA_FALLBACK_MODEL,
@@ -105,7 +105,7 @@ app.post('/api/chat', async (req, res) => {
         });
       } catch (fallbackError) {
         console.error('Error using fallback model:', fallbackError.message);
-        return res.status(500).json({ 
+        return res.status(500).json({
           error: 'Failed to generate response from Ollama',
           details: fallbackError.message
         });
@@ -113,7 +113,7 @@ app.post('/api/chat', async (req, res) => {
     }
   } catch (error) {
     console.error('Error in chat endpoint:', error.message);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Internal server error',
       details: error.message
     });

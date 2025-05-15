@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: visafy-vector-search-service
+    env: docker
+    dockerfilePath: ./Dockerfile.service
+    plan: free
+    envVars:
+      - key: PORT
+        value: 3009
+      - key: OLLAMA_HOST
+        value: http://visafy-ollama-service:11434
+      - key: SUPABASE_URL
+        value: https://qyvvrvthalxeibsmckep.supabase.co
+      - key: SUPABASE_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5dnZydnRoYWx4ZWlic21ja2VwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NzEwOTE4OCwiZXhwIjoyMDYyNjg1MTg4fQ.s3qm3hcgR9ie2igjmaz4dMeEWsQdsJmQpLR718uO0nA
+
+  - type: web
+    name: visafy-ollama-service
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: standard # Note: Free tier likely won't have enough resources for Ollama
+    envVars:
+      - key: OLLAMA_HOST
+        value: 0.0.0.0
+      - key: OLLAMA_MODELS_PATH
+        value: /models

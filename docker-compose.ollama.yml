@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  ollama:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/models
+    restart: unless-stopped
+
+  vector-search-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+    ports:
+      - "3009:3009"
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - PORT=3009
+      - SUPABASE_URL=https://qyvvrvthalxeibsmckep.supabase.co
+      - SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5dnZydnRoYWx4ZWlic21ja2VwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NzEwOTE4OCwiZXhwIjoyMDYyNjg1MTg4fQ.s3qm3hcgR9ie2igjmaz4dMeEWsQdsJmQpLR718uO0nA
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+volumes:
+  ollama_models:

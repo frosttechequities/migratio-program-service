@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vector Search Service Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 2s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Vector Search Service Test</h1>
+    
+    <div class="test-section">
+        <h2>Search Test</h2>
+        <input id="searchQuery" type="text" placeholder="Enter search query" value="express entry">
+        <button onclick="testSearch()">Test Search</button>
+        <div id="searchLoading" class="loading">
+            <div class="spinner"></div> Loading...
+        </div>
+        <pre id="searchResults"></pre>
+    </div>
+    
+    <div class="test-section">
+        <h2>Chat Test</h2>
+        <input id="chatMessage" type="text" placeholder="Enter chat message" value="Tell me about Express Entry">
+        <button onclick="testChat()">Test Chat</button>
+        <div id="chatLoading" class="loading">
+            <div class="spinner"></div> Loading...
+        </div>
+        <pre id="chatResponse"></pre>
+    </div>
+
+    <script>
+        const API_URL = 'https://visafy-vector-search-service.onrender.com';
+
+        async function testSearch() {
+            const query = document.getElementById('searchQuery').value;
+            const resultsElement = document.getElementById('searchResults');
+            const loadingElement = document.getElementById('searchLoading');
+            
+            if (!query) {
+                resultsElement.textContent = 'Please enter a search query';
+                return;
+            }
+            
+            resultsElement.textContent = '';
+            loadingElement.style.display = 'block';
+            
+            try {
+                const response = await fetch(`${API_URL}/search`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        limit: 3,
+                        threshold: 0.6
+                    })
+                });
+                
+                const data = await response.json();
+                resultsElement.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultsElement.textContent = `Error: ${error.message}`;
+            } finally {
+                loadingElement.style.display = 'none';
+            }
+        }
+
+        async function testChat() {
+            const message = document.getElementById('chatMessage').value;
+            const responseElement = document.getElementById('chatResponse');
+            const loadingElement = document.getElementById('chatLoading');
+            
+            if (!message) {
+                responseElement.textContent = 'Please enter a message';
+                return;
+            }
+            
+            responseElement.textContent = '';
+            loadingElement.style.display = 'block';
+            
+            try {
+                const response = await fetch(`${API_URL}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        messages: [
+                            { role: 'user', content: message }
+                        ]
+                    })
+                });
+                
+                const data = await response.json();
+                responseElement.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                responseElement.textContent = `Error: ${error.message}`;
+            } finally {
+                loadingElement.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -2,7 +2,90 @@
 
 ## Resolved Issues
 
-### 1. Blank Pages Issue - RESOLVED
+### 1. Ollama Integration Issues - RESOLVED
+
+**Previous Symptoms:**
+- API timeouts when trying to use Ollama
+- No responses from the chat endpoint
+- Error message: `Error using Ollama API: timeout of 60000ms exceeded`
+- CLI commands working but API requests failing
+
+**Root Causes Identified and Fixed:**
+1. **Outdated Ollama Version**
+   - Ollama needed to be updated to the latest version
+   - Fixed by updating Ollama from the official website
+
+2. **API vs CLI Discrepancy**
+   - The Ollama API was timing out but CLI commands were working
+   - Fixed by creating both API and CLI integration options
+
+3. **Error Handling Issues**
+   - No proper error handling or fallback mechanisms
+   - Fixed by implementing comprehensive error handling and fallbacks
+
+4. **Model Selection**
+   - Using large models that were slow to respond
+   - Fixed by using smaller models (deepseek-r1:1.5b) for faster responses
+
+**Debugging Steps Used:**
+1. Created simple test scripts to isolate the issue:
+   ```javascript
+   // Simple test for Ollama API
+   const axios = require('axios');
+
+   async function testOllama() {
+     try {
+       const response = await axios.post(
+         'http://127.0.0.1:11434/api/chat',
+         {
+           model: 'deepseek-r1:1.5b',
+           messages: [{ role: 'user', content: 'Hello' }],
+           stream: false
+         },
+         { timeout: 60000 }
+       );
+       console.log('Response:', response.data);
+     } catch (error) {
+       console.error('Error:', error.message);
+     }
+   }
+
+   testOllama();
+   ```
+
+2. Tested CLI commands directly:
+   ```powershell
+   ollama run deepseek-r1:1.5b "Hello"
+   ```
+
+3. Created a CLI wrapper for cases where the API fails:
+   ```javascript
+   const { spawn } = require('child_process');
+
+   function runOllamaCLI(model, prompt) {
+     return new Promise((resolve, reject) => {
+       const ollamaProcess = spawn('ollama', ['run', model, prompt], {
+         shell: true
+       });
+
+       let fullOutput = '';
+
+       ollamaProcess.stdout.on('data', (data) => {
+         fullOutput += data.toString();
+       });
+
+       ollamaProcess.on('close', (code) => {
+         if (code !== 0) {
+           reject(new Error(`Process exited with code ${code}`));
+         } else {
+           resolve(fullOutput);
+         }
+       });
+     });
+   }
+   ```
+
+### 2. Blank Pages Issue - RESOLVED
 
 **Previous Symptoms:**
 - Most pages in the application displayed as blank
@@ -98,7 +181,135 @@ Open the browser's developer tools (F12) and check the console for any errors. L
 
 ## Specific Debugging Techniques
 
-### 1. Create a Simplified Version
+### 1. Troubleshooting Ollama Integration
+
+If you encounter issues with the Ollama integration, follow these steps:
+
+#### Check Ollama Installation
+
+1. **Verify Ollama is Running**
+   ```powershell
+   ollama list
+   ```
+   This should show a list of available models. If it fails, Ollama is not running.
+
+2. **Check Ollama Version**
+   ```powershell
+   ollama --version
+   ```
+   Make sure you have the latest version. If not, download and install the latest version from [ollama.ai](https://ollama.ai/download).
+
+3. **Test Basic Ollama Functionality**
+   ```powershell
+   ollama run deepseek-r1:1.5b "Hello"
+   ```
+   This should generate a response. If it fails, there's an issue with Ollama itself.
+
+#### Test Ollama API
+
+1. **Create a Simple Test Script**
+   ```javascript
+   // ollama-api-test.js
+   const axios = require('axios');
+
+   async function testOllamaAPI() {
+     try {
+       console.log('Testing Ollama API...');
+       const response = await axios.post(
+         'http://127.0.0.1:11434/api/chat',
+         {
+           model: 'deepseek-r1:1.5b',
+           messages: [{ role: 'user', content: 'Hello' }],
+           stream: false
+         },
+         { timeout: 60000 }
+       );
+       console.log('Response received!');
+       console.log(response.data.message.content);
+     } catch (error) {
+       console.error('Error:', error.message);
+       if (error.response) {
+         console.error('Response status:', error.response.status);
+         console.error('Response data:', error.response.data);
+       }
+     }
+   }
+
+   testOllamaAPI();
+   ```
+
+2. **Run the Test Script**
+   ```powershell
+   node ollama-api-test.js
+   ```
+
+3. **Check for Timeouts**
+   If you get a timeout error, try:
+   - Using a smaller model (deepseek-r1:1.5b instead of llama3)
+   - Increasing the timeout value
+   - Restarting Ollama
+   - Updating Ollama to the latest version
+
+#### Test Vector Search Service
+
+1. **Start the Vector Search Service**
+   ```powershell
+   $env:PORT=3006
+   node src\services\vector-search-service\server.js
+   ```
+
+2. **Test the Health Endpoint**
+   ```powershell
+   Invoke-WebRequest -Uri "http://localhost:3006/health" -Method GET
+   ```
+
+3. **Test the Chat Endpoint**
+   ```powershell
+   Invoke-WebRequest -Uri "http://localhost:3006/chat" -Method POST -ContentType "application/json" -Body '{"messages":[{"role":"user","content":"Hello"}]}'
+   ```
+
+4. **Check Server Logs**
+   Look for any error messages or warnings in the server logs.
+
+#### Implement Fallback Mechanisms
+
+If Ollama API issues persist, implement fallback mechanisms:
+
+1. **CLI Fallback**
+   Use the Ollama CLI directly when the API fails:
+   ```javascript
+   try {
+     // Try API first
+     const apiResponse = await callOllamaAPI(prompt);
+     return apiResponse;
+   } catch (error) {
+     console.log('API failed, falling back to CLI');
+     // Fall back to CLI
+     const cliResponse = await runOllamaCLI(prompt);
+     return cliResponse;
+   }
+   ```
+
+2. **Mock Implementation**
+   Use a mock implementation when both API and CLI fail:
+   ```javascript
+   try {
+     // Try API first
+     const apiResponse = await callOllamaAPI(prompt);
+     return apiResponse;
+   } catch (apiError) {
+     try {
+       // Fall back to CLI
+       const cliResponse = await runOllamaCLI(prompt);
+       return cliResponse;
+     } catch (cliError) {
+       // Fall back to mock implementation
+       return getMockResponse(prompt);
+     }
+   }
+   ```
+
+### 2. Create a Simplified Version
 
 Create a simplified version of the application to isolate the problem:
 

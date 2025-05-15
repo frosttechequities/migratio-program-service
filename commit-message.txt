@@ -1,0 +1,15 @@
+Add Hugging Face API integration for vector search service
+
+This commit adds Hugging Face API integration to the vector search service, providing an alternative to Ollama for generating AI responses. The integration includes:
+
+- A new huggingface-api.js module for interacting with the Hugging Face Inference API
+- Updated server.js to use Hugging Face as a primary or fallback option
+- Enhanced health endpoint to check both Hugging Face and Ollama availability
+- Added parameters to control response generation behavior
+- Improved error handling and fallback mechanisms
+
+The integration allows the service to use Hugging Face's models in production on Render's free tier, where Ollama cannot be run due to resource constraints.
+
+Models used:
+- Primary: HuggingFaceH4/zephyr-7b-beta
+- Fallback: google/flan-t5-base

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Local Ollama API</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .response {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background-color: #f9f9f9;
+      white-space: pre-wrap;
+    }
+    .loading {
+      display: none;
+      margin-top: 20px;
+      color: #666;
+    }
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Test Local Ollama API</h1>
+
+  <div class="container">
+    <div class="input-group">
+      <label for="question">Enter your question:</label>
+      <textarea id="question" placeholder="e.g., What are the requirements for a work visa?"></textarea>
+    </div>
+
+    <div class="input-group">
+      <label for="context">Context (optional):</label>
+      <textarea id="context" placeholder="Add any context information here..."></textarea>
+    </div>
+
+    <button id="submit">Submit</button>
+
+    <div id="loading" class="loading">Generating response...</div>
+
+    <div id="error" class="error"></div>
+
+    <div id="response" class="response" style="display: none;"></div>
+  </div>
+
+  <script>
+    document.getElementById('submit').addEventListener('click', async () => {
+      const question = document.getElementById('question').value.trim();
+      const context = document.getElementById('context').value.trim();
+      const loadingEl = document.getElementById('loading');
+      const responseEl = document.getElementById('response');
+      const errorEl = document.getElementById('error');
+
+      if (!question) {
+        errorEl.textContent = 'Please enter a question';
+        return;
+      }
+
+      errorEl.textContent = '';
+      responseEl.style.display = 'none';
+      loadingEl.style.display = 'block';
+
+      try {
+        console.log('Sending request to CORS proxy...');
+
+        // Use CORS proxy for Ollama API
+        const response = await fetch('http://localhost:3010/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'llama3',
+            messages: [
+              { role: 'system', content: context || 'You are an immigration assistant for the Visafy platform. Provide helpful and accurate information about immigration processes, requirements, and pathways.' },
+              { role: 'user', content: question }
+            ],
+            stream: false,
+            options: {
+              temperature: 0.7,
+              num_predict: 1024,
+            }
+          })
+        });
+
+        console.log('Received response from CORS proxy');
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`HTTP error! status: ${response.status}, details: ${errorText}`);
+        }
+
+        console.log('Parsing JSON response...');
+        const data = await response.json();
+        console.log('Response data:', data);
+
+        if (data.message && data.message.content) {
+          responseEl.textContent = data.message.content;
+        } else {
+          responseEl.textContent = JSON.stringify(data, null, 2);
+        }
+        responseEl.style.display = 'block';
+      } catch (error) {
+        console.error('Error:', error);
+        errorEl.textContent = `Error: ${error.message}`;
+      } finally {
+        loadingEl.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -54,6 +54,27 @@ The Visafy Platform follows a modern web application architecture with the follo
 
 ## API Services
 
+### Vector Search Service
+- **URL**: https://visafy-vector-search-service.onrender.com
+- **Repository**: https://github.com/frosttechequities/migratio-program-service (branch: fix-supabase-integration)
+- **Endpoints**:
+  - `/search`: Vector search for immigration documents
+  - `/chat`: AI-powered chat responses
+  - `/health`: Health check endpoint
+  - `/`: Service information
+
+#### Architecture
+- **Node.js/Express**: Backend framework
+- **Supabase**: Vector database with pgvector extension
+- **Ollama**: Local LLM integration for AI responses
+- **Transformers.js**: Embedding generation for search queries
+
+#### Key Components
+- **server.js**: Main server file with API endpoints
+- **ollama-api.js**: Ollama API wrapper with error handling and fallback
+- **embedding-pipeline.js**: Embedding generation pipeline
+- **mock-data.js**: Mock data for fallback responses
+
 ### Program Service
 - **URL**: https://migratio-program-service.onrender.com
 - **Endpoints**:
