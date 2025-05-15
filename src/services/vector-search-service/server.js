@@ -24,7 +24,7 @@ console.log('API Key starts with:', supabaseKey ? supabaseKey.substring(0, 10) +
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Initialize Local Ollama API configuration
-const LOCAL_OLLAMA_API_URL = process.env.LOCAL_OLLAMA_API_URL || 'http://localhost:3007';
+const LOCAL_OLLAMA_API_URL = process.env.LOCAL_OLLAMA_API_URL || 'http://localhost:3008';
 console.log('Using Local Ollama API URL:', LOCAL_OLLAMA_API_URL);
 
 // Initialize the embedding pipeline
