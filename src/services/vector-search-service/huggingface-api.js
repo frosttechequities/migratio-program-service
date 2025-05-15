@@ -9,7 +9,7 @@ const axios = require('axios');
 
 // Configuration
 const HUGGINGFACE_API_URL = 'https://api-inference.huggingface.co/models';
-const HUGGINGFACE_API_TOKEN = process.env.HUGGINGFACE_API_TOKEN || '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';
+const HUGGINGFACE_API_TOKEN = process.env.HUGGINGFACE_API_TOKEN;
 const DEFAULT_MODEL = 'HuggingFaceH4/zephyr-7b-beta'; // Known working model
 const FALLBACK_MODEL = 'google/flan-t5-base'; // Smaller fallback model
 const DEFAULT_TIMEOUT = 60000; // 60 seconds
