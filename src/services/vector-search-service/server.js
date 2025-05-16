@@ -28,8 +28,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 const { generateChatResponse: generateHuggingFaceChatResponse, isHuggingFaceAvailable, DEFAULT_MODEL, FALLBACK_MODEL } = require('./huggingface-official');
 console.log('Using Hugging Face models:', DEFAULT_MODEL, 'and', FALLBACK_MODEL);
 
-// Import Local Response Generator for fallback
-const { generateChatResponse: generateLocalChatResponse, isAvailable: isLocalGeneratorAvailable } = require('./local-response-generator');
+// No local response generator is used
 
 // Initialize the embedding pipeline
 let embeddingPipeline;
