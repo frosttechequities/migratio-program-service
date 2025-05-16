@@ -25,8 +25,11 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Ollama is not used in production on Render
 
 // Import Official Hugging Face API wrapper
-const { generateChatResponse: generateHuggingFaceChatResponse, isHuggingFaceAvailable, DEFAULT_MODEL, FALLBACK_MODEL } = require('./huggingface-official-fixed');
+const { generateChatResponse: generateHuggingFaceChatResponse, isHuggingFaceAvailable, DEFAULT_MODEL, FALLBACK_MODEL } = require('./huggingface-official');
 console.log('Using Hugging Face models:', DEFAULT_MODEL, 'and', FALLBACK_MODEL);
+
+// Import Local Response Generator for fallback
+const { generateChatResponse: generateLocalChatResponse, isAvailable: isLocalGeneratorAvailable } = require('./local-response-generator');
 
 // Initialize the embedding pipeline
 let embeddingPipeline;
@@ -236,21 +239,19 @@ app.post('/chat', async (req, res) => {
             timestamp: new Date().toISOString()
           });
         } else {
-          console.log('Hugging Face API is not available');
+          console.log('Hugging Face API is not available, returning error');
           return res.status(503).json({
             error: 'Service unavailable',
-            message: 'Hugging Face API is not available.',
+            message: 'The AI service is currently unavailable. Please try again later.',
             details: 'API availability check failed',
             timestamp: new Date().toISOString()
           });
         }
       } catch (huggingFaceError) {
         console.error('Hugging Face API failed:', huggingFaceError.message);
-
-        console.error('Hugging Face API failed');
         return res.status(503).json({
           error: 'Service unavailable',
-          message: 'Hugging Face API failed.',
+          message: 'The AI service is currently unavailable. Please try again later.',
           details: huggingFaceError.message,
           timestamp: new Date().toISOString()
         });
