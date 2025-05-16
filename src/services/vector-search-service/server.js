@@ -188,7 +188,14 @@ app.post('/search', async (req, res) => {
         similarity: doc.similarity
       }));
 
-      res.json({ results });
+      // Add cache control headers for better performance
+      res.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
+
+      res.json({
+        results,
+        query,
+        timestamp: new Date().toISOString()
+      });
     } catch (error) {
       console.log('Using mock implementation for search');
 
@@ -304,8 +311,14 @@ app.post('/chat', async (req, res) => {
           // Generate response using Hugging Face API wrapper
           const result = await generateHuggingFaceChatResponse(messages, systemMessage);
 
+          // Add cache control headers for better performance
+          res.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
+
           // Return the response
-          return res.json(result);
+          return res.json({
+            ...result,
+            timestamp: new Date().toISOString()
+          });
         } catch (huggingFaceError) {
           console.error('Hugging Face API failed:', huggingFaceError.message);
 
@@ -343,8 +356,14 @@ app.post('/chat', async (req, res) => {
             // Generate response using Hugging Face API wrapper
             const result = await generateHuggingFaceChatResponse(messages, systemMessage);
 
+            // Add cache control headers for better performance
+            res.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
+
             // Return the response
-            return res.json(result);
+            return res.json({
+              ...result,
+              timestamp: new Date().toISOString()
+            });
           } else {
             console.log('Hugging Face API is not available, trying Ollama');
             throw new Error('Hugging Face API is not available');
@@ -363,8 +382,14 @@ app.post('/chat', async (req, res) => {
               // Generate response using Ollama API wrapper
               const result = await generateOllamaChatResponse(messages, systemMessage);
 
+              // Add cache control headers for better performance
+              res.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
+
               // Return the response
-              return res.json(result);
+              return res.json({
+                ...result,
+                timestamp: new Date().toISOString()
+              });
             } else {
               console.log('Ollama is not available, using mock implementation');
               throw new Error('Ollama is not available');
@@ -443,11 +468,15 @@ app.post('/chat', async (req, res) => {
         mockResponse = "Hello! I'm your immigration assistant. How can I help you today?";
       }
 
+      // Add cache control headers for better performance
+      res.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
+
       res.json({
         response: mockResponse,
         model: 'mock',
         hasContext: relevantDocs.length > 0,
-        note: "Using mock data due to API connection issues"
+        note: "Using mock data due to API connection issues",
+        timestamp: new Date().toISOString()
       });
     }
   } catch (error) {
