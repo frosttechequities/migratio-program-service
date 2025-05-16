@@ -2,7 +2,7 @@
  * Vector Search Service
  *
  * This service provides vector search and AI chat capabilities for the Visafy platform.
- * It uses Supabase for vector storage and the Google Gemini API for AI features.
+ * It uses Supabase for vector storage and the Hugging Face API for AI features.
  */
 
 require('dotenv').config();
@@ -12,7 +12,6 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const { createClient } = require('@supabase/supabase-js');
 const { pipeline } = require('@xenova/transformers');
-const axios = require('axios');
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL || 'https://qyvvrvthalxeibsmckep.supabase.co';
@@ -165,8 +164,7 @@ app.post('/chat', async (req, res) => {
   try {
     const {
       messages,
-      context = '',
-      forceHuggingFace = false
+      context = ''
     } = req.body;
 
     if (!messages || !Array.isArray(messages)) {
@@ -217,12 +215,12 @@ app.post('/chat', async (req, res) => {
         ? `You are an immigration assistant for the Visafy platform. Use the following information to answer the user's question:\n\n${relevantContext}`
         : 'You are an immigration assistant for the Visafy platform. Provide helpful and accurate information about immigration processes, requirements, and pathways.';
 
-      // Determine which API to try first based on forceHuggingFace parameter
-      if (forceHuggingFace) {
-        console.log('Force using Hugging Face API requested');
+      // Only use Hugging Face API
+      try {
+        // Check if Hugging Face API is available
+        const huggingFaceAvailable = await isHuggingFaceAvailable();
 
-        try {
-          // Try Hugging Face API directly without checking availability
+        if (huggingFaceAvailable) {
           console.log('Using Hugging Face API for chat response');
 
           // Generate response using Hugging Face API wrapper
@@ -236,58 +234,25 @@ app.post('/chat', async (req, res) => {
             ...result,
             timestamp: new Date().toISOString()
           });
-        } catch (huggingFaceError) {
-          console.error('Hugging Face API failed:', huggingFaceError.message);
-
-          // No Ollama fallback - return error directly
-          console.error('Hugging Face API failed and no fallback is available');
+        } else {
+          console.log('Hugging Face API is not available');
           return res.status(503).json({
             error: 'Service unavailable',
-            message: 'Hugging Face API failed and no fallback is available.',
-            details: huggingFaceError.message,
+            message: 'Hugging Face API is not available.',
+            details: 'API availability check failed',
             timestamp: new Date().toISOString()
           });
         }
-      } else {
-        // Only use Hugging Face API
-        try {
-          // Check if Hugging Face API is available
-          const huggingFaceAvailable = await isHuggingFaceAvailable();
+      } catch (huggingFaceError) {
+        console.error('Hugging Face API failed:', huggingFaceError.message);
 
-          if (huggingFaceAvailable) {
-            console.log('Using Hugging Face API for chat response');
-
-            // Generate response using Hugging Face API wrapper
-            const result = await generateHuggingFaceChatResponse(messages, systemMessage);
-
-            // Add cache control headers for better performance
-            res.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
-
-            // Return the response
-            return res.json({
-              ...result,
-              timestamp: new Date().toISOString()
-            });
-          } else {
-            console.log('Hugging Face API is not available');
-            return res.status(503).json({
-              error: 'Service unavailable',
-              message: 'Hugging Face API is not available.',
-              details: 'API availability check failed',
-              timestamp: new Date().toISOString()
-            });
-          }
-        } catch (huggingFaceError) {
-          console.error('Hugging Face API failed:', huggingFaceError.message);
-
-          // Return error directly
-          return res.status(503).json({
-            error: 'Service unavailable',
-            message: 'Hugging Face API failed and no fallback is available.',
-            details: huggingFaceError.message,
-            timestamp: new Date().toISOString()
-          });
-        }
+        // Return error directly
+        return res.status(503).json({
+          error: 'Service unavailable',
+          message: 'Hugging Face API failed and no fallback is available.',
+          details: huggingFaceError.message,
+          timestamp: new Date().toISOString()
+        });
       }
     } catch (error) {
       // No mock fallback - return error
