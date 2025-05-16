@@ -24,8 +24,8 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Ollama is not used in production on Render
 
-// Import Hugging Face API wrapper
-const { generateChatResponse: generateHuggingFaceChatResponse, isHuggingFaceAvailable, DEFAULT_MODEL: HF_MODEL, FALLBACK_MODEL: HF_FALLBACK_MODEL } = require('./huggingface-api');
+// Import Official Hugging Face API wrapper
+const { generateChatResponse: generateHuggingFaceChatResponse, isHuggingFaceAvailable, DEFAULT_MODEL: HF_MODEL, FALLBACK_MODEL: HF_FALLBACK_MODEL } = require('./huggingface-official');
 console.log('Using Hugging Face models:', HF_MODEL, 'and', HF_FALLBACK_MODEL);
 
 // Initialize the embedding pipeline
@@ -344,14 +344,14 @@ async function preWarmHuggingFaceAPI() {
         console.error('Error pre-warming embedding pipeline:', embeddingError.message);
       }
 
-      // Try again in 30 seconds
-      setTimeout(preWarmHuggingFaceAPI, 30000);
+      // Try again in 60 seconds
+      setTimeout(preWarmHuggingFaceAPI, 60000);
     }
   } catch (error) {
     console.error('Error pre-warming Hugging Face API:', error.message);
 
-    // Try again in 30 seconds
-    setTimeout(preWarmHuggingFaceAPI, 30000);
+    // Try again in 60 seconds
+    setTimeout(preWarmHuggingFaceAPI, 60000);
   }
 }
 
