@@ -23,9 +23,7 @@ console.log('API Key starts with:', supabaseKey ? supabaseKey.substring(0, 10) +
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Import Ollama API wrapper
-const { generateChatResponse: generateOllamaChatResponse, isOllamaAvailable, OLLAMA_MODEL, OLLAMA_FALLBACK_MODEL } = require('./ollama-api');
-console.log('Using Ollama models:', OLLAMA_MODEL, 'and', OLLAMA_FALLBACK_MODEL);
+// Ollama is not used in production on Render
 
 // Import Hugging Face API wrapper
 const { generateChatResponse: generateHuggingFaceChatResponse, isHuggingFaceAvailable, DEFAULT_MODEL: HF_MODEL, FALLBACK_MODEL: HF_FALLBACK_MODEL } = require('./huggingface-api');
@@ -241,41 +239,17 @@ app.post('/chat', async (req, res) => {
         } catch (huggingFaceError) {
           console.error('Hugging Face API failed:', huggingFaceError.message);
 
-          // Fall back to Ollama if Hugging Face fails
-          try {
-            // Check if Ollama is available
-            const ollamaAvailable = await isOllamaAvailable();
-
-            if (ollamaAvailable) {
-              console.log('Falling back to Ollama API for chat response');
-
-              // Generate response using Ollama API wrapper
-              const result = await generateOllamaChatResponse(messages, systemMessage);
-
-              // Add cache control headers for better performance
-              res.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
-
-              // Return the response
-              return res.json({
-                ...result,
-                timestamp: new Date().toISOString()
-              });
-            } else {
-              console.log('Ollama is not available');
-              return res.status(503).json({
-                error: 'Service unavailable',
-                message: 'Hugging Face API failed and Ollama is not available. No mock responses are used.',
-                details: 'Ollama is not available',
-                timestamp: new Date().toISOString()
-              });
-            }
-          } catch (ollamaError) {
-            console.error('Ollama API failed:', ollamaError.message);
-            throw ollamaError;
-          }
+          // No Ollama fallback - return error directly
+          console.error('Hugging Face API failed and no fallback is available');
+          return res.status(503).json({
+            error: 'Service unavailable',
+            message: 'Hugging Face API failed and no fallback is available.',
+            details: huggingFaceError.message,
+            timestamp: new Date().toISOString()
+          });
         }
       } else {
-        // Default behavior: try Hugging Face first, then Ollama
+        // Only use Hugging Face API
         try {
           // Check if Hugging Face API is available
           const huggingFaceAvailable = await isHuggingFaceAvailable();
@@ -295,44 +269,24 @@ app.post('/chat', async (req, res) => {
               timestamp: new Date().toISOString()
             });
           } else {
-            console.log('Hugging Face API is not available, trying Ollama');
-            throw new Error('Hugging Face API is not available');
+            console.log('Hugging Face API is not available');
+            return res.status(503).json({
+              error: 'Service unavailable',
+              message: 'Hugging Face API is not available.',
+              details: 'API availability check failed',
+              timestamp: new Date().toISOString()
+            });
           }
         } catch (huggingFaceError) {
           console.error('Hugging Face API failed:', huggingFaceError.message);
 
-          // Fall back to Ollama if Hugging Face fails
-          try {
-            // Check if Ollama is available
-            const ollamaAvailable = await isOllamaAvailable();
-
-            if (ollamaAvailable) {
-              console.log('Using Ollama API for chat response');
-
-              // Generate response using Ollama API wrapper
-              const result = await generateOllamaChatResponse(messages, systemMessage);
-
-              // Add cache control headers for better performance
-              res.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
-
-              // Return the response
-              return res.json({
-                ...result,
-                timestamp: new Date().toISOString()
-              });
-            } else {
-              console.log('Ollama is not available');
-              return res.status(503).json({
-                error: 'Service unavailable',
-                message: 'Hugging Face API failed and Ollama is not available. No mock responses are used.',
-                details: 'Ollama is not available',
-                timestamp: new Date().toISOString()
-              });
-            }
-          } catch (ollamaError) {
-            console.error('Ollama API failed:', ollamaError.message);
-            throw ollamaError;
-          }
+          // Return error directly
+          return res.status(503).json({
+            error: 'Service unavailable',
+            message: 'Hugging Face API failed and no fallback is available.',
+            details: huggingFaceError.message,
+            timestamp: new Date().toISOString()
+          });
         }
       }
     } catch (error) {
@@ -357,14 +311,10 @@ app.get('/health', async (_, res) => {
     // Check if Hugging Face API is available
     const huggingFaceAvailable = await isHuggingFaceAvailable();
 
-    // Check if Ollama is available
-    const ollamaAvailable = await isOllamaAvailable();
-
     res.status(200).json({
       status: 'ok',
       message: 'Vector search service is running',
       huggingFaceAvailable,
-      ollamaAvailable,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
@@ -372,7 +322,6 @@ app.get('/health', async (_, res) => {
       status: 'ok',
       message: 'Vector search service is running, but AI services are unavailable',
       huggingFaceAvailable: false,
-      ollamaAvailable: false,
       error: error.message,
       timestamp: new Date().toISOString()
     });
