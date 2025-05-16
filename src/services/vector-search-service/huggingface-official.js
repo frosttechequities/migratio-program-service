@@ -6,7 +6,7 @@
  */
 
 // Import the Hugging Face Inference library
-const HfInference = require('@huggingface/inference').HfInference;
+const { HfInference } = require('@huggingface/inference');
 const crypto = require('crypto');
 
 // Simple in-memory cache
