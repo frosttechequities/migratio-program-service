@@ -64,7 +64,7 @@ const generateEmbedding = async (text) => {
   }
 };
 
-// No mock data - using real data only
+// No mock responses - using only real API responses
 
 // Search endpoint
 app.post('/search', async (req, res) => {
@@ -247,20 +247,19 @@ app.post('/chat', async (req, res) => {
       } catch (huggingFaceError) {
         console.error('Hugging Face API failed:', huggingFaceError.message);
 
-        // Return error directly
+        console.error('Hugging Face API failed');
         return res.status(503).json({
           error: 'Service unavailable',
-          message: 'Hugging Face API failed and no fallback is available.',
+          message: 'Hugging Face API failed.',
           details: huggingFaceError.message,
           timestamp: new Date().toISOString()
         });
       }
     } catch (error) {
-      // No mock fallback - return error
       console.error('All AI providers failed');
       return res.status(503).json({
         error: 'Service unavailable',
-        message: 'All AI providers failed. No mock responses are used.',
+        message: 'All AI providers failed.',
         details: error.message,
         timestamp: new Date().toISOString()
       });
@@ -336,9 +335,23 @@ async function preWarmHuggingFaceAPI() {
       console.log('Hugging Face API pre-warmed successfully');
     } else {
       console.log('Hugging Face API is not available for pre-warming');
+
+      // Pre-warm the embedding pipeline instead
+      try {
+        await initEmbeddingPipeline();
+        console.log('Embedding pipeline pre-warmed successfully');
+      } catch (embeddingError) {
+        console.error('Error pre-warming embedding pipeline:', embeddingError.message);
+      }
+
+      // Try again in 30 seconds
+      setTimeout(preWarmHuggingFaceAPI, 30000);
     }
   } catch (error) {
     console.error('Error pre-warming Hugging Face API:', error.message);
+
+    // Try again in 30 seconds
+    setTimeout(preWarmHuggingFaceAPI, 30000);
   }
 }
 

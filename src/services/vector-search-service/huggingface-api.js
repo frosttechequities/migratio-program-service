@@ -14,9 +14,9 @@ const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 // Configuration for Hugging Face API
 const HUGGINGFACE_API_URL = 'https://api-inference.huggingface.co/models';
-const HUGGINGFACE_API_TOKEN = process.env.HUGGINGFACE_API_TOKEN;
-const DEFAULT_MODEL = 'HuggingFaceH4/zephyr-7b-beta'; // Known working model
-const FALLBACK_MODEL = 'gpt2'; // Widely available fallback model
+const HUGGINGFACE_API_TOKEN = process.env.HUGGINGFACE_API_TOKEN || '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';
+const DEFAULT_MODEL = 'gpt2'; // Widely available model
+const FALLBACK_MODEL = 'distilgpt2'; // Even more widely available fallback model
 const DEFAULT_TIMEOUT = 30000; // 30 seconds timeout
 
 /**
@@ -185,7 +185,7 @@ async function generateChatResponse(messages, systemPrompt = null, useFastRespon
     if (useFastResponse) {
       // Simplified prompt for faster responses
       prompt = `${systemPrompt ? systemPrompt + ': ' : ''}${lastUserMessage.content}`;
-      model = 'gpt2'; // Use a widely available model for fast responses
+      // Use the same model for consistency
     } else {
       // Add system prompt if provided
       if (systemPrompt) {
