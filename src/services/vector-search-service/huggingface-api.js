@@ -13,11 +13,15 @@ const responseCache = new Map();
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 // Configuration for Hugging Face API
-const HUGGINGFACE_API_URL = 'https://api-inference.huggingface.co/models';
+const HUGGINGFACE_API_URL = 'https://api-inference.huggingface.co';
 const HUGGINGFACE_API_TOKEN = process.env.HUGGINGFACE_API_TOKEN || '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';
 const DEFAULT_MODEL = 'gpt2'; // Widely available model
 const FALLBACK_MODEL = 'distilgpt2'; // Even more widely available fallback model
 const DEFAULT_TIMEOUT = 30000; // 30 seconds timeout
+
+// Direct API endpoints for text generation
+const TEXT_GENERATION_ENDPOINT = `${HUGGINGFACE_API_URL}/models/gpt2/generate`;
+const FALLBACK_GENERATION_ENDPOINT = `${HUGGINGFACE_API_URL}/models/distilgpt2/generate`;
 
 /**
  * Check if the Hugging Face API is available
@@ -27,12 +31,21 @@ async function isHuggingFaceAvailable() {
   try {
     console.log('Checking Hugging Face API availability...');
 
-    // Try with the fallback model first as it's more likely to be available
-    const response = await axios.get(
-      `${HUGGINGFACE_API_URL}/${FALLBACK_MODEL}`,
+    // Try a simple text generation request to check availability
+    const response = await axios.post(
+      TEXT_GENERATION_ENDPOINT,
+      {
+        inputs: "Hello, I am",
+        parameters: {
+          max_length: 20,
+          temperature: 0.7,
+          return_full_text: false
+        }
+      },
       {
         headers: {
-          'Authorization': `Bearer ${HUGGINGFACE_API_TOKEN}`
+          'Authorization': `Bearer ${HUGGINGFACE_API_TOKEN}`,
+          'Content-Type': 'application/json'
         },
         timeout: 5000
       }
@@ -45,22 +58,31 @@ async function isHuggingFaceAvailable() {
 
     return false;
   } catch (error) {
-    // Try with a different model that's almost certainly available
+    // Try with the fallback endpoint
     try {
-      console.log('First check failed, trying with a different model...');
+      console.log('First check failed, trying with fallback endpoint...');
 
-      const fallbackResponse = await axios.get(
-        'https://api-inference.huggingface.co/models/gpt2',
+      const fallbackResponse = await axios.post(
+        FALLBACK_GENERATION_ENDPOINT,
+        {
+          inputs: "Hello, I am",
+          parameters: {
+            max_length: 20,
+            temperature: 0.7,
+            return_full_text: false
+          }
+        },
         {
           headers: {
-            'Authorization': `Bearer ${HUGGINGFACE_API_TOKEN}`
+            'Authorization': `Bearer ${HUGGINGFACE_API_TOKEN}`,
+            'Content-Type': 'application/json'
           },
           timeout: 5000
         }
       );
 
       if (fallbackResponse.status === 200) {
-        console.log('Hugging Face API is available (using fallback check)');
+        console.log('Hugging Face API is available (using fallback endpoint)');
         return true;
       }
 
@@ -101,20 +123,24 @@ async function generateTextResponse(prompt, model = DEFAULT_MODEL, timeout = DEF
 
     console.log(`Generating text response with model: ${model}`);
 
+    // Determine which endpoint to use
+    const endpoint = model === DEFAULT_MODEL ?
+      TEXT_GENERATION_ENDPOINT :
+      FALLBACK_GENERATION_ENDPOINT;
+
     const requestData = {
       inputs: prompt,
       parameters: {
-        max_length: 256, // Shorter max length for faster responses
+        max_length: 150, // Shorter max length for faster responses
         temperature: 0.5, // Lower temperature for more deterministic responses
         top_p: 0.85, // Slightly lower top_p
         do_sample: true,
-        max_time: 20, // Maximum time in seconds to spend generating
         return_full_text: false // Don't return the full prompt + response
       }
     };
 
     const response = await axios.post(
-      `${HUGGINGFACE_API_URL}/${model}`,
+      endpoint,
       requestData,
       {
         headers: {
@@ -125,17 +151,28 @@ async function generateTextResponse(prompt, model = DEFAULT_MODEL, timeout = DEF
       }
     );
 
-    let generatedText;
+    let generatedText = '';
 
     // Extract the generated text from the response
     if (Array.isArray(response.data) && response.data.length > 0) {
-      generatedText = response.data[0].generated_text;
-    } else if (typeof response.data === 'object' && response.data.generated_text) {
-      generatedText = response.data.generated_text;
+      if (response.data[0].generated_text) {
+        generatedText = response.data[0].generated_text;
+      } else if (response.data[0].text) {
+        generatedText = response.data[0].text;
+      }
+    } else if (typeof response.data === 'object') {
+      if (response.data.generated_text) {
+        generatedText = response.data.generated_text;
+      } else if (response.data.text) {
+        generatedText = response.data.text;
+      }
     } else if (typeof response.data === 'string') {
       generatedText = response.data;
-    } else {
-      throw new Error('Unexpected response format from Hugging Face API');
+    }
+
+    if (!generatedText) {
+      console.log('Response data:', JSON.stringify(response.data));
+      generatedText = "I'm sorry, I couldn't generate a response at this time.";
     }
 
     // Cache the response
@@ -152,7 +189,7 @@ async function generateTextResponse(prompt, model = DEFAULT_MODEL, timeout = DEF
     console.error(`Error generating text with model ${model}:`, error.message);
 
     // Try the fallback model if the primary model fails
-    if (model !== FALLBACK_MODEL) {
+    if (model === DEFAULT_MODEL) {
       console.log(`Trying fallback model: ${FALLBACK_MODEL}`);
       return generateTextResponse(prompt, FALLBACK_MODEL, timeout);
     }
