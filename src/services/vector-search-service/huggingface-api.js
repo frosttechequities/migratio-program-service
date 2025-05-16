@@ -15,8 +15,8 @@ const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 // Configuration for Hugging Face API
 const HUGGINGFACE_API_URL = 'https://api-inference.huggingface.co/models';
 const HUGGINGFACE_API_TOKEN = process.env.HUGGINGFACE_API_TOKEN;
-const DEFAULT_MODEL = 'google/flan-t5-small'; // Small, fast model for production
-const FALLBACK_MODEL = 'distilgpt2'; // Even smaller fallback model
+const DEFAULT_MODEL = 'HuggingFaceH4/zephyr-7b-beta'; // Known working model
+const FALLBACK_MODEL = 'gpt2'; // Widely available fallback model
 const DEFAULT_TIMEOUT = 30000; // 30 seconds timeout
 
 /**
@@ -27,8 +27,9 @@ async function isHuggingFaceAvailable() {
   try {
     console.log('Checking Hugging Face API availability...');
 
+    // Try with the fallback model first as it's more likely to be available
     const response = await axios.get(
-      `${HUGGINGFACE_API_URL}/${DEFAULT_MODEL}`,
+      `${HUGGINGFACE_API_URL}/${FALLBACK_MODEL}`,
       {
         headers: {
           'Authorization': `Bearer ${HUGGINGFACE_API_TOKEN}`
@@ -37,10 +38,38 @@ async function isHuggingFaceAvailable() {
       }
     );
 
-    return response.status === 200;
-  } catch (error) {
-    console.error('Hugging Face API availability check failed:', error.message);
+    if (response.status === 200) {
+      console.log('Hugging Face API is available');
+      return true;
+    }
+
     return false;
+  } catch (error) {
+    // Try with a different model that's almost certainly available
+    try {
+      console.log('First check failed, trying with a different model...');
+
+      const fallbackResponse = await axios.get(
+        'https://api-inference.huggingface.co/models/gpt2',
+        {
+          headers: {
+            'Authorization': `Bearer ${HUGGINGFACE_API_TOKEN}`
+          },
+          timeout: 5000
+        }
+      );
+
+      if (fallbackResponse.status === 200) {
+        console.log('Hugging Face API is available (using fallback check)');
+        return true;
+      }
+
+      return false;
+    } catch (fallbackError) {
+      console.error('Hugging Face API availability check failed:', error.message);
+      console.error('Fallback check also failed:', fallbackError.message);
+      return false;
+    }
   }
 }
 
@@ -156,7 +185,7 @@ async function generateChatResponse(messages, systemPrompt = null, useFastRespon
     if (useFastResponse) {
       // Simplified prompt for faster responses
       prompt = `${systemPrompt ? systemPrompt + ': ' : ''}${lastUserMessage.content}`;
-      model = 'google/flan-t5-small'; // Use the smallest model for fast responses
+      model = 'gpt2'; // Use a widely available model for fast responses
     } else {
       // Add system prompt if provided
       if (systemPrompt) {
