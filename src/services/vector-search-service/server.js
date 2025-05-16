@@ -164,7 +164,8 @@ app.post('/chat', async (req, res) => {
   try {
     const {
       messages,
-      context = ''
+      context = '',
+      useFastResponse = true // Default to fast response
     } = req.body;
 
     if (!messages || !Array.isArray(messages)) {
@@ -221,10 +222,10 @@ app.post('/chat', async (req, res) => {
         const huggingFaceAvailable = await isHuggingFaceAvailable();
 
         if (huggingFaceAvailable) {
-          console.log('Using Hugging Face API for chat response');
+          console.log(`Using Hugging Face API for chat response (fast mode: ${useFastResponse})`);
 
-          // Generate response using Hugging Face API wrapper
-          const result = await generateHuggingFaceChatResponse(messages, systemMessage);
+          // Generate response using Hugging Face API wrapper with fast response option
+          const result = await generateHuggingFaceChatResponse(messages, systemMessage, useFastResponse);
 
           // Add cache control headers for better performance
           res.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
@@ -316,12 +317,43 @@ app.use((err, _, res) => {
   });
 });
 
+// Function to pre-warm the Hugging Face API
+async function preWarmHuggingFaceAPI() {
+  try {
+    console.log('Pre-warming Hugging Face API...');
+
+    // Check if the API is available
+    const available = await isHuggingFaceAvailable();
+
+    if (available) {
+      // Generate a simple response to warm up the API
+      await generateHuggingFaceChatResponse(
+        [{ role: 'user', content: 'Hello' }],
+        'You are a helpful assistant',
+        true
+      );
+
+      console.log('Hugging Face API pre-warmed successfully');
+    } else {
+      console.log('Hugging Face API is not available for pre-warming');
+    }
+  } catch (error) {
+    console.error('Error pre-warming Hugging Face API:', error.message);
+  }
+}
+
 // Start server
 app.listen(PORT, async () => {
   try {
     // Initialize the embedding pipeline on startup
     await initEmbeddingPipeline();
     console.log(`Vector search service running on port ${PORT}`);
+
+    // Pre-warm the API after server starts
+    preWarmHuggingFaceAPI();
+
+    // Set up periodic pre-warming (every 10 minutes)
+    setInterval(preWarmHuggingFaceAPI, 10 * 60 * 1000);
   } catch (error) {
     console.error('Error starting server:', error);
   }
