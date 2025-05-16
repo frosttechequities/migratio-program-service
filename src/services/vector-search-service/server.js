@@ -67,59 +67,7 @@ const generateEmbedding = async (text) => {
   }
 };
 
-// Mock data for search and chat
-const mockDocuments = [
-  {
-    id: 1,
-    content: "The Express Entry system is Canada's flagship immigration management system for key economic immigration programs. Launched in January 2015, Express Entry is not an immigration program itself but rather a system used to manage applications for permanent residence under three federal economic immigration programs: Federal Skilled Worker Program (FSWP), Federal Skilled Trades Program (FSTP), and Canadian Experience Class (CEC).",
-    metadata: {
-      title: "Express Entry Program Guide",
-      source: "Immigration Canada",
-      tags: ["canada", "express entry", "immigration"]
-    },
-    similarity: 0.92
-  },
-  {
-    id: 2,
-    content: "When applying for immigration to any country, proper documentation is crucial for a successful application. Essential identity documents include a valid passport (must be valid for at least 6 months beyond your intended period of stay), previous passports, birth certificate, marriage certificate (if applicable), divorce certificate/decree (if previously married), and national identity documents.",
-    metadata: {
-      title: "Document Requirements for Immigration",
-      source: "Immigration Resources",
-      tags: ["documents", "requirements", "immigration"]
-    },
-    similarity: 0.85
-  },
-  {
-    id: 3,
-    content: "Language proficiency is a critical component of the immigration process for many countries. Demonstrating adequate language skills is not only a requirement for most immigration pathways but also a key factor in successful integration and employment prospects in a new country.",
-    metadata: {
-      title: "Language Testing for Immigration",
-      source: "Immigration Resources",
-      tags: ["language testing", "proficiency", "immigration"]
-    },
-    similarity: 0.78
-  },
-  {
-    id: 4,
-    content: "Medical examinations are a mandatory component of most immigration processes worldwide. These examinations serve to ensure that applicants do not pose a public health risk to the destination country and that they will not place excessive demands on health and social services.",
-    metadata: {
-      title: "Medical Examinations for Immigration",
-      source: "Immigration Resources",
-      tags: ["medical", "health", "immigration"]
-    },
-    similarity: 0.75
-  },
-  {
-    id: 5,
-    content: "Points-based immigration systems are structured frameworks used by many countries to select skilled immigrants based on their potential to contribute economically and integrate successfully into society. These systems assign points for various attributes such as age, education, work experience, language proficiency, and adaptability factors.",
-    metadata: {
-      title: "Points-Based Immigration Systems",
-      source: "Immigration Resources",
-      tags: ["points system", "skilled immigration", "immigration"]
-    },
-    similarity: 0.72
-  }
-];
+// No mock data - using real data only
 
 // Search endpoint
 app.post('/search', async (req, res) => {
@@ -145,8 +93,12 @@ app.post('/search', async (req, res) => {
 
       if (error) {
         console.error('Error searching documents:', error);
-        // Fall back to mock implementation
-        throw new Error('Supabase search failed');
+        // Return error instead of falling back to mock implementation
+        return res.status(500).json({
+          error: 'Error searching for documents',
+          message: 'Database search failed',
+          details: error.message
+        });
       }
 
       console.log(`Found ${documents ? documents.length : 0} documents in Supabase`);
@@ -197,43 +149,11 @@ app.post('/search', async (req, res) => {
         timestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.log('Using mock implementation for search');
-
-      // Filter mock results based on the query
-      const filteredResults = mockDocuments.filter(result =>
-        result.content.toLowerCase().includes(query.toLowerCase()) ||
-        result.metadata.title.toLowerCase().includes(query.toLowerCase()) ||
-        (result.metadata.tags && result.metadata.tags.some(tag =>
-          tag.toLowerCase().includes(query.toLowerCase())
-        ))
-      );
-
-      // Sort by relevance (simple keyword matching)
-      const scoredResults = filteredResults.map(result => {
-        let score = result.similarity;
-
-        // Boost score based on keyword matches
-        if (result.content.toLowerCase().includes(query.toLowerCase())) {
-          score += 0.1;
-        }
-        if (result.metadata.title.toLowerCase().includes(query.toLowerCase())) {
-          score += 0.2;
-        }
-        if (result.metadata.tags && result.metadata.tags.some(tag =>
-          tag.toLowerCase() === query.toLowerCase()
-        )) {
-          score += 0.3;
-        }
-
-        return { ...result, similarity: Math.min(score, 0.99) };
-      }).sort((a, b) => b.similarity - a.similarity);
-
-      // Limit results
-      const limitedResults = scoredResults.slice(0, limit);
-
-      res.json({
-        results: limitedResults.length > 0 ? limitedResults : mockDocuments.slice(0, limit),
-        note: "Using mock data due to database connection issues"
+      console.error('Error in search endpoint:', error);
+      return res.status(500).json({
+        error: 'Error searching for documents',
+        message: 'An unexpected error occurred during the search operation',
+        details: error.message
       });
     }
   } catch (error) {
@@ -248,8 +168,7 @@ app.post('/chat', async (req, res) => {
     const {
       messages,
       context = '',
-      forceHuggingFace = false,
-      disableMockFallback = false  // Parameter to disable mock fallback
+      forceHuggingFace = false
     } = req.body;
 
     if (!messages || !Array.isArray(messages)) {
@@ -333,11 +252,22 @@ app.post('/chat', async (req, res) => {
               // Generate response using Ollama API wrapper
               const result = await generateOllamaChatResponse(messages, systemMessage);
 
+              // Add cache control headers for better performance
+              res.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
+
               // Return the response
-              return res.json(result);
+              return res.json({
+                ...result,
+                timestamp: new Date().toISOString()
+              });
             } else {
-              console.log('Ollama is not available, using mock implementation');
-              throw new Error('Ollama is not available');
+              console.log('Ollama is not available');
+              return res.status(503).json({
+                error: 'Service unavailable',
+                message: 'Hugging Face API failed and Ollama is not available. No mock responses are used.',
+                details: 'Ollama is not available',
+                timestamp: new Date().toISOString()
+              });
             }
           } catch (ollamaError) {
             console.error('Ollama API failed:', ollamaError.message);
@@ -391,8 +321,13 @@ app.post('/chat', async (req, res) => {
                 timestamp: new Date().toISOString()
               });
             } else {
-              console.log('Ollama is not available, using mock implementation');
-              throw new Error('Ollama is not available');
+              console.log('Ollama is not available');
+              return res.status(503).json({
+                error: 'Service unavailable',
+                message: 'Hugging Face API failed and Ollama is not available. No mock responses are used.',
+                details: 'Ollama is not available',
+                timestamp: new Date().toISOString()
+              });
             }
           } catch (ollamaError) {
             console.error('Ollama API failed:', ollamaError.message);
@@ -401,81 +336,12 @@ app.post('/chat', async (req, res) => {
         }
       }
     } catch (error) {
-      // Check if mock fallback is disabled
-      if (disableMockFallback) {
-        console.error('All AI providers failed and mock fallback is disabled');
-        return res.status(503).json({
-          error: 'Service unavailable',
-          message: 'All AI providers failed and mock fallback is disabled',
-          details: error.message
-        });
-      }
-
-      console.log('Using mock implementation for chat');
-
-      // Find relevant mock documents for context
-      let relevantDocs = [];
-
-      if (lastUserMessage) {
-        const query = lastUserMessage.content.toLowerCase();
-
-        // Find relevant documents based on the query
-        relevantDocs = mockDocuments.filter(doc =>
-          doc.content.toLowerCase().includes(query.toLowerCase()) ||
-          doc.metadata.title.toLowerCase().includes(query.toLowerCase()) ||
-          (doc.metadata.tags && doc.metadata.tags.some(tag =>
-            tag.toLowerCase().includes(query.toLowerCase())
-          ))
-        ).sort((a, b) => b.similarity - a.similarity).slice(0, 2);
-      }
-
-      // Generate a response based on the relevant documents
-      let mockResponse = '';
-
-      if (relevantDocs.length > 0) {
-        // Use the content from the most relevant document
-        const mostRelevantDoc = relevantDocs[0];
-
-        if (mostRelevantDoc.metadata.title === "Express Entry Program Guide") {
-          mockResponse = "Express Entry is Canada's immigration system that manages applications for permanent residence under three federal economic immigration programs: the Federal Skilled Worker Program, the Federal Skilled Trades Program, and the Canadian Experience Class. It uses a Comprehensive Ranking System (CRS) to score candidates based on factors like age, education, work experience, and language skills. The highest-scoring candidates receive invitations to apply for permanent residence through regular draws.";
-        } else if (mostRelevantDoc.metadata.title === "Document Requirements for Immigration") {
-          mockResponse = "For most immigration applications, you'll need several key documents: a valid passport, birth certificate, marriage certificate (if applicable), police clearance certificates from countries where you've lived, proof of language proficiency (like IELTS or CELPIP test results), educational credential assessments, proof of funds to support yourself, and medical examination results. Make sure all documents are properly translated and certified if they're not in English or French.";
-        } else if (mostRelevantDoc.metadata.title === "Language Testing for Immigration") {
-          mockResponse = "Language proficiency is crucial for most immigration programs. For English, accepted tests include IELTS (International English Language Testing System) and CELPIP (Canadian English Language Proficiency Index Program). For French, you can take the TEF (Test d'Évaluation de Français) or TCF (Test de Connaissance du Français). Test results are typically valid for 2 years, and higher scores can significantly improve your chances in points-based immigration systems.";
-        } else if (mostRelevantDoc.metadata.title === "Medical Examinations for Immigration") {
-          mockResponse = "Immigration medical examinations must be performed by approved physicians (often called panel physicians). The exam typically includes a physical examination, chest X-ray, blood tests for conditions like HIV and syphilis, and urinalysis. Results are usually valid for 12 months. You should only undergo the medical exam after being instructed to do so by immigration authorities, as timing is important.";
-        } else if (mostRelevantDoc.metadata.title === "Points-Based Immigration Systems") {
-          mockResponse = "Points-based immigration systems assign scores to candidates based on factors like age, education, work experience, language proficiency, and adaptability. Canada's Express Entry uses the Comprehensive Ranking System (CRS), Australia has the SkillSelect points test, and New Zealand uses the Skilled Migrant Category (SMC) points system. Each system has different criteria and minimum score requirements for eligibility.";
-        }
-      } else if (lastUserMessage) {
-        const query = lastUserMessage.content.toLowerCase();
-
-        // Generate a generic response based on keywords in the query
-        if (query.includes('express entry') || query.includes('canada')) {
-          mockResponse = "Express Entry is Canada's immigration system that manages applications for permanent residence under three federal economic immigration programs: the Federal Skilled Worker Program, the Federal Skilled Trades Program, and the Canadian Experience Class. It uses a Comprehensive Ranking System (CRS) to score candidates based on factors like age, education, work experience, and language skills. The highest-scoring candidates receive invitations to apply for permanent residence through regular draws.";
-        } else if (query.includes('document') || query.includes('requirement')) {
-          mockResponse = "For most immigration applications, you'll need several key documents: a valid passport, birth certificate, marriage certificate (if applicable), police clearance certificates from countries where you've lived, proof of language proficiency (like IELTS or CELPIP test results), educational credential assessments, proof of funds to support yourself, and medical examination results. Make sure all documents are properly translated and certified if they're not in English or French.";
-        } else if (query.includes('language') || query.includes('test') || query.includes('ielts')) {
-          mockResponse = "Language proficiency is crucial for most immigration programs. For English, accepted tests include IELTS (International English Language Testing System) and CELPIP (Canadian English Language Proficiency Index Program). For French, you can take the TEF (Test d'Évaluation de Français) or TCF (Test de Connaissance du Français). Test results are typically valid for 2 years, and higher scores can significantly improve your chances in points-based immigration systems.";
-        } else if (query.includes('medical') || query.includes('exam') || query.includes('health')) {
-          mockResponse = "Immigration medical examinations must be performed by approved physicians (often called panel physicians). The exam typically includes a physical examination, chest X-ray, blood tests for conditions like HIV and syphilis, and urinalysis. Results are usually valid for 12 months. You should only undergo the medical exam after being instructed to do so by immigration authorities, as timing is important.";
-        } else if (query.includes('points') || query.includes('score') || query.includes('calculator')) {
-          mockResponse = "Points-based immigration systems assign scores to candidates based on factors like age, education, work experience, language proficiency, and adaptability. Canada's Express Entry uses the Comprehensive Ranking System (CRS), Australia has the SkillSelect points test, and New Zealand uses the Skilled Migrant Category (SMC) points system. Each system has different criteria and minimum score requirements for eligibility.";
-        } else {
-          mockResponse = "I'm an immigration assistant that can help answer questions about immigration processes, requirements, and pathways. You can ask me about specific immigration programs, document requirements, language testing, medical examinations, visa applications, and more. How can I assist you today?";
-        }
-      } else {
-        mockResponse = "Hello! I'm your immigration assistant. How can I help you today?";
-      }
-
-      // Add cache control headers for better performance
-      res.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
-
-      res.json({
-        response: mockResponse,
-        model: 'mock',
-        hasContext: relevantDocs.length > 0,
-        note: "Using mock data due to API connection issues",
+      // No mock fallback - return error
+      console.error('All AI providers failed');
+      return res.status(503).json({
+        error: 'Service unavailable',
+        message: 'All AI providers failed. No mock responses are used.',
+        details: error.message,
         timestamp: new Date().toISOString()
       });
     }
