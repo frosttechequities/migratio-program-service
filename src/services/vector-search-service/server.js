@@ -24,9 +24,9 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Ollama is not used in production on Render
 
-// Import Official Hugging Face API wrapper
-const { generateChatResponse: generateHuggingFaceChatResponse, isHuggingFaceAvailable, DEFAULT_MODEL: HF_MODEL, FALLBACK_MODEL: HF_FALLBACK_MODEL } = require('./huggingface-official');
-console.log('Using Hugging Face models:', HF_MODEL, 'and', HF_FALLBACK_MODEL);
+// Import Hugging Face API wrapper
+const { generateChatResponse: generateHuggingFaceChatResponse, isHuggingFaceAvailable, DEFAULT_MODEL, FALLBACK_MODEL } = require('./huggingface-api');
+console.log('Using Hugging Face models:', DEFAULT_MODEL, 'and', FALLBACK_MODEL);
 
 // Initialize the embedding pipeline
 let embeddingPipeline;
