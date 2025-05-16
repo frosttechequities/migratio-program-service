@@ -6,6 +6,11 @@
  */
 
 const { InferenceClient } = require('@huggingface/inference');
+const crypto = require('crypto');
+
+// Simple in-memory cache
+const responseCache = new Map();
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 // Configuration
 const HUGGINGFACE_API_TOKEN = process.env.HUGGINGFACE_API_TOKEN || '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';
@@ -23,7 +28,7 @@ const client = new InferenceClient(HUGGINGFACE_API_TOKEN);
 async function isHuggingFaceAvailable() {
   try {
     console.log('Checking Hugging Face API availability...');
-    
+
     // Try a simple text generation request to check availability
     await client.textGeneration({
       model: DEFAULT_MODEL,
@@ -33,14 +38,14 @@ async function isHuggingFaceAvailable() {
         return_full_text: false
       }
     });
-    
+
     console.log('Hugging Face API is available');
     return true;
   } catch (error) {
     // Try with the fallback model
     try {
       console.log('First check failed, trying with fallback model...');
-      
+
       await client.textGeneration({
         model: FALLBACK_MODEL,
         inputs: 'Hello, I am',
@@ -49,7 +54,7 @@ async function isHuggingFaceAvailable() {
           return_full_text: false
         }
       });
-      
+
       console.log('Hugging Face API is available (using fallback model)');
       return true;
     } catch (fallbackError) {
@@ -71,15 +76,34 @@ async function generateChatResponse(messages, systemPrompt = null, useFastRespon
   try {
     // Get the last user message
     const lastUserMessage = messages.filter(msg => msg.role === 'user').pop();
-    
+
     if (!lastUserMessage) {
       throw new Error('No user message found');
     }
-    
+
     // Format the prompt for the model
     let prompt = '';
-    let model = useFastResponse ? FALLBACK_MODEL : DEFAULT_MODEL;
-    
+    const model = useFastResponse ? FALLBACK_MODEL : DEFAULT_MODEL;
+
+    // Generate a cache key based on the messages, system prompt, and model
+    const cacheKey = crypto.createHash('md5').update(
+      `${model}:${JSON.stringify(messages)}:${systemPrompt || ''}`
+    ).digest('hex');
+
+    // Check if we have a cached response
+    if (responseCache.has(cacheKey)) {
+      const cachedItem = responseCache.get(cacheKey);
+
+      // Check if the cached item is still valid
+      if (Date.now() - cachedItem.timestamp < CACHE_TTL) {
+        console.log(`Using cached response for model: ${model}`);
+        return cachedItem.response;
+      } else {
+        // Remove expired cache item
+        responseCache.delete(cacheKey);
+      }
+    }
+
     if (useFastResponse) {
       // Simplified prompt for faster responses
       prompt = `${systemPrompt ? systemPrompt + ': ' : ''}${lastUserMessage.content}`;
@@ -88,15 +112,17 @@ async function generateChatResponse(messages, systemPrompt = null, useFastRespon
       if (systemPrompt) {
         prompt += `System: ${systemPrompt}\n\n`;
       }
-      
+
       for (const message of messages) {
         const role = message.role === 'user' ? 'User' : 'Assistant';
         prompt += `${role}: ${message.content}\n`;
       }
-      
+
       prompt += 'Assistant:';
     }
-    
+
+    console.log(`Generating text response with model: ${model}`);
+
     // Generate the response
     const response = await client.textGeneration({
       model: model,
@@ -109,45 +135,38 @@ async function generateChatResponse(messages, systemPrompt = null, useFastRespon
         return_full_text: false
       }
     });
-    
-    return {
+
+    const result = {
       response: response.generated_text.trim(),
       model: model,
       hasContext: !!systemPrompt,
       method: 'huggingface-official'
     };
+
+    // Cache the response
+    responseCache.set(cacheKey, {
+      response: result,
+      timestamp: Date.now()
+    });
+
+    // Log cache size
+    console.log(`Cache size: ${responseCache.size} items`);
+
+    return result;
   } catch (error) {
     console.error('Error generating chat response:', error.message);
-    
-    // Try with the fallback model if not already using it
-    if (model !== FALLBACK_MODEL) {
+
+    // Try with the fallback model if not already using fast response mode
+    if (!useFastResponse) {
       try {
-        console.log(`Trying fallback model: ${FALLBACK_MODEL}`);
-        
-        const response = await client.textGeneration({
-          model: FALLBACK_MODEL,
-          inputs: prompt,
-          parameters: {
-            max_new_tokens: 150,
-            temperature: 0.7,
-            top_p: 0.95,
-            do_sample: true,
-            return_full_text: false
-          }
-        });
-        
-        return {
-          response: response.generated_text.trim(),
-          model: FALLBACK_MODEL,
-          hasContext: !!systemPrompt,
-          method: 'huggingface-official-fallback'
-        };
+        console.log(`Trying with fast response mode and fallback model: ${FALLBACK_MODEL}`);
+        return generateChatResponse(messages, systemPrompt, true);
       } catch (fallbackError) {
-        console.error('Fallback model also failed:', fallbackError.message);
+        console.error('Fast response mode also failed:', fallbackError.message);
         throw fallbackError;
       }
     }
-    
+
     throw error;
   }
 }
