@@ -5,7 +5,8 @@
  * using the official @huggingface/inference library.
  */
 
-const { InferenceClient } = require('@huggingface/inference');
+// Import the Hugging Face Inference library
+const HfInference = require('@huggingface/inference').HfInference;
 const crypto = require('crypto');
 
 // Simple in-memory cache
@@ -19,7 +20,7 @@ const FALLBACK_MODEL = 'distilgpt2'; // Even more widely available fallback mode
 const DEFAULT_TIMEOUT = 30000; // 30 seconds timeout
 
 // Initialize the Hugging Face client
-const client = new InferenceClient(HUGGINGFACE_API_TOKEN);
+const client = new HfInference(HUGGINGFACE_API_TOKEN);
 
 /**
  * Check if the Hugging Face API is available
