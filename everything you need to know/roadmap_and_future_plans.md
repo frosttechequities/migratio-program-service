@@ -32,26 +32,27 @@
    - Ollama LLM integration
    - Fallback mechanisms for AI responses
 
+6. **Document Management**
+   - Document upload and storage
+   - Document categorization
+   - Document status tracking
+   - OCR processing
+   - Document quality assessment
+   - Extracted data review
+
 ### In Progress Features
 1. **Dashboard**
    - Progress tracking
    - Task management
-   - Document management
    - Recommendation display
 
-2. **Document Management**
-   - Document upload
-   - Document categorization
-   - Document status tracking
-   - Document templates
-
-3. **Roadmap Generation**
+2. **Roadmap Generation**
    - Personalized immigration roadmaps
    - Step-by-step guidance
    - Timeline visualization
    - Milestone tracking
 
-4. **PDF Generation**
+3. **PDF Generation**
    - Generate PDF reports
    - Export roadmaps as PDF
    - Export document checklists as PDF
@@ -136,7 +137,7 @@
 - **AI-powered Recommendations**: Implement AI for better recommendations
 - **Predictive Analytics**: Add predictive analytics for success rates
 - **Virtual Assistant**: Implement a virtual assistant for user guidance
-- **Document OCR**: Add OCR for document scanning and processing
+- **Advanced Document OCR**: Enhance OCR capabilities with AI-powered extraction and analysis
 
 ### 3. Business Model Evolution
 - **Subscription Tiers**: Implement different subscription tiers

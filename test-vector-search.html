@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vector Search Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        .search-section, .chat-section {
+            flex: 1;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .search-form, .chat-form {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result-item {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        .result-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .result-content {
+            margin-bottom: 10px;
+        }
+        .result-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8em;
+            color: #666;
+        }
+        .tag {
+            background-color: #f1f1f1;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-right: 5px;
+            font-size: 0.8em;
+        }
+        .chat-message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            max-width: 80%;
+        }
+        .user-message {
+            background-color: #e3f2fd;
+            margin-left: auto;
+        }
+        .assistant-message {
+            background-color: #f1f1f1;
+            margin-right: auto;
+        }
+        .chat-container {
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border: 1px solid #eee;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,0,0,.3);
+            border-radius: 50%;
+            border-top-color: #000;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .error {
+            color: red;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Vector Search Service Test</h1>
+    
+    <div class="container">
+        <div class="search-section">
+            <h2>Semantic Search</h2>
+            
+            <div class="search-form">
+                <input type="text" id="search-input" placeholder="Enter your search query...">
+                <button id="search-button">Search</button>
+            </div>
+            
+            <div id="search-error" class="error"></div>
+            
+            <div id="search-loading" style="display: none;">
+                <span class="loading"></span> Searching...
+            </div>
+            
+            <h3>Results (<span id="result-count">0</span>)</h3>
+            
+            <div id="search-results"></div>
+        </div>
+        
+        <div class="chat-section">
+            <h2>Immigration Chatbot</h2>
+            
+            <div class="chat-container" id="chat-container"></div>
+            
+            <div id="chat-error" class="error"></div>
+            
+            <div id="chat-loading" style="display: none;">
+                <span class="loading"></span> Generating response...
+            </div>
+            
+            <div class="chat-form">
+                <input type="text" id="chat-input" placeholder="Type your message...">
+                <button id="chat-button">Send</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Configuration
+        const API_URL = 'https://visafy-vector-search-service.onrender.com';
+        
+        // DOM Elements
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
+        const searchResults = document.getElementById('search-results');
+        const resultCount = document.getElementById('result-count');
+        const searchLoading = document.getElementById('search-loading');
+        const searchError = document.getElementById('search-error');
+        
+        const chatInput = document.getElementById('chat-input');
+        const chatButton = document.getElementById('chat-button');
+        const chatContainer = document.getElementById('chat-container');
+        const chatLoading = document.getElementById('chat-loading');
+        const chatError = document.getElementById('chat-error');
+        
+        // Chat history
+        let chatHistory = [];
+        
+        // Handle search
+        searchButton.addEventListener('click', async () => {
+            const query = searchInput.value.trim();
+            
+            if (!query) return;
+            
+            // Show loading
+            searchLoading.style.display = 'block';
+            searchError.textContent = '';
+            searchResults.innerHTML = '';
+            resultCount.textContent = '0';
+            
+            try {
+                const response = await fetch(`${API_URL}/search`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query,
+                        limit: 5,
+                        threshold: 0.6
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const results = data.results || [];
+                
+                resultCount.textContent = results.length;
+                
+                if (results.length > 0) {
+                    results.forEach(result => {
+                        const resultItem = document.createElement('div');
+                        resultItem.className = 'result-item';
+                        
+                        const title = document.createElement('div');
+                        title.className = 'result-title';
+                        title.textContent = result.metadata?.title || 'Untitled Document';
+                        
+                        const content = document.createElement('div');
+                        content.className = 'result-content';
+                        content.textContent = result.content.length > 200 
+                            ? `${result.content.substring(0, 200)}...` 
+                            : result.content;
+                        
+                        const meta = document.createElement('div');
+                        meta.className = 'result-meta';
+                        
+                        const tags = document.createElement('div');
+                        if (result.metadata?.tags) {
+                            result.metadata.tags.forEach(tag => {
+                                const tagSpan = document.createElement('span');
+                                tagSpan.className = 'tag';
+                                tagSpan.textContent = tag;
+                                tags.appendChild(tagSpan);
+                            });
+                        }
+                        
+                        const similarity = document.createElement('div');
+                        similarity.textContent = `Similarity: ${(result.similarity * 100).toFixed(1)}%`;
+                        
+                        meta.appendChild(tags);
+                        meta.appendChild(similarity);
+                        
+                        resultItem.appendChild(title);
+                        resultItem.appendChild(content);
+                        resultItem.appendChild(meta);
+                        
+                        searchResults.appendChild(resultItem);
+                    });
+                } else {
+                    searchResults.innerHTML = '<p>No results found. Try a different query.</p>';
+                }
+            } catch (error) {
+                console.error('Error searching:', error);
+                searchError.textContent = `Failed to search: ${error.message}`;
+            } finally {
+                searchLoading.style.display = 'none';
+            }
+        });
+        
+        // Handle chat
+        chatButton.addEventListener('click', async () => {
+            const message = chatInput.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message to chat
+            addChatMessage('user', message);
+            chatInput.value = '';
+            
+            // Show loading
+            chatLoading.style.display = 'block';
+            chatError.textContent = '';
+            
+            try {
+                const response = await fetch(`${API_URL}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        messages: [...chatHistory]
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Add assistant message to chat
+                addChatMessage('assistant', data.response, {
+                    model: data.model,
+                    hasContext: data.hasContext
+                });
+            } catch (error) {
+                console.error('Error chatting:', error);
+                chatError.textContent = `Failed to get a response: ${error.message}`;
+            } finally {
+                chatLoading.style.display = 'none';
+            }
+        });
+        
+        // Add chat message to the UI and history
+        function addChatMessage(role, content, metadata = {}) {
+            // Add to history
+            chatHistory.push({ role, content });
+            
+            // Add to UI
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${role}-message`;
+            
+            const contentP = document.createElement('p');
+            contentP.textContent = content;
+            messageDiv.appendChild(contentP);
+            
+            if (role === 'assistant' && metadata.model) {
+                const metaP = document.createElement('p');
+                metaP.style.fontSize = '0.8em';
+                metaP.style.color = '#666';
+                metaP.textContent = `${metadata.model} ${metadata.hasContext ? '(with context)' : ''}`;
+                messageDiv.appendChild(metaP);
+            }
+            
+            chatContainer.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        // Handle Enter key
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchButton.click();
+            }
+        });
+        
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                chatButton.click();
+            }
+        });
+    </script>
+</body>
+</html>

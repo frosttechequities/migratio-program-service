@@ -17,6 +17,7 @@ const programRoutes = require('./routes/programRoutes');
 const recommendationRoutes = require('./routes/recommendationRoutes');
 const pdfRoutes = require('./routes/pdfRoutes');
 const immigrationDataRoutes = require('./routes/immigrationDataRoutes');
+const nlpProxy = require('./api/nlpProxy');
 
 // Create Express app
 const app = express();
@@ -47,6 +48,7 @@ app.use('/api/programs', programRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/pdf', pdfRoutes);
 app.use('/api/immigration', immigrationDataRoutes);
+app.use('/api/nlp', nlpProxy);
 
 // Serve static assets in production
 if (process.env.NODE_ENV === 'production') {

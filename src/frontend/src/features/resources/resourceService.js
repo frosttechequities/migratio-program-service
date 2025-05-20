@@ -40,9 +40,9 @@ const getResources = async (tags = []) => {
           throw new Error(response.data?.message || 'Failed to fetch resources');
       }
     } catch (apiError) {
-      // If the endpoint doesn't exist (404), return mock data
-      if (apiError.response?.status === 404) {
-        console.log('[resourceService] Resources endpoint not found, returning mock data');
+      // If the endpoint doesn't exist (404) or connection refused (network error), return mock data
+      if (apiError.response?.status === 404 || apiError.message === 'Network Error') {
+        console.log('[resourceService] Resources endpoint not available, returning mock data');
         return {
           status: 'success',
           results: 3,
@@ -98,9 +98,9 @@ const getResourceById = async (resourceId) => {
           throw new Error(response.data?.message || `Failed to fetch resource ${resourceId}`);
       }
     } catch (apiError) {
-      // If the endpoint doesn't exist (404), return mock data
-      if (apiError.response?.status === 404) {
-        console.log(`[resourceService] Resource endpoint not found, returning mock data for ${resourceId}`);
+      // If the endpoint doesn't exist (404) or connection refused (network error), return mock data
+      if (apiError.response?.status === 404 || apiError.message === 'Network Error') {
+        console.log(`[resourceService] Resource endpoint not available, returning mock data for ${resourceId}`);
 
         // Return mock data based on the resource ID
         if (resourceId === 'mock-1') {

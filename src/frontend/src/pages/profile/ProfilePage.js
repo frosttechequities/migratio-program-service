@@ -37,9 +37,11 @@ function TabPanel(props) {
 
 const ProfilePage = () => {
   const dispatch = useDispatch();
-  const { data: profile, isLoading, isSuccess, isError, error, completion } = useSelector(
-    (state) => state.profile
-  );
+  const profile = useSelector((state) => state.profile.profile);
+  const isLoading = useSelector((state) => state.profile.isLoading);
+  const isError = useSelector((state) => state.profile.isError);
+  const error = useSelector((state) => state.profile.error);
+  const profileCompletion = useSelector((state) => state.profile.profileCompletion);
   const [tabValue, setTabValue] = useState(0);
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -54,7 +56,7 @@ const ProfilePage = () => {
 
   const handleUpdateProfile = async (values, sectionId) => {
     try {
-      await dispatch(updateProfileSection({ sectionId, data: values })).unwrap();
+      await dispatch(updateProfileSection({ section: sectionId, data: values })).unwrap();
       setSuccessMessage('Profile updated successfully');
       setTimeout(() => setSuccessMessage(''), 3000);
       dispatch(getProfileCompletion());
@@ -86,10 +88,10 @@ const ProfilePage = () => {
           <Box sx={{ position: 'relative', display: 'inline-flex', mr: 2 }}>
             <CircularProgress
               variant="determinate"
-              value={completion}
+              value={profileCompletion || 0}
               size={60}
               thickness={5}
-              color={completion < 50 ? 'error' : completion < 80 ? 'warning' : 'success'}
+              color={profileCompletion < 50 ? 'error' : profileCompletion < 80 ? 'warning' : 'success'}
             />
             <Box
               sx={{
@@ -104,7 +106,7 @@ const ProfilePage = () => {
               }}
             >
               <Typography variant="caption" component="div" color="text.secondary">
-                {`${Math.round(completion)}%`}
+                {`${Math.round(profileCompletion || 0)}%`}
               </Typography>
             </Box>
           </Box>
@@ -113,9 +115,9 @@ const ProfilePage = () => {
               Profile Completion
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {completion < 50
+              {profileCompletion < 50
                 ? 'Your profile needs more information'
-                : completion < 80
+                : profileCompletion < 80
                 ? 'Good progress, keep going!'
                 : 'Your profile is almost complete!'}
             </Typography>
@@ -304,7 +306,7 @@ const ProfilePage = () => {
           <Typography variant="body2" color="text.secondary" paragraph>
             Add your educational qualifications to help us assess your eligibility for various immigration programs.
           </Typography>
-          
+
           {/* Placeholder for education form */}
           <Box sx={{ p: 4, textAlign: 'center' }}>
             <Typography variant="body1">
@@ -321,7 +323,7 @@ const ProfilePage = () => {
           <Typography variant="body2" color="text.secondary" paragraph>
             Add your work history to help us assess your eligibility for various immigration programs.
           </Typography>
-          
+
           {/* Placeholder for work experience form */}
           <Box sx={{ p: 4, textAlign: 'center' }}>
             <Typography variant="body1">
@@ -338,7 +340,7 @@ const ProfilePage = () => {
           <Typography variant="body2" color="text.secondary" paragraph>
             Add your language test scores to help us assess your eligibility for various immigration programs.
           </Typography>
-          
+
           {/* Placeholder for language proficiency form */}
           <Box sx={{ p: 4, textAlign: 'center' }}>
             <Typography variant="body1">
@@ -355,7 +357,7 @@ const ProfilePage = () => {
           <Typography variant="body2" color="text.secondary" paragraph>
             Add your financial information to help us assess your eligibility for various immigration programs.
           </Typography>
-          
+
           {/* Placeholder for financial information form */}
           <Box sx={{ p: 4, textAlign: 'center' }}>
             <Typography variant="body1">
@@ -372,7 +374,7 @@ const ProfilePage = () => {
           <Typography variant="body2" color="text.secondary" paragraph>
             Tell us about your immigration goals and preferences.
           </Typography>
-          
+
           {/* Placeholder for immigration preferences form */}
           <Box sx={{ p: 4, textAlign: 'center' }}>
             <Typography variant="body1">

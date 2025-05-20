@@ -79,19 +79,19 @@ const DocumentList = ({ documents = [], onEdit, onDelete, onView }) => {
         <TableBody>
           {documents.map((doc) => (
             <TableRow
-              key={doc._id}
+              key={doc.id}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               <TableCell component="th" scope="row">
                 {/* Link to view details? */}
-                <MuiLink component={RouterLink} to={`/documents/${doc._id}`} underline="hover">
-                     {doc.originalFilename || 'N/A'}
+                <MuiLink component={RouterLink} to={`/documents/${doc.id}`} underline="hover">
+                     {doc.name || 'N/A'}
                 </MuiLink>
               </TableCell>
-              <TableCell>{doc.documentTypeId?.name || doc.documentTypeCode || 'Unknown'}</TableCell> {/* Assumes population or code */}
-              <TableCell>{formatDate(doc.uploadDate)}</TableCell>
-              <TableCell>{formatDate(doc.expiryDate)}</TableCell>
-              <TableCell>{getVerificationChip(doc.verificationStatus)}</TableCell>
+              <TableCell>{doc.document_type || 'Unknown'}</TableCell>
+              <TableCell>{formatDate(doc.upload_date)}</TableCell>
+              <TableCell>{formatDate(doc.expires_at)}</TableCell>
+              <TableCell>{getVerificationChip(doc.status)}</TableCell>
               {/* Analysis Suggestions Cell */}
               <TableCell>
                 {doc.analysis?.hasOptimizationSuggestions && doc.analysis?.optimizationSuggestions?.length > 0 ? (
@@ -113,17 +113,17 @@ const DocumentList = ({ documents = [], onEdit, onDelete, onView }) => {
               </TableCell>
               <TableCell align="right">
                 <Tooltip title="View Details">
-                  <IconButton size="small" onClick={() => onView ? onView(doc._id) : navigate(`/documents/${doc._id}`)}>
+                  <IconButton size="small" onClick={() => onView ? onView(doc.id) : navigate(`/documents/${doc.id}`)}>
                     <VisibilityIcon fontSize="inherit" />
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Edit Metadata">
-                  <IconButton size="small" onClick={() => onEdit ? onEdit(doc._id) : alert('Edit not implemented')}>
+                  <IconButton size="small" onClick={() => onEdit ? onEdit(doc.id) : alert('Edit not implemented')}>
                     <EditIcon fontSize="inherit" />
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Delete Document">
-                  <IconButton size="small" onClick={() => onDelete ? onDelete(doc._id) : alert('Delete not implemented')} sx={{ color: 'error.main' }}>
+                  <IconButton size="small" onClick={() => onDelete ? onDelete(doc.id) : alert('Delete not implemented')} sx={{ color: 'error.main' }}>
                     <DeleteOutlineIcon fontSize="inherit" />
                   </IconButton>
                 </Tooltip>

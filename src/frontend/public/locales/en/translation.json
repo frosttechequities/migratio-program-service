@@ -1,7 +1,25 @@
 {
   "dashboard": {
     "welcome": "Welcome, {{name}}!",
-    "title": "Your Dashboard"
+    "title": "Your Dashboard",
+    "recommendations": {
+      "title": "Top Pathway Opportunities",
+      "viewDetails": "View Details",
+      "emptyState": "Complete your assessment to view recommendations."
+    },
+    "tasks": {
+      "title": "Upcoming Tasks",
+      "markComplete": "Mark as complete",
+      "markIncomplete": "Mark as incomplete",
+      "options": "Task Options",
+      "due": "Due",
+      "priority": {
+        "high": "High priority",
+        "medium": "Medium priority",
+        "low": "Low priority"
+      },
+      "emptyState": "No upcoming tasks."
+    }
   },
   "navigation": {
     "dashboard": "Dashboard",

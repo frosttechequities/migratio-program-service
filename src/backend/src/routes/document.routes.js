@@ -143,4 +143,22 @@ router.put(
   documentController.rejectDocument
 );
 
+/**
+ * @route POST /api/documents/:documentId/ocr
+ * @desc Process a document with OCR
+ * @access Private
+ */
+router.post(
+  '/:documentId/ocr',
+  authenticate,
+  [
+    body('engine')
+      .optional()
+      .isIn(['tesseract', 'google', 'azure', 'aws'])
+      .withMessage('Invalid OCR engine'),
+    validate
+  ],
+  documentController.processDocumentOcr
+);
+
 module.exports = router;

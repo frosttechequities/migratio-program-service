@@ -14,7 +14,13 @@ import {
   FormControl,
   InputLabel
 } from '@mui/material';
-import { simulateScenario, selectSimulationResults, selectSimulationLoading, selectRecommendationsError, selectProgramRecommendations } from '../recommendationSlice';
+import { simulateScenario } from '../recommendationSlice';
+import {
+  selectSimulationResults,
+  selectSimulationLoading,
+  selectRecommendationsError,
+  selectProgramRecommendations
+} from '../recommendationSelectors';
 import RecommendationSummaryWidget from '../../dashboard/components/RecommendationSummaryWidget'; // Reuse for display
 
 // Basic list of fields that might be simulated (extend as needed)
@@ -25,14 +31,44 @@ const simulatableFields = [
     // Add more fields like age, work experience years, etc.
 ];
 
-const ScenarioPlanner = () => {
+const ScenarioPlanner = ({ profile, isLoading: isProfileLoading }) => {
   const dispatch = useDispatch();
   const [selectedField, setSelectedField] = useState('');
   const [newValue, setNewValue] = useState('');
-  const simulationResults = useSelector(selectSimulationResults);
-  const isLoading = useSelector(selectSimulationLoading);
-  const error = useSelector(selectRecommendationsError); // Use shared error state for now
-  const originalRecommendations = useSelector(selectProgramRecommendations); // Get original recommendations for comparison
+  const simulationResults = useSelector(selectSimulationResults) || null;
+  const isLoading = useSelector(selectSimulationLoading) || isProfileLoading || false;
+  const error = useSelector(selectRecommendationsError) || null; // Use shared error state for now
+  const originalRecommendations = useSelector(selectProgramRecommendations) || []; // Get original recommendations for comparison
+
+  // Pre-fill the new value based on the selected field and profile data
+  React.useEffect(() => {
+    if (selectedField && profile) {
+      const fieldConfig = simulatableFields.find(f => f.key === selectedField);
+
+      if (fieldConfig) {
+        try {
+          let value = '';
+
+          if (fieldConfig.key === 'financialInformation.annualIncome' && profile.financial_information?.annual_income) {
+            value = profile.financial_information.annual_income.toString();
+          } else if (fieldConfig.key === 'languageProficiency.english.ielts' && profile.language_proficiency?.length > 0) {
+            const englishProficiency = profile.language_proficiency.find(l => l.language?.toLowerCase() === 'english');
+            if (englishProficiency?.formal_test?.results?.overall) {
+              value = englishProficiency.formal_test.results.overall.toString();
+            }
+          } else if (fieldConfig.key === 'education.highestLevel' && profile.education?.length > 0) {
+            value = profile.education[0]?.level || '';
+          }
+
+          if (value) {
+            setNewValue(value);
+          }
+        } catch (error) {
+          console.error('Error pre-filling field value:', error);
+        }
+      }
+    }
+  }, [selectedField, profile]);
 
   const handleSimulate = () => {
     if (!selectedField || newValue === '') {
@@ -138,7 +174,13 @@ const ScenarioPlanner = () => {
           <Typography variant="subtitle1" gutterBottom>Simulation Results:</Typography>
           {/* Display comparison - Use RecommendationSummaryWidget? Or a simpler list? */}
           {/* For simplicity, just show the new list */}
-           <RecommendationSummaryWidget recommendations={simulationResults.simulatedRecommendations || []} />
+           <RecommendationSummaryWidget
+             recommendations={
+               simulationResults?.simulatedRecommendations ||
+               simulationResults?.recommendations ||
+               []
+             }
+           />
            {/* TODO: Add comparison logic vs originalRecommendations */}
         </Box>
       )}

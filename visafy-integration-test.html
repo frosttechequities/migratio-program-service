@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visafy Platform - Vector Search Integration Test</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f7fa;
+      color: #333;
+    }
+    header {
+      background-color: #1976d2;
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    .container {
+      display: flex;
+      gap: 20px;
+    }
+    .panel {
+      flex: 1;
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-top: 0;
+      color: #1976d2;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+    input, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #1565c0;
+    }
+    .results {
+      margin-top: 20px;
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid #eee;
+      border-radius: 4px;
+      padding: 10px;
+      background-color: #f9f9f9;
+    }
+    .chat-message {
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    .user-message {
+      background-color: #e3f2fd;
+      margin-left: 20px;
+      border-top-left-radius: 0;
+    }
+    .assistant-message {
+      background-color: #f1f8e9;
+      margin-right: 20px;
+      border-top-right-radius: 0;
+    }
+    .search-result {
+      margin-bottom: 10px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background-color: white;
+    }
+    .search-result h3 {
+      margin-top: 0;
+      color: #1976d2;
+    }
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+    .error {
+      color: #d32f2f;
+      background-color: #ffebee;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    .settings {
+      margin-bottom: 20px;
+      padding: 10px;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+    }
+    .settings label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    .settings input[type="checkbox"] {
+      width: auto;
+      margin-right: 5px;
+    }
+    .api-url {
+      margin-bottom: 20px;
+    }
+    pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Visafy Platform - Vector Search Integration Test</h1>
+  </header>
+
+  <div class="api-url">
+    <label for="api-url">Vector Search Service URL:</label>
+    <input type="text" id="api-url" value="https://visafy-vector-search-service.onrender.com">
+  </div>
+
+  <div class="container">
+    <div class="panel">
+      <h2>Immigration Chatbot</h2>
+      
+      <div class="settings">
+        <h3>Settings:</h3>
+        <label>
+          <input type="checkbox" id="use-precomputed" checked>
+          Use Pre-computed Responses
+        </label>
+        <label>
+          <input type="checkbox" id="use-vector-search" checked>
+          Use Vector Search
+        </label>
+        <label>
+          <input type="checkbox" id="use-fast-model">
+          Use Fast Model
+        </label>
+        <label>
+          <input type="checkbox" id="use-mock">
+          Use Mock in Production
+        </label>
+        <label>
+          <input type="checkbox" id="force-huggingface" checked>
+          Force Hugging Face
+        </label>
+        <label>
+          <input type="checkbox" id="disable-mock-fallback">
+          Disable Mock Fallback
+        </label>
+      </div>
+      
+      <div class="results" id="chat-history">
+        <div class="chat-message assistant-message">
+          Hello! I'm the Visafy immigration assistant. How can I help you today?
+        </div>
+      </div>
+      
+      <textarea id="chat-input" placeholder="Type your immigration question here..." rows="3"></textarea>
+      <button id="send-chat">Send Message</button>
+      <div id="chat-error" class="error" style="display: none;"></div>
+    </div>
+    
+    <div class="panel">
+      <h2>Immigration Document Search</h2>
+      
+      <input type="text" id="search-input" placeholder="Search for immigration documents...">
+      <button id="search-button">Search</button>
+      
+      <div class="results" id="search-results"></div>
+      <div id="search-error" class="error" style="display: none;"></div>
+    </div>
+  </div>
+
+  <script>
+    // DOM Elements
+    const apiUrlInput = document.getElementById('api-url');
+    const chatInput = document.getElementById('chat-input');
+    const sendChatButton = document.getElementById('send-chat');
+    const chatHistory = document.getElementById('chat-history');
+    const chatError = document.getElementById('chat-error');
+    const searchInput = document.getElementById('search-input');
+    const searchButton = document.getElementById('search-button');
+    const searchResults = document.getElementById('search-results');
+    const searchError = document.getElementById('search-error');
+    
+    // Settings Elements
+    const usePrecomputedCheckbox = document.getElementById('use-precomputed');
+    const useVectorSearchCheckbox = document.getElementById('use-vector-search');
+    const useFastModelCheckbox = document.getElementById('use-fast-model');
+    const useMockCheckbox = document.getElementById('use-mock');
+    const forceHuggingfaceCheckbox = document.getElementById('force-huggingface');
+    const disableMockFallbackCheckbox = document.getElementById('disable-mock-fallback');
+    
+    // Chat History
+    let messages = [];
+    
+    // Send Chat Message
+    sendChatButton.addEventListener('click', async () => {
+      const message = chatInput.value.trim();
+      if (!message) return;
+      
+      // Add user message to chat history
+      addMessageToChat('user', message);
+      chatInput.value = '';
+      
+      // Add loading indicator
+      const loadingElement = document.createElement('div');
+      loadingElement.className = 'loading';
+      loadingElement.textContent = 'Thinking...';
+      chatHistory.appendChild(loadingElement);
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+      
+      try {
+        chatError.style.display = 'none';
+        
+        // Get API URL
+        const apiUrl = apiUrlInput.value.trim();
+        
+        // Get settings
+        const usePrecomputed = usePrecomputedCheckbox.checked;
+        const useVectorSearch = useVectorSearchCheckbox.checked;
+        const useFastModel = useFastModelCheckbox.checked;
+        const useMock = useMockCheckbox.checked;
+        const forceHuggingface = forceHuggingfaceCheckbox.checked;
+        const disableMockFallback = disableMockFallbackCheckbox.checked;
+        
+        // Add message to messages array
+        messages.push({ role: 'user', content: message });
+        
+        // Send request to API
+        const response = await fetch(`${apiUrl}/chat`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            messages,
+            systemPrompt: 'You are an immigration assistant for the Visafy platform.',
+            usePreComputed: usePrecomputed,
+            useVectorSearch: useVectorSearch,
+            useFastModel: useFastModel,
+            useMockInProduction: useMock,
+            forceHuggingFace: forceHuggingface,
+            disableMockFallback: disableMockFallback
+          })
+        });
+        
+        // Remove loading indicator
+        chatHistory.removeChild(loadingElement);
+        
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        // Add assistant message to chat history
+        addMessageToChat('assistant', data.response);
+        
+        // Add message to messages array
+        messages.push({ role: 'assistant', content: data.response });
+        
+        // Log response details
+        console.log('Chat Response:', {
+          model: data.model,
+          method: data.method,
+          hasContext: data.hasContext,
+          responseTime: data.responseTime
+        });
+      } catch (error) {
+        // Remove loading indicator
+        if (loadingElement.parentNode === chatHistory) {
+          chatHistory.removeChild(loadingElement);
+        }
+        
+        // Show error
+        chatError.textContent = `Error: ${error.message}`;
+        chatError.style.display = 'block';
+        console.error('Chat error:', error);
+      }
+    });
+    
+    // Search Documents
+    searchButton.addEventListener('click', async () => {
+      const query = searchInput.value.trim();
+      if (!query) return;
+      
+      // Clear previous results
+      searchResults.innerHTML = '<div class="loading">Searching...</div>';
+      
+      try {
+        searchError.style.display = 'none';
+        
+        // Get API URL
+        const apiUrl = apiUrlInput.value.trim();
+        
+        // Send request to API
+        const response = await fetch(`${apiUrl}/search`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            query,
+            limit: 5,
+            threshold: 0.6
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        // Display results
+        displaySearchResults(data.results);
+      } catch (error) {
+        // Show error
+        searchError.textContent = `Error: ${error.message}`;
+        searchError.style.display = 'block';
+        searchResults.innerHTML = '';
+        console.error('Search error:', error);
+      }
+    });
+    
+    // Add Message to Chat
+    function addMessageToChat(role, content) {
+      const messageElement = document.createElement('div');
+      messageElement.className = `chat-message ${role}-message`;
+      messageElement.textContent = content;
+      chatHistory.appendChild(messageElement);
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+    
+    // Display Search Results
+    function displaySearchResults(results) {
+      searchResults.innerHTML = '';
+      
+      if (!results || results.length === 0) {
+        searchResults.innerHTML = '<div>No results found.</div>';
+        return;
+      }
+      
+      results.forEach(result => {
+        const resultElement = document.createElement('div');
+        resultElement.className = 'search-result';
+        
+        const title = document.createElement('h3');
+        title.textContent = result.metadata.title || 'Untitled Document';
+        resultElement.appendChild(title);
+        
+        const content = document.createElement('p');
+        content.textContent = result.content || result.metadata.content || 'No content available';
+        resultElement.appendChild(content);
+        
+        const similarity = document.createElement('div');
+        similarity.textContent = `Relevance: ${typeof result.similarity === 'number' ? result.similarity.toFixed(2) : result.similarity}`;
+        resultElement.appendChild(similarity);
+        
+        searchResults.appendChild(resultElement);
+      });
+    }
+    
+    // Enter key to send message
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendChatButton.click();
+      }
+    });
+    
+    // Enter key to search
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        searchButton.click();
+      }
+    });
+  </script>
+</body>
+</html>

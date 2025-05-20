@@ -20,9 +20,9 @@ import ResourceList from '../../resources/components/ResourceList'; // Import th
 
 const ResourceRecommendationsWidget = () => {
   const dispatch = useDispatch();
-  const resources = useSelector(selectAllResources);
-  const isLoading = useSelector(selectResourcesLoading);
-  const error = useSelector(selectResourcesError);
+  const resources = useSelector(selectAllResources) || [];
+  const isLoading = useSelector(selectResourcesLoading) || false;
+  const error = useSelector(selectResourcesError) || null;
 
   // Fetch resources relevant to the dashboard on mount
   useEffect(() => {
@@ -48,7 +48,16 @@ const ResourceRecommendationsWidget = () => {
      return (
        <Paper sx={{ p: 2, height: '100%' }}>
          <Typography variant="h6" component="h3" gutterBottom>Recommended Resources</Typography>
-         <Alert severity="warning">Could not load resources: {error}</Alert>
+         <Alert severity="warning">
+           Could not load resources: {error.includes('Network Error') ? 'Connection issue' : error}
+         </Alert>
+         {error.includes('Network Error') && (
+           <Box sx={{ mt: 2 }}>
+             <Typography variant="body2" color="text.secondary">
+               We're having trouble connecting to our resource server. Please check your internet connection or try again later.
+             </Typography>
+           </Box>
+         )}
        </Paper>
      );
   }

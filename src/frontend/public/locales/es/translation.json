@@ -1,7 +1,25 @@
 {
   "dashboard": {
     "welcome": "¡Bienvenido, {{name}}!",
-    "title": "Tu Panel de Control"
+    "title": "Tu Panel de Control",
+    "recommendations": {
+      "title": "Mejores Oportunidades de Inmigración",
+      "viewDetails": "Ver Detalles",
+      "emptyState": "Complete su evaluación para ver recomendaciones."
+    },
+    "tasks": {
+      "title": "Tareas Próximas",
+      "markComplete": "Marcar como completada",
+      "markIncomplete": "Marcar como incompleta",
+      "options": "Opciones de Tarea",
+      "due": "Fecha límite",
+      "priority": {
+        "high": "Prioridad alta",
+        "medium": "Prioridad media",
+        "low": "Prioridad baja"
+      },
+      "emptyState": "No hay tareas próximas."
+    }
   },
   "navigation": {
     "dashboard": "Panel de Control",

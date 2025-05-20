@@ -1,4 +1,5 @@
 import React, { Fragment } from 'react'; // Import Fragment
+import TextQuestion from './questions/TextQuestion';
 import {
   TextField,
   RadioGroup,
@@ -23,7 +24,16 @@ import {
 
 // TODO: Refine matrix implementation based on actual data structure
 
-const QuestionRenderer = ({ question, currentAnswer, onChange, disabled }) => {
+const QuestionRenderer = ({
+  question,
+  currentAnswer,
+  onChange,
+  disabled,
+  // NLP related props
+  isProcessingNlp = false,
+  nlpResults = null,
+  onNlpRequest = null
+}) => {
   if (!question) {
     return null; // Or a loading/placeholder state
   }
@@ -64,21 +74,39 @@ const QuestionRenderer = ({ question, currentAnswer, onChange, disabled }) => {
 
   switch (question.type) {
     case 'text':
-    case 'free-text-nlp': // Treat NLP text input like regular multiline text for now
       return (
-        <TextField
-          fullWidth
-          variant="outlined"
-          label={question.label || (question.type === 'free-text-nlp' ? "Your Detailed Answer" : "Your Answer")}
+        <TextQuestion
           value={currentAnswer || ''}
-          onChange={handleValueChange}
+          onChange={onChange}
+          placeholder={question.placeholder || "Type your answer here..."}
+          helperText={question.helpText || ''}
+          multiline={question.multiline || false}
+          rows={question.rows || 1}
+          validation={question.validation || {}}
           disabled={disabled}
-          required={question.required}
-          helperText={question.helpText || (question.type === 'free-text-nlp' ? "Please provide a detailed response." : '')}
-          multiline={question.multiline || question.type === 'free-text-nlp'} // Default multiline for NLP
-          rows={question.rows || (question.type === 'free-text-nlp' ? 4 : 1)} // Default rows
         />
       );
+
+    case 'free-text-nlp': // Use enhanced TextQuestion with NLP capabilities
+      return (
+        <TextQuestion
+          value={currentAnswer || ''}
+          onChange={onChange}
+          placeholder={question.placeholder || "Type your detailed answer here..."}
+          helperText={question.helpText || "Your response will be analyzed to provide better recommendations."}
+          multiline={true}
+          rows={question.rows || 4}
+          validation={question.validation || {}}
+          disabled={disabled}
+          enableNlp={true}
+          nlpResults={nlpResults}
+          isProcessingNlp={isProcessingNlp}
+          onNlpRequest={onNlpRequest}
+        />
+      );
+
+    case 'single-select': // Add support for single-select question type
+    // Note: single_choice is handled below
 
     case 'number':
       return (
@@ -123,7 +151,8 @@ const QuestionRenderer = ({ question, currentAnswer, onChange, disabled }) => {
         </FormControl>
       );
 
-     case 'multiple_choice':
+     case 'multi-select': // Support both naming conventions
+     case 'multiple_choice': // Both cases use the same implementation
        const currentSelection = Array.isArray(currentAnswer) ? currentAnswer : [];
        return (
          <FormControl component="fieldset" disabled={disabled} required={question.required} fullWidth>

@@ -1,9 +1,9 @@
 import React, { forwardRef } from 'react';
 import PropTypes from 'prop-types';
-import { 
-  Snackbar, 
-  Alert as MuiAlert, 
-  Typography, 
+import {
+  Snackbar,
+  Alert as MuiAlert,
+  Typography,
   Box,
   IconButton,
   LinearProgress
@@ -21,7 +21,7 @@ const Alert = forwardRef((props, ref) => {
 
 /**
  * Enhanced Toast notification component
- * 
+ *
  * @param {Object} props - Component props
  * @param {boolean} props.open - Whether the toast is open
  * @param {function} props.onClose - Function to call when the toast is closed
@@ -58,23 +58,26 @@ const Toast = ({
         return <InfoIcon />;
     }
   };
-  
+
   // Progress bar animation duration
   const progressProps = showProgress ? {
-    sx: { width: '100%', mt: 0.5 },
-    variant: 'determinate',
-    value: 100,
-    color: severity,
-    style: {
-      animation: `progress-shrink ${autoHideDuration}ms linear`,
-      transformOrigin: 'left',
-      '@keyframes progress-shrink': {
+    sx: {
+      width: '100%',
+      mt: 0.5,
+      '& .MuiLinearProgress-bar': {
+        animation: `progressShrink ${autoHideDuration}ms linear`,
+        transformOrigin: 'left',
+      },
+      '@keyframes progressShrink': {
         '0%': { transform: 'scaleX(1)' },
         '100%': { transform: 'scaleX(0)' },
-      },
+      }
     },
+    variant: 'determinate',
+    value: 100,
+    color: severity
   } : {};
-  
+
   return (
     <Snackbar
       open={open}

@@ -22,6 +22,9 @@ import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'; // Defaul
 // TODO: Fetch actual document data and calculate stats dynamically
 const DocumentCenterWidget = ({ documents = [], stats = {} }) => {
 
+  // Ensure documents is an array and handle undefined/null
+  const validDocuments = Array.isArray(documents) ? documents : [];
+
   // Use default values if stats are not provided
   const {
     uploaded = 0,
@@ -29,10 +32,10 @@ const DocumentCenterWidget = ({ documents = [], stats = {} }) => {
     verified = 0,
     expiring = 0,
     pendingVerification = 0 // Added based on integrated spec
-  } = stats;
+  } = stats || {};
 
   // Get top 3-4 recent documents
-  const recentDocuments = documents.slice(0, 3); // Example: show top 3
+  const recentDocuments = validDocuments.slice(0, 3); // Example: show top 3
 
   const getStatusIcon = (status, verificationStatus) => {
      if (verificationStatus === 'verified') return <CheckCircleOutlineIcon color="success" />;
@@ -78,26 +81,31 @@ const DocumentCenterWidget = ({ documents = [], stats = {} }) => {
       <Typography variant="subtitle2" sx={{ mb: 1 }}>Recently Updated:</Typography>
       {recentDocuments.length > 0 ? (
         <List dense sx={{ flexGrow: 1, overflowY: 'auto' }}>
-          {recentDocuments.map((doc) => (
-            <ListItem key={doc.documentId || doc.filename} disablePadding>
+          {recentDocuments.map((doc, index) => (
+            <ListItem key={doc?.documentId || doc?.id || doc?.filename || index} disablePadding>
               <ListItemIcon sx={{ minWidth: 'auto', mr: 1.5 }}>
-                 <Tooltip title={doc.verificationStatus || doc.status || 'Status'}>
-                    {getStatusIcon(doc.status, doc.verificationStatus)}
+                 <Tooltip title={doc?.verificationStatus || doc?.status || 'Status'}>
+                    {getStatusIcon(doc?.status, doc?.verificationStatus)}
                  </Tooltip>
               </ListItemIcon>
               <ListItemText
                 primary={
                     <Typography variant="body2" noWrap>
-                        {doc.documentName || doc.originalFilename || 'Document Name'}
+                        {doc?.name || doc?.documentName || doc?.originalFilename || 'Document Name'}
                     </Typography>
                 }
                 secondary={
                   <Typography variant="caption" color="text.secondary">
-                    Updated: {doc.lastUpdated || doc.uploadDate || 'N/A'}
+                    Updated: {doc?.lastUpdated || doc?.uploadDate || doc?.updatedAt || 'N/A'}
                   </Typography>
                 }
               />
-               <Button component={RouterLink} to={`/documents/${doc.documentId}`} size="small" sx={{ ml: 1 }}>
+               <Button
+                  component={RouterLink}
+                  to={`/documents/${doc?.documentId || doc?.id || index}`}
+                  size="small"
+                  sx={{ ml: 1 }}
+               >
                   View
                </Button>
             </ListItem>

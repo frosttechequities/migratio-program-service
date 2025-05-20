@@ -21,6 +21,9 @@ import ProfilePage from './pages/profile/ProfilePage';
 import AssessmentPage from './pages/assessment/AssessmentPage';
 import ResultsPage from './pages/assessment/ResultsPage';
 import DocumentsPage from './pages/documents/DocumentsPage';
+import DocumentDetailPage from './features/documents/pages/DocumentDetailPage';
+import DocumentOptimizationPage from './pages/documents/DocumentOptimizationPage';
+import DocumentVerificationPage from './pages/documents/DocumentVerificationPage';
 import RoadmapPage from './pages/roadmap/RoadmapPage';
 import CreateRoadmapPage from './pages/roadmap/CreateRoadmapPage';
 import RoadmapDetailPage from './pages/roadmap/RoadmapDetailPage';
@@ -32,6 +35,9 @@ import CountryProfilesPage from './pages/immigration/CountryProfilesPage';
 import PointsCalculatorPage from './pages/immigration/PointsCalculatorPage';
 import ProcessingTimesPage from './pages/immigration/ProcessingTimesPage';
 import ProgramDetailPage from './pages/immigration/ProgramDetailPage';
+import RecommendationsPage from './pages/recommendations/RecommendationsPage'; // Import the new Recommendations page
+import PersonalizationPage from './pages/personalization/PersonalizationPage'; // Import the new Personalization page
+import ChatbotPage from './pages/chatbot/ChatbotPage'; // Import the new Chatbot page
 import ResourcesPage from './pages/resources/ResourcesPage'; // Import ResourcesPage
 import ResearchPage from './pages/research/ResearchPage'; // Import the new Research page
 import StandaloneResearchPage from './pages/research/StandaloneResearchPage'; // Import the standalone Research page
@@ -39,6 +45,8 @@ import LegalPage from './pages/legal/LegalPage';
 import NotFoundPage from './pages/NotFoundPage';
 import TestAuthPage from './pages/test/TestAuthPage'; // Import TestAuthPage
 import VectorSearchDemo from './components/search/VectorSearchDemo'; // Import VectorSearchDemo
+import NlpTester from './features/assessment/components/NlpTester'; // Import NlpTester
+import QuestionPathEditor from './features/assessment/components/admin/QuestionPathEditor'; // Import QuestionPathEditor
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
 function App() {
@@ -135,6 +143,7 @@ function App() {
           <Route path="immigration/points-calculator" element={<PointsCalculatorPage />} />
           <Route path="immigration/processing-times" element={<ProcessingTimesPage />} />
           <Route path="programs/:programId" element={<ProgramDetailPage />} />
+          <Route path="recommendations" element={<RecommendationsPage />} />
 
           {/* Legal routes */}
           <Route path="legal/:pageType" element={<LegalPage />} />
@@ -142,6 +151,14 @@ function App() {
           {/* Test routes */}
           <Route path="test/auth" element={<TestAuthPage />} />
           <Route path="test/vector-search" element={<VectorSearchDemo />} />
+          <Route path="test/nlp" element={<NlpTester />} />
+
+          {/* Admin routes */}
+          <Route path="admin/question-paths" element={
+            <ProtectedRoute>
+              <QuestionPathEditor />
+            </ProtectedRoute>
+          } />
 
           {/* Protected routes */}
           <Route path="dashboard" element={
@@ -169,6 +186,21 @@ function App() {
               <DocumentsPage />
             </ProtectedRoute>
           } />
+          <Route path="documents/:id" element={
+            <ProtectedRoute>
+              <DocumentDetailPage />
+            </ProtectedRoute>
+          } />
+          <Route path="documents/:documentId/optimize" element={
+            <ProtectedRoute>
+              <DocumentOptimizationPage />
+            </ProtectedRoute>
+          } />
+          <Route path="documents/:documentId/verify" element={
+            <ProtectedRoute>
+              <DocumentVerificationPage />
+            </ProtectedRoute>
+          } />
           <Route path="roadmap" element={
             <ProtectedRoute>
               <RoadmapPage />
@@ -192,6 +224,16 @@ function App() {
           <Route path="pdf/generate" element={
             <ProtectedRoute>
               <GeneratePDFPage />
+            </ProtectedRoute>
+          } />
+          <Route path="personalization" element={
+            <ProtectedRoute>
+              <PersonalizationPage />
+            </ProtectedRoute>
+          } />
+          <Route path="assistant" element={
+            <ProtectedRoute>
+              <ChatbotPage />
             </ProtectedRoute>
           } />
 

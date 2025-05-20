@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from 'react'; // Import useState
+import React, { useEffect, useState, useCallback, useMemo } from 'react'; // Import hooks
 import { useSelector, useDispatch } from 'react-redux';
-import { Box, Container, Grid, Paper, Typography, Button, Skeleton, Alert, Switch, FormControlLabel, FormGroup, Collapse } from '@mui/material'; // Added more imports
+import { Box, Container, Grid, Paper, Typography, Button, Skeleton, Alert, Link, Collapse, FormGroup, FormControlLabel, Switch } from '@mui/material'; // Added more imports
 import SettingsIcon from '@mui/icons-material/Settings'; // Icon for customize button
+import { Link as RouterLink } from 'react-router-dom';
+import LanguageSelector from '../../components/common/LanguageSelector'; // Import LanguageSelector
+import { sanitizeData, sanitizeLocalStorage, sanitizeUrl } from '../../utils/sanitize'; // Import sanitization utilities
 // MainLayout is no longer needed as we're using the parent Layout
 import WelcomeWidget from '../../features/dashboard/components/WelcomeWidget';
 import JourneyProgressWidget from '../../features/dashboard/components/JourneyProgressWidget';
@@ -20,11 +23,32 @@ import { fetchUserProfile } from '../../features/profile/profileSlice';
 import ReadinessChecklist from '../../features/profile/components/ReadinessChecklist';
 import DestinationSuggestionsWidget from '../../features/recommendations/components/DestinationSuggestionsWidget';
 import ScenarioPlanner from '../../features/recommendations/components/ScenarioPlanner'; // Import Scenario Planner
+import SuccessProbabilityWidget from '../../features/recommendations/components/SuccessProbabilityWidget';
+import ActionRecommendations from '../../features/recommendations/components/ActionRecommendations';
 
 // Helper function to get initial visibility from localStorage or defaults
 const getInitialVisibility = (widgetKey, defaultValue = true) => {
-    const stored = localStorage.getItem(`widgetVisibility_${widgetKey}`);
-    return stored !== null ? JSON.parse(stored) : defaultValue;
+    // Check if localStorage is available (might not be in test environment)
+    if (typeof localStorage === 'undefined') {
+        return defaultValue;
+    }
+
+    try {
+        // Use sanitizeLocalStorage to safely get and parse localStorage data
+        const key = `widgetVisibility_${widgetKey}`;
+        const sanitizedValue = sanitizeLocalStorage(key);
+
+        // If sanitizedValue is null, return default
+        if (sanitizedValue === null) {
+            return defaultValue;
+        }
+
+        return sanitizedValue;
+    } catch (error) {
+        // This catches any other errors
+        console.warn(`Error accessing localStorage for ${widgetKey}:`, error);
+        return defaultValue;
+    }
 };
 
 
@@ -43,25 +67,78 @@ const DashboardPage = () => {
       subscription: getInitialVisibility('subscription'),
       readiness: getInitialVisibility('readiness'),
       destinations: getInitialVisibility('destinations'),
+      successProbability: getInitialVisibility('successProbability'),
+      actionRecommendations: getInitialVisibility('actionRecommendations'),
   });
   const [showCustomizePanel, setShowCustomizePanel] = useState(false);
 
+  // Toggle customization panel - memoized for performance
+  const toggleCustomizePanel = useCallback(() => {
+    setShowCustomizePanel(prevState => !prevState);
+  }, []);
+
+  // Handle visibility toggle and save to localStorage - memoized for performance
+  const handleVisibilityChange = useCallback((event) => {
+    const { name, checked } = event.target;
+    setWidgetVisibility(prev => {
+      const newState = { ...prev, [name]: checked };
+      // Save to localStorage with sanitized data
+      const sanitizedValue = JSON.stringify(sanitizeData(checked));
+      localStorage.setItem(`widgetVisibility_${name}`, sanitizedValue);
+      return newState;
+    });
+  }, []);
 
   // Select data from Redux store
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const authState = useSelector((state) => state.auth);
+  const { user: unsanitizedUser, isAuthenticated } = authState;
 
-  // Debugging state.dashboard
+  // Sanitize user data to prevent XSS attacks
+  const user = useMemo(() => {
+    return unsanitizedUser ? sanitizeData(unsanitizedUser) : null;
+  }, [unsanitizedUser]);
+
+  // Get dashboard state from Redux
   const dashboardState = useSelector((state) => state.dashboard);
-  console.log('[DashboardPage] state.dashboard:', dashboardState);
 
-  const { data: dashboardData, isLoading: isLoadingDashboard, isError: isErrorDashboard, error: errorDashboard } = dashboardState || {}; // Add fallback for undefined
-  const { profile, isLoading: isLoadingProfile, isError: isErrorProfile, error: errorProfile } = useSelector((state) => state.profile);
+  // Only log in development environment
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[DashboardPage] state.dashboard:', dashboardState);
+  }
+
+  // Memoize dashboard data to prevent unnecessary re-renders and sanitize for security
+  const { data: dashboardData, isLoading: isLoadingDashboard, isError: isErrorDashboard, error: errorDashboard } = useMemo(() => {
+    const state = dashboardState || {}; // Add fallback for undefined
+
+    // Create a new object instead of mutating the original state
+    return {
+      ...state,
+      // Sanitize dashboard data to prevent XSS attacks
+      data: state.data ? sanitizeData(state.data) : null
+    };
+  }, [dashboardState]);
+
+  // Get profile data from Redux store and sanitize it
+  const profileState = useSelector((state) => state.profile);
+  const { profile: unsanitizedProfile, isLoading: isLoadingProfile, isError: isErrorProfile, error: errorProfile } = profileState;
+
+  // Sanitize profile data to prevent XSS attacks
+  const profile = useMemo(() => {
+    return unsanitizedProfile ? sanitizeData(unsanitizedProfile) : null;
+  }, [unsanitizedProfile]);
 
   // Fetch dashboard and profile data on mount if authenticated
   useEffect(() => {
-    console.log('[DashboardPage] useEffect - isAuthenticated:', isAuthenticated);
+    // Only log in development environment
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[DashboardPage] useEffect - isAuthenticated:', isAuthenticated);
+    }
+
     if (isAuthenticated) {
-      console.log('[DashboardPage] Fetching data - dashboardData:', dashboardData, 'profile:', profile);
+      // Only log in development environment
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[DashboardPage] Fetching data - dashboardData:', dashboardData, 'profile:', profile);
+      }
 
       // Wrap in try-catch to handle any errors
       try {
@@ -69,13 +146,20 @@ const DashboardPage = () => {
         dispatch(fetchDashboardData());
         dispatch(fetchUserProfile());
       } catch (error) {
-        console.error('[DashboardPage] Error fetching data:', error);
+        // Always log errors, but with more context in development
+        if (process.env.NODE_ENV === 'development') {
+          console.error('[DashboardPage] Error fetching data:', error);
+        } else {
+          console.error('[DashboardPage] Error fetching data');
+        }
       }
     }
 
     // Optional: Reset states on unmount
     return () => {
-      console.log('[DashboardPage] Cleaning up');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[DashboardPage] Cleaning up');
+      }
       // No cleanup needed
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -87,7 +171,7 @@ const DashboardPage = () => {
   if (isLoading && (!dashboardData || !profile)) { // Show skeleton if either is loading and not yet available
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-            <Grid container spacing={3}>
+            <Grid container spacing={3} data-testid="loading-indicator">
                 {/* Skeleton placeholders for widgets */}
                 <Grid item xs={12}><Skeleton variant="rectangular" height={100} /></Grid>
                 <Grid item xs={12}><Skeleton variant="rectangular" height={100} /></Grid>
@@ -132,7 +216,7 @@ const DashboardPage = () => {
                   }}
                   sx={{ mr: 2 }}
                 >
-                  Retry
+                  Try again
                 </Button>
                 <Button
                   variant="outlined"
@@ -147,37 +231,69 @@ const DashboardPage = () => {
      );
   }
 
-  // Handle visibility toggle and save to localStorage
-  const handleVisibilityChange = (event) => {
-      const { name, checked } = event.target;
-      setWidgetVisibility(prev => {
-          const newState = { ...prev, [name]: checked };
-          // Save to localStorage
-          localStorage.setItem(`widgetVisibility_${name}`, JSON.stringify(checked));
-          return newState;
-      });
-  };
+
 
 
   // Render dashboard with fetched data (or default/empty states if data is null/undefined)
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-       {/* Customization Toggle Button */}
-       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-           <Button
-               variant="outlined"
-               size="small"
-               startIcon={<SettingsIcon />}
-               onClick={() => setShowCustomizePanel(!showCustomizePanel)}
-           >
-               Customize Dashboard
-           </Button>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }} data-testid="dashboard-container">
+      {/* Skip link for keyboard users */}
+      <a
+        href="#main-content"
+        className="skip-link"
+        style={{
+          position: 'absolute',
+          top: '-40px',
+          left: 0,
+          background: '#1976d2',
+          color: '#fff',
+          padding: '8px',
+          zIndex: 1000,
+          transition: 'top 0.3s'
+        }}
+        onFocus={(e) => {
+          e.target.style.top = '0';
+        }}
+        onBlur={(e) => {
+          e.target.style.top = '-40px';
+        }}
+      >
+        Skip to main content
+      </a>
+       {/* Customization Buttons */}
+       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, gap: 1 }}>
+           <Box>
+               <LanguageSelector />
+           </Box>
+           <Box sx={{ display: 'flex', gap: 1 }}>
+               <Button
+                   variant="outlined"
+                   size="small"
+                   onClick={toggleCustomizePanel}
+               >
+                   Quick Settings
+               </Button>
+               <Button
+                   variant="outlined"
+                   size="small"
+                   startIcon={<SettingsIcon />}
+                   component={RouterLink}
+                   to="/personalization"
+               >
+                   Advanced Customization
+               </Button>
+           </Box>
        </Box>
 
-       {/* Customization Panel */}
+       {/* Quick Widget Visibility Panel */}
        <Collapse in={showCustomizePanel}>
            <Paper sx={{ p: 2, mb: 3 }}>
-               <Typography variant="subtitle1" gutterBottom>Show/Hide Widgets</Typography>
+               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                   <Typography variant="subtitle1">Show/Hide Widgets</Typography>
+                   <Link component={RouterLink} to="/personalization" underline="hover">
+                       Advanced Customization
+                   </Link>
+               </Box>
                <FormGroup sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 1 }}>
                    {Object.entries(widgetVisibility).map(([key, value]) => (
                        <FormControlLabel
@@ -191,14 +307,22 @@ const DashboardPage = () => {
        </Collapse>
 
 
-      <Grid container spacing={3}>
+      <Grid container spacing={3} id="main-content" tabIndex="-1">
         {/* Welcome Widget */}
         {widgetVisibility.welcome && <Grid item xs={12}>
            <WelcomeWidget
-              user={user}
-              stats={dashboardData?.overview || {}}
+              user={{
+                ...user,
+                firstName: profile?.first_name || user?.firstName,
+                lastName: profile?.last_name || user?.lastName,
+                name: profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : user?.name
+              }}
+              stats={{
+                ...dashboardData?.overview || {},
+                profileCompletion: profileState?.profileCompletion || 0
+              }}
               nextStepSuggestion={dashboardData?.nextSteps?.[0]?.title || "Review your recommendations"}
-              primaryAction={{ text: "View Recommendations", link: "/recommendations" }}
+              primaryAction={{ text: "View Recommendations", link: sanitizeUrl("/recommendations") }}
            />
         </Grid>}
 
@@ -238,7 +362,10 @@ const DashboardPage = () => {
 
          {/* Subscription Status Widget */}
          {widgetVisibility.subscription && <Grid item xs={12} md={6}>
-            <SubscriptionStatusWidget subscription={{ tier: user?.subscriptionTier || 'free', expiryDate: user?.subscriptionExpiry }} />
+            <SubscriptionStatusWidget subscription={{
+              tier: profile?.subscription_tier || user?.subscriptionTier || 'free',
+              expiryDate: profile?.subscription_expiry || user?.subscriptionExpiry
+            }} />
          </Grid>}
 
          {/* Readiness Checklist Widget */}
@@ -257,9 +384,69 @@ const DashboardPage = () => {
             <DestinationSuggestionsWidget />
          </Grid>}
 
+          {/* Success Probability Widget */}
+          {widgetVisibility.successProbability && <Grid item xs={12} md={6}>
+            <SuccessProbabilityWidget
+              probability={75}
+              positiveFactors={[
+                {
+                  name: profile?.education?.length > 0 ? 'Education Level' : 'Education Level',
+                  description: profile?.education?.length > 0
+                    ? `Your ${profile.education[0]?.degree || 'education'} meets the requirements for most programs.`
+                    : 'Your education level meets the requirements for most programs.'
+                },
+                {
+                  name: profile?.language_proficiency?.length > 0 ? 'Language Proficiency' : 'Language Proficiency',
+                  description: profile?.language_proficiency?.length > 0
+                    ? `Your ${profile.language_proficiency[0]?.language || 'language'} skills are sufficient for many immigration pathways.`
+                    : 'Your language skills are sufficient for many immigration pathways.'
+                }
+              ]}
+              negativeFactors={[
+                {
+                  name: 'Work Experience',
+                  description: profile?.work_experience?.length > 0
+                    ? `Additional work experience beyond your ${profile.work_experience.length} ${profile.work_experience.length === 1 ? 'position' : 'positions'} would improve your eligibility.`
+                    : 'Additional work experience would improve your eligibility for skilled worker programs.'
+                }
+              ]}
+              isLoading={isLoadingProfile}
+            />
+          </Grid>}
+
+          {/* Action Recommendations Widget */}
+          {widgetVisibility.actionRecommendations && <Grid item xs={12} md={6}>
+            <ActionRecommendations
+              recommendations={[
+                {
+                  title: profile?.language_proficiency?.length > 0 ? 'Update Language Test' : 'Complete Language Test',
+                  description: profile?.language_proficiency?.length > 0
+                    ? `Update your ${profile.language_proficiency[0]?.language || 'language'} test results for better assessment.`
+                    : 'Take an approved language test to verify your proficiency.',
+                  category: 'High',
+                  type: 'language',
+                  estimatedImpact: 15
+                },
+                {
+                  title: profile?.education?.length > 0 ? 'Verify Education Credentials' : 'Obtain Education Credential Assessment',
+                  description: profile?.education?.length > 0
+                    ? `Get your ${profile.education[0]?.degree || 'education'} credentials assessed by an approved organization.`
+                    : 'Get your education credentials assessed by an approved organization.',
+                  category: 'Medium',
+                  type: 'education',
+                  estimatedImpact: 10
+                }
+              ]}
+              isLoading={isLoadingProfile}
+            />
+          </Grid>}
+
           {/* Scenario Planner */}
           <Grid item xs={12}>
-              <ScenarioPlanner />
+              <ScenarioPlanner
+                profile={profile}
+                isLoading={isLoadingProfile}
+              />
           </Grid>
 
          {/* Ensure Grid container is closed */}

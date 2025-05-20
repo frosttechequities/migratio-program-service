@@ -1,0 +1,124 @@
+{
+  "id": "user-1",
+  "firstName": "Test",
+  "lastName": "User",
+  "email": "test@example.com",
+  "completionPercentage": 85,
+  "personalInfo": {
+    "dateOfBirth": "1990-01-01",
+    "nationality": "United States",
+    "currentCountry": "United States",
+    "maritalStatus": "Single",
+    "hasChildren": false
+  },
+  "education": [
+    {
+      "id": "edu-1",
+      "degree": "Bachelor of Science",
+      "field": "Computer Science",
+      "institution": "Test University",
+      "country": "United States",
+      "startDate": "2010-09-01",
+      "endDate": "2014-05-31",
+      "isVerified": true
+    },
+    {
+      "id": "edu-2",
+      "degree": "Master of Science",
+      "field": "Data Science",
+      "institution": "Advanced University",
+      "country": "United States",
+      "startDate": "2015-09-01",
+      "endDate": "2017-05-31",
+      "isVerified": false
+    }
+  ],
+  "workExperience": [
+    {
+      "id": "work-1",
+      "title": "Software Engineer",
+      "company": "Tech Company",
+      "country": "United States",
+      "startDate": "2014-06-01",
+      "endDate": "2018-12-31",
+      "isCurrent": false,
+      "description": "Developed web applications using React and Node.js"
+    },
+    {
+      "id": "work-2",
+      "title": "Senior Software Engineer",
+      "company": "Advanced Tech",
+      "country": "United States",
+      "startDate": "2019-01-01",
+      "endDate": null,
+      "isCurrent": true,
+      "description": "Leading development team for cloud-based solutions"
+    }
+  ],
+  "languageProficiency": [
+    {
+      "language": "English",
+      "speaking": "Native",
+      "reading": "Native",
+      "writing": "Native",
+      "listening": "Native",
+      "testType": null,
+      "testScore": null,
+      "testDate": null
+    },
+    {
+      "language": "French",
+      "speaking": "Intermediate",
+      "reading": "Intermediate",
+      "writing": "Basic",
+      "listening": "Intermediate",
+      "testType": "DELF",
+      "testScore": "B1",
+      "testDate": "2022-05-15"
+    }
+  ],
+  "financialInfo": {
+    "savings": 50000,
+    "currency": "USD",
+    "annualIncome": 95000,
+    "assets": [
+      { "type": "Property", "value": 350000, "currency": "USD" },
+      { "type": "Investments", "value": 75000, "currency": "USD" }
+    ],
+    "liabilities": [
+      { "type": "Student Loan", "value": 15000, "currency": "USD" }
+    ]
+  },
+  "immigrationPreferences": {
+    "targetCountries": ["Canada", "Australia", "New Zealand"],
+    "preferredCities": ["Toronto", "Vancouver", "Sydney", "Melbourne", "Auckland"],
+    "immigrationGoals": ["Work", "Permanent Residency", "Citizenship"],
+    "timeframe": "1-2 years",
+    "familyMembers": 0
+  },
+  "preferences": {
+    "dashboard": {
+      "widgets": {
+        "welcome": true,
+        "journeyProgress": true,
+        "recommendations": true,
+        "upcomingTasks": true,
+        "documentCenter": true,
+        "resourceRecommendations": true,
+        "subscriptionStatus": true,
+        "globalOpportunities": true,
+        "destinationSuggestions": true,
+        "successProbability": true,
+        "actionRecommendations": true,
+        "roadmap": true
+      },
+      "layout": "default"
+    },
+    "notifications": {
+      "email": true,
+      "push": true,
+      "sms": false,
+      "frequency": "daily"
+    }
+  }
+}

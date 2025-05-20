@@ -1,0 +1,115 @@
+[
+  {
+    "programId": "program-1",
+    "programName": "Express Entry - Federal Skilled Worker",
+    "country": "Canada",
+    "category": "Skilled Worker",
+    "scores": {
+      "mlMatchScore": 0.85,
+      "mlSuccessProbability": 0.75
+    },
+    "explanation": {
+      "summary": "Strong match based on education and work experience",
+      "factors": [
+        { "name": "Education", "impact": "positive", "description": "Master's degree in a high-demand field" },
+        { "name": "Language", "impact": "positive", "description": "High English proficiency" },
+        { "name": "Work Experience", "impact": "positive", "description": "5+ years in a skilled occupation" },
+        { "name": "Age", "impact": "positive", "description": "Within optimal age range" },
+        { "name": "Adaptability", "impact": "negative", "description": "No previous connections to Canada" }
+      ]
+    },
+    "requirements": {
+      "education": "Bachelor's degree or higher",
+      "language": "CLB 7 or higher in English or French",
+      "workExperience": "At least 1 year of skilled work experience",
+      "investmentRequired": false
+    },
+    "estimatedProcessingTime": {
+      "min": 6,
+      "max": 12,
+      "average": 9
+    },
+    "estimatedCost": {
+      "min": 2000,
+      "max": 3000,
+      "average": 2500,
+      "currency": "CAD"
+    },
+    "isSaved": false
+  },
+  {
+    "programId": "program-2",
+    "programName": "Provincial Nominee Program - Ontario",
+    "country": "Canada",
+    "category": "Provincial Nominee",
+    "scores": {
+      "mlMatchScore": 0.78,
+      "mlSuccessProbability": 0.70
+    },
+    "explanation": {
+      "summary": "Good match for Ontario PNP based on in-demand skills",
+      "factors": [
+        { "name": "Education", "impact": "positive", "description": "Master's degree in a high-demand field" },
+        { "name": "Language", "impact": "positive", "description": "High English proficiency" },
+        { "name": "Work Experience", "impact": "positive", "description": "Experience in an in-demand occupation" },
+        { "name": "Age", "impact": "positive", "description": "Within optimal age range" },
+        { "name": "Provincial Demand", "impact": "positive", "description": "Skills in high demand in Ontario" }
+      ]
+    },
+    "requirements": {
+      "education": "Bachelor's degree or higher",
+      "language": "CLB 7 or higher in English",
+      "workExperience": "At least 1 year of skilled work experience in an in-demand occupation",
+      "investmentRequired": false
+    },
+    "estimatedProcessingTime": {
+      "min": 8,
+      "max": 16,
+      "average": 12
+    },
+    "estimatedCost": {
+      "min": 2500,
+      "max": 3500,
+      "average": 3000,
+      "currency": "CAD"
+    },
+    "isSaved": true
+  },
+  {
+    "programId": "program-3",
+    "programName": "Global Talent Stream",
+    "country": "Canada",
+    "category": "Work Permit",
+    "scores": {
+      "mlMatchScore": 0.72,
+      "mlSuccessProbability": 0.65
+    },
+    "explanation": {
+      "summary": "Good match for tech professionals seeking faster entry",
+      "factors": [
+        { "name": "Education", "impact": "positive", "description": "Advanced degree in tech field" },
+        { "name": "Work Experience", "impact": "positive", "description": "Experience in a tech occupation" },
+        { "name": "Occupation", "impact": "positive", "description": "In-demand tech occupation" },
+        { "name": "Salary", "impact": "negative", "description": "Current salary below Canadian market rate" }
+      ]
+    },
+    "requirements": {
+      "education": "No specific requirement, but tech education preferred",
+      "language": "No specific requirement, but English proficiency recommended",
+      "workExperience": "Experience in a tech occupation",
+      "investmentRequired": false
+    },
+    "estimatedProcessingTime": {
+      "min": 2,
+      "max": 4,
+      "average": 3
+    },
+    "estimatedCost": {
+      "min": 1000,
+      "max": 1500,
+      "average": 1250,
+      "currency": "CAD"
+    },
+    "isSaved": false
+  }
+]

@@ -39,6 +39,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import SearchIcon from '@mui/icons-material/Search'; // Import SearchIcon
 import LanguageIcon from '@mui/icons-material/Language'; // Icon for language switcher
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer'; // Icon for AI Assistant
 import { useTranslation } from 'react-i18next'; // Import useTranslation
 
 import { logout } from '../../features/auth/authSlice';
@@ -82,6 +83,7 @@ const Header = () => {
     { title: 'Documents', path: '/documents', icon: <DescriptionIcon fontSize="small" /> },
     { title: 'Roadmap', path: '/roadmap', icon: <MapIcon fontSize="small" /> },
     { title: 'Calendar', path: '/calendar', icon: <EventIcon fontSize="small" /> },
+    { title: 'AI Assistant', path: '/assistant', icon: <QuestionAnswerIcon fontSize="small" /> },
     { title: 'Generate PDF', path: '/pdf/generate', icon: <PictureAsPdfIcon fontSize="small" /> },
   ];
 

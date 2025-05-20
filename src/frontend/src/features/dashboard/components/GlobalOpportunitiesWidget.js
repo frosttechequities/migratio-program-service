@@ -5,7 +5,10 @@ import TravelExploreIcon from '@mui/icons-material/TravelExplore'; // Using Expl
 
 // This widget might not need specific props initially,
 // but could later take user profile summary to tailor the prompt.
-const GlobalOpportunitiesWidget = () => {
+const GlobalOpportunitiesWidget = (props) => {
+  // Component doesn't use props currently, but we're adding the parameter
+  // to ensure it handles undefined props gracefully
+
   return (
     <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
       <Box>

@@ -8,6 +8,8 @@ import Header from './Header';
 import Footer from './Footer';
 import SkipLink from '../common/SkipLink';
 import ChatbotWidget from '../../features/chatbot/components/ChatbotWidget'; // Import Chatbot
+import EnhancedChatbotWidget from '../../features/chatbot/components/EnhancedChatbotWidget'; // Import Enhanced Chatbot
+import SuggestionSystem from '../../features/chatbot/components/SuggestionSystem'; // Import Suggestion System
 import { useToast } from '../../contexts/ToastContext';
 
 /**
@@ -115,8 +117,13 @@ const Layout = () => {
       </Box>
 
       <Footer />
-      {/* Render Chatbot Widget (conditionally based on auth?) */}
-      {isAuthenticated && <ChatbotWidget />}
+      {/* Render Chatbot Widgets (conditionally based on auth) */}
+      {isAuthenticated && (
+        <>
+          <EnhancedChatbotWidget />
+          <SuggestionSystem />
+        </>
+      )}
     </Box>
     </>
   );

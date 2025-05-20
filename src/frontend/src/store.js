@@ -13,6 +13,7 @@ import pdfReducer from './features/pdf/pdfSlice';
 import immigrationReducer from './features/immigration/immigrationSlice';
 import comparisonReducer from './features/comparison/comparisonSlice';
 import resourceReducer from './features/resources/resourceSlice';
+import chatbotReducer from './features/chatbot/chatbotSlice';
 
 const store = configureStore({
   reducer: {
@@ -30,6 +31,7 @@ const store = configureStore({
     immigration: immigrationReducer,
     comparison: comparisonReducer,
     resources: resourceReducer,
+    chatbot: chatbotReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

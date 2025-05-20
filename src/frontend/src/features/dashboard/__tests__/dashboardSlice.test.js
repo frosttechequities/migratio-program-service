@@ -35,8 +35,8 @@ describe('dashboardSlice', () => {
       data: null,
       preferences: {
         layout: 'default',
-        visibleWidgets: ['overview', 'roadmap', 'recommendation', 'document', 'task'],
-        widgetOrder: ['overview', 'roadmap', 'recommendation', 'document', 'task']
+        visibleWidgets: ['overview', 'nextSteps', 'upcomingDeadlines', 'personalizedRecommendations', 'roadmap', 'document', 'task', 'notifications'],
+        widgetOrder: ['overview', 'nextSteps', 'upcomingDeadlines', 'personalizedRecommendations', 'roadmap', 'document', 'task', 'notifications']
       }
     });
   });
@@ -74,7 +74,7 @@ describe('dashboardSlice', () => {
 
   it('should handle fetchDashboardData.rejected', () => {
     const errorMessage = 'Failed to fetch dashboard data';
-    
+
     store.dispatch({
       type: fetchDashboardData.rejected.type,
       payload: errorMessage
@@ -131,7 +131,7 @@ describe('dashboardSlice', () => {
     expect(store.getState().dashboard.preferences).toEqual({
       layout: 'compact',
       visibleWidgets: ['overview', 'roadmap'],
-      widgetOrder: ['overview', 'roadmap', 'recommendation', 'document', 'task']
+      widgetOrder: ['overview', 'nextSteps', 'upcomingDeadlines', 'personalizedRecommendations', 'roadmap', 'document', 'task', 'notifications']
     });
   });
 
@@ -143,11 +143,11 @@ describe('dashboardSlice', () => {
         }
       }
     };
-    
+
     dashboardService.getDashboardData.mockResolvedValue(mockData);
-    
+
     await store.dispatch(fetchDashboardData());
-    
+
     expect(dashboardService.getDashboardData).toHaveBeenCalled();
   });
 
@@ -155,15 +155,15 @@ describe('dashboardSlice', () => {
     const preferences = {
       layout: 'compact'
     };
-    
+
     const mockResponse = {
       data: preferences
     };
-    
+
     dashboardService.updateDashboardPreferences.mockResolvedValue(mockResponse);
-    
+
     await store.dispatch(updateDashboardPreferences(preferences));
-    
+
     expect(dashboardService.updateDashboardPreferences).toHaveBeenCalledWith(preferences);
   });
 });

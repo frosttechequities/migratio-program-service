@@ -1,0 +1,21 @@
+{
+  "dashboard": {
+    "welcome": "¡Bienvenido, {{name}}!",
+    "title": "Tu Panel de Control"
+  },
+  "navigation": {
+    "dashboard": "Panel de Control",
+    "profile": "Perfil",
+    "documents": "Documentos",
+    "roadmap": "Hoja de Ruta",
+    "resources": "Recursos",
+    "comparison": "Comparar Programas"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Ocurrió un error.",
+    "viewAll": "Ver Todo",
+    "save": "Guardar",
+    "cancel": "Cancelar"
+  }
+}

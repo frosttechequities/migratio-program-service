@@ -23,7 +23,8 @@ import {
   Public as PublicIcon,
   Calculate as CalculateIcon,
   LibraryBooks as LibraryBooksIcon,
-  ArrowForward as ArrowForwardIcon
+  ArrowForward as ArrowForwardIcon,
+  Search as SearchIcon
 } from '@mui/icons-material';
 
 // Import background images

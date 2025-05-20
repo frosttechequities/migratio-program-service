@@ -21,11 +21,14 @@ export {
  */
 export const getQuestionComponent = (type) => {
   switch (type) {
+    case 'single-select': // Add support for single-select question type
     case 'single_choice':
       return SingleChoiceQuestion;
+    case 'multi-select': // Add support for multi-select question type
     case 'multiple_choice':
       return MultipleChoiceQuestion;
     case 'text':
+    case 'free-text-nlp': // Add support for NLP-enabled text questions
       return TextQuestion;
     case 'slider':
       return SliderQuestion;
@@ -34,6 +37,7 @@ export const getQuestionComponent = (type) => {
     case 'file_upload':
       return FileUploadQuestion;
     default:
+      console.warn(`Unsupported question type: ${type}, falling back to TextQuestion`);
       return TextQuestion;
   }
 };

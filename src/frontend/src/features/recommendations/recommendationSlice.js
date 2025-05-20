@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
 import recommendationService from './recommendationService';
 import { setMessage } from '../ui/uiSlice'; // For displaying messages
 
@@ -6,12 +6,14 @@ import { setMessage } from '../ui/uiSlice'; // For displaying messages
 const initialState = {
   programRecommendations: [], // Array for program recommendations
   destinationSuggestions: [], // Array for destination suggestions
-  programRecommendations: [],
-  destinationSuggestions: [],
   simulationResults: null, // Add state for simulation results
+  successProbability: null, // Success probability data
+  gapAnalysis: null, // Gap analysis data
   isLoadingPrograms: false,
   isLoadingDestinations: false,
   isLoadingSimulation: false, // Add loading state for simulation
+  isLoadingProbability: false, // Loading state for success probability
+  isLoadingGapAnalysis: false, // Loading state for gap analysis
   isError: false,
   error: null,
 };
@@ -31,6 +33,9 @@ export const generateProgramRecommendations = createAsyncThunk(
     }
   }
 );
+
+// Alias for fetchProgramRecommendations to maintain backward compatibility
+export const fetchProgramRecommendations = generateProgramRecommendations;
 
 // Async thunk to suggest destination countries
 export const suggestDestinationCountries = createAsyncThunk(
@@ -63,6 +68,34 @@ export const simulateScenario = createAsyncThunk(
   }
 );
 
+// Async thunk to fetch success probability for a program
+export const fetchSuccessProbability = createAsyncThunk(
+  'recommendations/fetchSuccessProbability',
+  async (programId, thunkAPI) => {
+    try {
+      return await recommendationService.getSuccessProbability(programId);
+    } catch (error) {
+      const message = error.message || error.toString();
+      thunkAPI.dispatch(setMessage({ type: 'error', text: `Failed to fetch success probability: ${message}` }));
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Async thunk to fetch gap analysis for a program
+export const fetchGapAnalysis = createAsyncThunk(
+  'recommendations/fetchGapAnalysis',
+  async (programId, thunkAPI) => {
+    try {
+      return await recommendationService.getGapAnalysis(programId);
+    } catch (error) {
+      const message = error.message || error.toString();
+      thunkAPI.dispatch(setMessage({ type: 'error', text: `Failed to fetch gap analysis: ${message}` }));
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 
 // Recommendation slice
 const recommendationSlice = createSlice({
@@ -72,8 +105,14 @@ const recommendationSlice = createSlice({
     resetRecommendations: (state) => {
       state.programRecommendations = [];
       state.destinationSuggestions = [];
+      state.simulationResults = null;
+      state.successProbability = null;
+      state.gapAnalysis = null;
       state.isLoadingPrograms = false;
       state.isLoadingDestinations = false;
+      state.isLoadingSimulation = false;
+      state.isLoadingProbability = false;
+      state.isLoadingGapAnalysis = false;
       state.isError = false;
       state.error = null;
     },
@@ -128,19 +167,119 @@ const recommendationSlice = createSlice({
         state.isError = true;
         state.error = action.payload;
         state.simulationResults = null;
+    })
+    // Fetch Success Probability
+    .addCase(fetchSuccessProbability.pending, (state) => {
+        state.isLoadingProbability = true;
+        // Don't reset error state here to maintain last error when a new request is made
+    })
+    .addCase(fetchSuccessProbability.fulfilled, (state, action) => {
+        state.isLoadingProbability = false;
+        state.successProbability = action.payload;
+        // Clear error state on successful request
+        state.isError = false;
+        state.error = null;
+    })
+    .addCase(fetchSuccessProbability.rejected, (state, action) => {
+        state.isLoadingProbability = false;
+        state.isError = true;
+        state.error = action.payload;
+        state.successProbability = null;
+    })
+    // Fetch Gap Analysis
+    .addCase(fetchGapAnalysis.pending, (state) => {
+        state.isLoadingGapAnalysis = true;
+        // Don't reset error state here to maintain last error when a new request is made
+    })
+    .addCase(fetchGapAnalysis.fulfilled, (state, action) => {
+        state.isLoadingGapAnalysis = false;
+        state.gapAnalysis = action.payload;
+        // Clear error state on successful request
+        state.isError = false;
+        state.error = null;
+    })
+    .addCase(fetchGapAnalysis.rejected, (state, action) => {
+        state.isLoadingGapAnalysis = false;
+        state.isError = true;
+        state.error = action.payload;
+        state.gapAnalysis = null;
     });
   }
 });
 
 export const { resetRecommendations } = recommendationSlice.actions;
 
-// Selectors
-export const selectProgramRecommendations = (state) => state.recommendations.programRecommendations;
-export const selectDestinationSuggestions = (state) => state.recommendations.destinationSuggestions;
-export const selectSimulationResults = (state) => state.recommendations.simulationResults;
-export const selectRecommendationsLoading = (state) => state.recommendations.isLoadingPrograms || state.recommendations.isLoadingDestinations;
-export const selectSimulationLoading = (state) => state.recommendations.isLoadingSimulation;
-export const selectRecommendationsError = (state) => state.recommendations.error;
+// Base selector for recommendations state
+const selectRecommendationsState = (state) => state?.recommendations || {};
+
+// Memoized selectors with improved null/undefined handling
+export const selectProgramRecommendations = createSelector(
+  [selectRecommendationsState],
+  (recommendations) => {
+    return Array.isArray(recommendations.programRecommendations)
+      ? recommendations.programRecommendations
+      : [];
+  }
+);
+
+export const selectDestinationSuggestions = createSelector(
+  [selectRecommendationsState],
+  (recommendations) => {
+    return Array.isArray(recommendations.destinationSuggestions)
+      ? recommendations.destinationSuggestions
+      : [];
+  }
+);
+
+export const selectSimulationResults = createSelector(
+  [selectRecommendationsState],
+  (recommendations) => recommendations.simulationResults || null
+);
+
+export const selectSuccessProbability = createSelector(
+  [selectRecommendationsState],
+  (recommendations) => recommendations.successProbability || null
+);
+
+export const selectGapAnalysis = createSelector(
+  [selectRecommendationsState],
+  (recommendations) => recommendations.gapAnalysis || null
+);
+
+export const selectRecommendationsLoading = createSelector(
+  [selectRecommendationsState],
+  (recommendations) => (recommendations.isLoadingPrograms || recommendations.isLoadingDestinations) || false
+);
+
+export const selectSimulationLoading = createSelector(
+  [selectRecommendationsState],
+  (recommendations) => recommendations.isLoadingSimulation || false
+);
+
+export const selectProbabilityLoading = createSelector(
+  [selectRecommendationsState],
+  (recommendations) => recommendations.isLoadingProbability || false
+);
+
+export const selectGapAnalysisLoading = createSelector(
+  [selectRecommendationsState],
+  (recommendations) => recommendations.isLoadingGapAnalysis || false
+);
+
+export const selectRecommendationsError = createSelector(
+  [selectRecommendationsState],
+  (recommendations) => recommendations.error || null
+);
+
+export const selectError = createSelector(
+  [selectRecommendationsState],
+  (recommendations) => recommendations.error || null
+);
+
+export const selectIsError = createSelector(
+  [selectRecommendationsState],
+  (recommendations) => recommendations.isError || false
+);
 
 
 export default recommendationSlice.reducer;

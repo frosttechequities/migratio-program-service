@@ -3,6 +3,8 @@ import authReducer from '../features/auth/authSlice';
 import uiReducer from '../features/ui/uiSlice';
 import assessmentReducer from '../features/assessment/assessmentSlice';
 import documentReducer from '../features/documents/documentSlice';
+import documentOptimizationReducer from '../features/documents/documentOptimizationSlice';
+import documentVerificationReducer from '../features/documents/documentVerificationSlice';
 import roadmapReducer from '../features/roadmap/roadmapSlice';
 import programReducer from '../features/programs/programSlice';
 import recommendationReducer from '../features/recommendations/recommendationSlice';
@@ -20,6 +22,8 @@ const store = configureStore({
     ui: uiReducer,
     assessment: assessmentReducer,
     documents: documentReducer,
+    documentOptimization: documentOptimizationReducer,
+    documentVerification: documentVerificationReducer,
     roadmap: roadmapReducer,
     programs: programReducer,
     recommendations: recommendationReducer,

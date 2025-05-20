@@ -1,0 +1,21 @@
+{
+  "dashboard": {
+    "welcome": "Bienvenue, {{name}}!",
+    "title": "Votre Tableau de Bord"
+  },
+  "navigation": {
+    "dashboard": "Tableau de Bord",
+    "profile": "Profil",
+    "documents": "Documents",
+    "roadmap": "Feuille de Route",
+    "resources": "Ressources",
+    "comparison": "Comparer Programmes"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue.",
+    "viewAll": "Voir Tout",
+    "save": "Sauvegarder",
+    "cancel": "Annuler"
+  }
+}

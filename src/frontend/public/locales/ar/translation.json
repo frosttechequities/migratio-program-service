@@ -1,0 +1,39 @@
+{
+  "dashboard": {
+    "welcome": "مرحبًا، {{name}}!",
+    "title": "لوحة التحكم الخاصة بك",
+    "recommendations": {
+      "title": "أفضل فرص الهجرة",
+      "viewDetails": "عرض التفاصيل",
+      "emptyState": "أكمل تقييمك لعرض التوصيات."
+    },
+    "tasks": {
+      "title": "المهام القادمة",
+      "markComplete": "وضع علامة كمكتمل",
+      "markIncomplete": "وضع علامة كغير مكتمل",
+      "options": "خيارات المهمة",
+      "due": "تاريخ الاستحقاق",
+      "priority": {
+        "high": "أولوية عالية",
+        "medium": "أولوية متوسطة",
+        "low": "أولوية منخفضة"
+      },
+      "emptyState": "لا توجد مهام قادمة."
+    }
+  },
+  "navigation": {
+    "dashboard": "لوحة التحكم",
+    "profile": "الملف الشخصي",
+    "documents": "المستندات",
+    "roadmap": "خارطة الطريق",
+    "resources": "الموارد",
+    "comparison": "مقارنة البرامج"
+  },
+  "common": {
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ.",
+    "viewAll": "عرض الكل",
+    "save": "حفظ",
+    "cancel": "إلغاء"
+  }
+}

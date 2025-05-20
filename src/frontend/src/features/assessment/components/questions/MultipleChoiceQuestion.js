@@ -13,41 +13,57 @@ import {
 
 /**
  * MultipleChoiceQuestion component
- * A component for displaying multiple choice questions
- * 
+ * A component for displaying multiple choice questions with enhanced visual design
+ *
  * @param {Object} props - Component props
  * @param {Array} props.options - Array of options
  * @param {Array} props.value - Array of selected values
  * @param {Function} props.onChange - Function to call when value changes
+ * @param {string} props.helperText - Helper text to display below the options
  * @returns {React.ReactElement} MultipleChoiceQuestion component
  */
-const MultipleChoiceQuestion = ({ options = [], value = [], onChange }) => {
+const MultipleChoiceQuestion = ({ options = [], value = [], onChange, helperText }) => {
   const theme = useTheme();
 
   const handleChange = (optionValue) => {
-    const newValue = [...(value || [])];
+    const newValue = Array.isArray(value) ? [...value] : [];
     const index = newValue.indexOf(optionValue);
-    
+
     if (index === -1) {
       newValue.push(optionValue);
     } else {
       newValue.splice(index, 1);
     }
-    
+
     onChange(newValue);
   };
 
+  // If no options are provided, show a message
+  if (!options || options.length === 0) {
+    return (
+      <Typography color="error">
+        No options available for this question.
+      </Typography>
+    );
+  }
+
   return (
     <FormControl component="fieldset" sx={{ width: '100%' }}>
+      {helperText && (
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          {helperText}
+        </Typography>
+      )}
+
       <FormGroup>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {options.map((option) => {
-            const isSelected = value && value.includes(option.value);
-            
+            const isSelected = Array.isArray(value) && value.includes(option.value);
+
             return (
               <Paper
                 key={option.value}
-                elevation={isSelected ? 2 : 0}
+                elevation={isSelected ? 3 : 0}
                 sx={{
                   borderRadius: 2,
                   border: '1px solid',
@@ -55,15 +71,17 @@ const MultipleChoiceQuestion = ({ options = [], value = [], onChange }) => {
                   backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.05) : 'background.paper',
                   transition: 'all 0.2s ease',
                   overflow: 'hidden',
+                  cursor: 'pointer',
                   '&:hover': {
                     borderColor: isSelected ? 'primary.main' : 'primary.light',
-                    backgroundColor: isSelected 
-                      ? alpha(theme.palette.primary.main, 0.05) 
+                    backgroundColor: isSelected
+                      ? alpha(theme.palette.primary.main, 0.08)
                       : alpha(theme.palette.primary.main, 0.02),
                     transform: 'translateY(-2px)',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
                   },
                 }}
+                onClick={() => handleChange(option.value)}
               >
                 <FormControlLabel
                   control={
@@ -93,7 +111,7 @@ const MultipleChoiceQuestion = ({ options = [], value = [], onChange }) => {
                   sx={{
                     margin: 0,
                     width: '100%',
-                    padding: 1,
+                    padding: 1.5,
                     '& .MuiFormControlLabel-label': {
                       width: '100%',
                     },
@@ -104,6 +122,22 @@ const MultipleChoiceQuestion = ({ options = [], value = [], onChange }) => {
           })}
         </Box>
       </FormGroup>
+
+      {Array.isArray(value) && value.length > 0 && (
+        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="body2" color="text.secondary">
+            {value.length} option{value.length !== 1 ? 's' : ''} selected
+          </Typography>
+          <Typography
+            variant="body2"
+            color="primary"
+            sx={{ cursor: 'pointer', fontWeight: 500 }}
+            onClick={() => onChange([])}
+          >
+            Clear selection
+          </Typography>
+        </Box>
+      )}
     </FormControl>
   );
 };

@@ -1,0 +1,42 @@
+module.exports = {
+  presets: [
+    ['@babel/preset-env', { targets: { node: 'current' } }],
+    ['@babel/preset-react', { runtime: 'automatic', development: true }]
+  ],
+  plugins: [
+    '@babel/plugin-transform-runtime',
+    '@babel/plugin-syntax-jsx'
+  ],
+  env: {
+    test: {
+      presets: [
+        ['@babel/preset-env', { targets: { node: 'current' } }],
+        ['@babel/preset-react', { runtime: 'automatic', development: true }]
+      ],
+      plugins: [
+        '@babel/plugin-transform-runtime',
+        '@babel/plugin-syntax-jsx'
+      ]
+    },
+    development: {
+      presets: [
+        ['@babel/preset-env', { targets: { node: 'current' } }],
+        ['@babel/preset-react', { runtime: 'automatic', development: true }]
+      ],
+      plugins: [
+        '@babel/plugin-transform-runtime',
+        '@babel/plugin-syntax-jsx'
+      ]
+    },
+    production: {
+      presets: [
+        ['@babel/preset-env', { targets: { node: 'current' } }],
+        ['@babel/preset-react', { runtime: 'automatic' }]
+      ],
+      plugins: [
+        '@babel/plugin-transform-runtime',
+        '@babel/plugin-syntax-jsx'
+      ]
+    }
+  }
+};

@@ -294,6 +294,67 @@ class DocumentService {
   }
 
   /**
+   * Process document with OCR
+   * @param {string} documentId - Document ID
+   * @param {string} userId - User ID
+   * @param {string} engine - OCR engine
+   * @returns {Promise<Object>} - Processed document
+   */
+  async processDocumentOcr(documentId, userId, engine = 'tesseract') {
+    try {
+      // Get document
+      const document = await this.getDocument(documentId, userId);
+
+      if (!document) {
+        throw new Error('Document not found');
+      }
+
+      // Check if file exists
+      if (!fs.existsSync(document.filePath)) {
+        throw new Error('Document file not found');
+      }
+
+      // Process document with OCR
+      // In a real implementation, you would use an OCR library or service
+      // For now, we'll simulate OCR processing
+      logger.info(`Processing document ${documentId} with OCR engine: ${engine}`);
+
+      // Simulate OCR processing delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Update document with OCR results
+      const ocrResults = {
+        text: 'Sample extracted text from OCR processing',
+        confidence: 0.85,
+        processedAt: new Date(),
+        engine
+      };
+
+      // Update document
+      const updatedDocument = await Document.findOneAndUpdate(
+        { _id: documentId, userId },
+        {
+          $set: {
+            ocrResults,
+            status: 'processed',
+            'metadata.ocr': {
+              processed: true,
+              engine,
+              processedAt: new Date()
+            }
+          }
+        },
+        { new: true }
+      );
+
+      return updatedDocument;
+    } catch (error) {
+      logger.error('Error processing document with OCR:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Ensure directory exists
    * @param {string} directory - Directory path
    * @returns {Promise<void>}

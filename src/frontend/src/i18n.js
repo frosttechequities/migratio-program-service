@@ -15,7 +15,7 @@ i18n
   // Init i18next
   // for all options read: https://www.i18next.com/overview/configuration-options
   .init({
-    supportedLngs: ['en', 'fr', 'es'], // Define supported languages
+    supportedLngs: ['en', 'fr', 'es', 'ar'], // Define supported languages
     fallbackLng: 'en', // Fallback language if detected language is not supported
     debug: process.env.NODE_ENV === 'development', // Enable debug output in development
     detection: {
@@ -33,7 +33,9 @@ i18n
     },
     react: {
       useSuspense: true, // Use React Suspense for loading translations
-    }
+    },
+    // RTL languages
+    rtl: ['ar', 'he', 'fa', 'ur']
   });
 
 export default i18n;

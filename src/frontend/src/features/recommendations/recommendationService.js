@@ -20,11 +20,77 @@ const getAuthHeaders = () => {
 const generateRecommendations = async () => {
   try {
     console.log('[recommendationService] Fetching program recommendations...');
-    const response = await axios.get(RECOMMENDATION_API_URL, { headers: getAuthHeaders() });
-    if (response.data?.status === 'success') {
-        return response.data;
-    } else {
-        throw new Error(response.data?.message || 'Failed to fetch recommendations');
+    try {
+      const response = await axios.get(RECOMMENDATION_API_URL, { headers: getAuthHeaders() });
+      if (response.data?.status === 'success') {
+          return response.data;
+      } else {
+          throw new Error(response.data?.message || 'Failed to fetch recommendations');
+      }
+    } catch (apiError) {
+      // If the endpoint doesn't exist (404) or connection refused (network error), return mock data
+      if (apiError.response?.status === 404 || apiError.message === 'Network Error') {
+        console.log('[recommendationService] Recommendations endpoint not available, returning mock data');
+        return {
+          status: 'success',
+          data: {
+            recommendations: [
+              {
+                id: 'mock-rec-1',
+                programId: 'ca-express-entry',
+                programName: 'Express Entry',
+                countryCode: 'CA',
+                countryName: 'Canada',
+                category: 'Skilled Worker',
+                matchScore: 85,
+                successProbability: 75,
+                processingTime: '6-12 months',
+                estimatedCost: '$2,300 CAD',
+                requirements: [
+                  { name: 'Language Proficiency', met: true },
+                  { name: 'Education', met: true },
+                  { name: 'Work Experience', met: false }
+                ]
+              },
+              {
+                id: 'mock-rec-2',
+                programId: 'au-skilled-independent',
+                programName: 'Skilled Independent Visa',
+                countryCode: 'AU',
+                countryName: 'Australia',
+                category: 'Skilled Worker',
+                matchScore: 78,
+                successProbability: 68,
+                processingTime: '8-14 months',
+                estimatedCost: '$4,045 AUD',
+                requirements: [
+                  { name: 'Points Test', met: true },
+                  { name: 'Age', met: true },
+                  { name: 'English Proficiency', met: false }
+                ]
+              },
+              {
+                id: 'mock-rec-3',
+                programId: 'nz-skilled-migrant',
+                programName: 'Skilled Migrant Category',
+                countryCode: 'NZ',
+                countryName: 'New Zealand',
+                category: 'Skilled Worker',
+                matchScore: 72,
+                successProbability: 65,
+                processingTime: '6-10 months',
+                estimatedCost: '$3,240 NZD',
+                requirements: [
+                  { name: 'Expression of Interest', met: true },
+                  { name: 'Points Threshold', met: false },
+                  { name: 'Job Offer', met: false }
+                ]
+              }
+            ]
+          }
+        };
+      }
+      throw apiError;
     }
   } catch (error) {
     const message = error.response?.data?.message || error.message || 'Failed to fetch recommendations';
@@ -45,18 +111,43 @@ const suggestDestinations = async () => {
                 throw new Error(response.data?.message || 'Failed to fetch destination suggestions');
             }
         } catch (apiError) {
-            // If the endpoint doesn't exist (404), return mock data
-            if (apiError.response?.status === 404) {
-                console.log('[recommendationService] Destination suggestions endpoint not found, returning mock data');
+            // If the endpoint doesn't exist (404) or connection refused (network error), return mock data
+            if (apiError.response?.status === 404 || apiError.message === 'Network Error') {
+                console.log('[recommendationService] Destination suggestions endpoint not available, returning mock data');
                 return {
                     status: 'success',
                     data: {
-                        destinations: [
-                            { country: 'Canada', score: 85, reasoning: 'Strong match based on your profile' },
-                            { country: 'Australia', score: 78, reasoning: 'Good match for your skills' },
-                            { country: 'New Zealand', score: 72, reasoning: 'Favorable immigration policies' },
-                            { country: 'Germany', score: 68, reasoning: 'Demand for your profession' },
-                            { country: 'United Kingdom', score: 65, reasoning: 'Language compatibility' }
+                        destinationSuggestions: [
+                            {
+                                countryCode: 'CA',
+                                countryName: 'Canada',
+                                matchScore: 85,
+                                reasons: ['Strong match based on your profile']
+                            },
+                            {
+                                countryCode: 'AU',
+                                countryName: 'Australia',
+                                matchScore: 78,
+                                reasons: ['Good match for your skills']
+                            },
+                            {
+                                countryCode: 'NZ',
+                                countryName: 'New Zealand',
+                                matchScore: 72,
+                                reasons: ['Favorable immigration policies']
+                            },
+                            {
+                                countryCode: 'DE',
+                                countryName: 'Germany',
+                                matchScore: 68,
+                                reasons: ['Demand for your profession']
+                            },
+                            {
+                                countryCode: 'GB',
+                                countryName: 'United Kingdom',
+                                matchScore: 65,
+                                reasons: ['Language compatibility']
+                            }
                         ]
                     }
                 };
@@ -90,10 +181,46 @@ const simulateProfileChange = async (profileChanges) => {
   }
 };
 
+// Get success probability for a specific program
+const getSuccessProbability = async (programId) => {
+  try {
+    console.log(`[recommendationService] Fetching success probability for program ${programId}...`);
+    const response = await axios.get(`${RECOMMENDATION_API_URL}/${programId}/probability`, { headers: getAuthHeaders() });
+    if (response.data?.status === 'success') {
+      return response.data.data;
+    } else {
+      throw new Error(response.data?.message || 'Failed to fetch success probability');
+    }
+  } catch (error) {
+    const message = error.response?.data?.message || error.message || 'Failed to fetch success probability';
+    console.error('Get Success Probability Service Error:', message);
+    throw new Error(message);
+  }
+};
+
+// Get gap analysis for a specific program
+const getGapAnalysis = async (programId) => {
+  try {
+    console.log(`[recommendationService] Fetching gap analysis for program ${programId}...`);
+    const response = await axios.get(`${RECOMMENDATION_API_URL}/${programId}/gaps`, { headers: getAuthHeaders() });
+    if (response.data?.status === 'success') {
+      return response.data.data;
+    } else {
+      throw new Error(response.data?.message || 'Failed to fetch gap analysis');
+    }
+  } catch (error) {
+    const message = error.response?.data?.message || error.message || 'Failed to fetch gap analysis';
+    console.error('Get Gap Analysis Service Error:', message);
+    throw new Error(message);
+  }
+};
+
 const recommendationService = {
   generateRecommendations,
   suggestDestinations,
   simulateProfileChange,
+  getSuccessProbability,
+  getGapAnalysis
 };
 
 export default recommendationService;

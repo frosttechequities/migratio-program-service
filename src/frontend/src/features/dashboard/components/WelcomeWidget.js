@@ -5,7 +5,22 @@ import { useTranslation } from 'react-i18next'; // Import useTranslation hook
 
 const WelcomeWidget = ({ user, stats = {}, nextStepSuggestion = "Review your recommendations", primaryAction = { text: "View Recommendations", link: "/recommendations" } }) => {
   const navigate = useNavigate();
-  const { t } = useTranslation(); // Initialize translation hook
+
+  // Initialize translation hook with error handling
+  let t;
+  try {
+    const translation = useTranslation();
+    t = translation.t;
+  } catch (error) {
+    console.warn('Translation not available:', error);
+    // Fallback translation function
+    t = (key, options) => {
+      if (key === 'dashboard.welcome') {
+        return `Welcome back, ${options?.name || 'User'}`;
+      }
+      return key;
+    };
+  }
 
   // Use default values if stats are not provided
   const {
@@ -29,8 +44,8 @@ const WelcomeWidget = ({ user, stats = {}, nextStepSuggestion = "Review your rec
         {/* Greeting */}
         <Grid item xs={12} md={6}>
           <Typography variant="h5" component="h2" gutterBottom>
-            {/* Use t function for translation */}
-            {t('dashboard.welcome', { name: user?.firstName || 'User' })}
+            {/* Use t function for translation with fallback */}
+            {t('dashboard.welcome', { name: user?.firstName || user?.name || 'User' })}
           </Typography>
           <Typography variant="body1" color="text.secondary">
             {nextStepSuggestion || "Let's continue your immigration journey."}

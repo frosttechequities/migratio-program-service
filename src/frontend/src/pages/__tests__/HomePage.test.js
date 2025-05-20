@@ -1,8 +1,10 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { ChakraProvider } from '@chakra-ui/react';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import HomePage from '../HomePage'; // Adjust the import path if necessary
-import theme from '../../theme'; // Assuming theme is needed by HomePage or its children
+
+// Create a Material UI theme for testing
+const theme = createTheme();
 
 // Mock any necessary providers or context if HomePage depends on them
 // For example, if it uses Redux:
@@ -16,12 +18,12 @@ import theme from '../../theme'; // Assuming theme is needed by HomePage or its 
 describe('HomePage', () => {
   it('should render the world map visualization with the correct PNG background', () => {
     render(
-      <ChakraProvider theme={theme}>
+      <ThemeProvider theme={theme}>
         {/* Wrap with other providers if needed, e.g., Redux Provider */}
         {/* <Provider store={store}> */}
           <HomePage />
         {/* </Provider> */}
-      </ChakraProvider>
+      </ThemeProvider>
     );
 
     // Find the element responsible for the world map background.
@@ -30,6 +32,8 @@ describe('HomePage', () => {
 
     // Check the computed style for the background image
     // Using a flexible check in case other background properties are set
-    expect(worldMapElement).toHaveStyleContaining(`background: url(/assets/world-map-dots.png)`);
+    expect(worldMapElement).toHaveStyle({
+      backgroundImage: expect.stringContaining('world-map-dots.png')
+    });
   });
 });

@@ -1,6 +1,9 @@
 const express = require('express');
+const { check } = require('express-validator');
 const recommendationController = require('../controllers/recommendationController');
-const scenarioPlannerController = require('../controllers/scenarioPlannerController'); // To be created
+const scenarioPlannerController = require('../controllers/scenarioPlannerController');
+const probabilityController = require('../controllers/probabilityController');
+const gapAnalysisController = require('../controllers/gapAnalysisController');
 // Placeholder for auth middleware - assumes middleware is available
 // const { protect } = require('../middleware/authMiddleware'); // Adjust path as needed
 
@@ -26,6 +29,24 @@ router.post('/scenarios/simulate', scenarioPlannerController.handleSimulateProfi
 router.get('/destinations', recommendationController.suggestDestinations); // Unprotected for now, To be implemented
 
 
-// Add other potential routes (e.g., GET /:id for specific recommendation details) later
+// --- Success Probability Routes ---
+// GET /api/recommendations/:programId/probability - Get success probability for a specific program
+// router.get('/:programId/probability', protect, probabilityController.getSuccessProbability);
+router.get('/:programId/probability',
+  [
+    check('programId').isString().withMessage('Program ID must be a string')
+  ],
+  probabilityController.getSuccessProbability
+); // Unprotected for now
+
+// --- Gap Analysis Routes ---
+// GET /api/recommendations/:programId/gaps - Get gap analysis for a specific program
+// router.get('/:programId/gaps', protect, gapAnalysisController.getGapAnalysis);
+router.get('/:programId/gaps',
+  [
+    check('programId').isString().withMessage('Program ID must be a string')
+  ],
+  gapAnalysisController.getGapAnalysis
+); // Unprotected for now
 
 module.exports = router;

@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSelector } from 'reselect';
 import dashboardService from './dashboardService';
 import { setMessage } from '../ui/uiSlice';
 
@@ -155,4 +156,21 @@ const dashboardSlice = createSlice({
 });
 
 export const { resetDashboard, setDashboardPreferences } = dashboardSlice.actions;
+
+// Selectors
+export const selectDashboardData = (state) => state.dashboard?.data || null;
+export const selectDashboardLoading = (state) => state.dashboard?.isLoading || false;
+export const selectDashboardError = (state) => state.dashboard?.error || null;
+export const selectDashboardSuccess = (state) => state.dashboard?.isSuccess || false;
+const selectDashboardState = (state) => state.dashboard;
+
+export const selectDashboardPreferences = createSelector(
+  selectDashboardState,
+  (dashboardState) => dashboardState?.preferences || {
+    layout: 'default',
+    visibleWidgets: [],
+    widgetOrder: []
+  }
+);
+
 export default dashboardSlice.reducer;

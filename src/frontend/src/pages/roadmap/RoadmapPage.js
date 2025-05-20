@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams, Link as RouterLink } from 'react-router-dom';
-import { Container, Typography, Box, Paper, Button, CircularProgress, Alert } from '@mui/material';
+import { Container, Typography, Box, Paper, Button, CircularProgress, Alert, Grid } from '@mui/material';
 // MainLayout is no longer needed as we're using the parent Layout
 // Import Roadmap components
 import RoadmapOverviewDisplay from '../../features/roadmap/components/RoadmapOverviewDisplay';
 import InteractiveTimeline from '../../features/roadmap/components/InteractiveTimeline';
+import RoadmapProgress from '../../features/roadmap/components/RoadmapProgress';
 // Import Redux actions/selectors
 import { fetchRoadmapById, selectRoadmapState, clearCurrentRoadmap } from '../../features/roadmap/roadmapSlice';
 
@@ -61,20 +62,21 @@ const RoadmapPage = () => {
   // Render roadmap details if data is loaded
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-       {/* Render Roadmap Overview */}
-       <RoadmapOverviewDisplay roadmap={currentRoadmap} />
+      {/* Roadmap Header */}
+      <RoadmapOverviewDisplay roadmap={currentRoadmap} />
 
-       {/* Render Interactive Timeline */}
-       <InteractiveTimeline roadmap={currentRoadmap} />
+      {/* Roadmap Progress and Timeline */}
+      <Grid container spacing={3} sx={{ mt: 1 }}>
+        {/* Roadmap Progress */}
+        <Grid item xs={12} md={4}>
+          <RoadmapProgress roadmap={currentRoadmap} isLoading={isLoading} />
+        </Grid>
 
-       {/* TODO: Add sections for Tasks, Documents specific to this roadmap */}
-       <Box sx={{ mb: 3, border: '1px dashed grey', p: 2 }}>
-          <Typography variant="h6">Roadmap Tasks Placeholder</Typography>
-       </Box>
-       <Box sx={{ mb: 3, border: '1px dashed grey', p: 2 }}>
-          <Typography variant="h6">Roadmap Documents Placeholder</Typography>
-       </Box>
-
+        {/* Interactive Timeline */}
+        <Grid item xs={12} md={8}>
+          <InteractiveTimeline roadmap={currentRoadmap} />
+        </Grid>
+      </Grid>
     </Container>
   );
 };

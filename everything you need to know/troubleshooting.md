@@ -2,6 +2,78 @@
 
 This document provides solutions to common issues and debugging tips for the Visafy platform.
 
+## Assessment Results Page Issues
+
+### No Recommendations Displayed
+
+**Symptoms:**
+- Assessment results page shows "No Matching Programs Found" message
+- Console logs show recommendations are being generated but not displayed
+- Redux store doesn't contain the expected recommendation data
+
+**Solutions:**
+1. **Check Data Flow**
+   - Verify that recommendations are being generated in the assessment service
+   - Check that recommendations are being properly passed to the Redux store
+   - Ensure that the UI component is correctly accessing the recommendations
+
+2. **Implement Robust Error Handling**
+   - Add try/catch blocks around data processing code
+   - Provide fallback data when API calls fail
+   - Add validation for all data structures to prevent undefined/null values
+
+3. **Standardize Data Format**
+   - Ensure consistent data format throughout the application
+   - Add data transformation where necessary
+   - Use default values for missing or invalid data
+
+4. **Add Fallback Mechanisms**
+   - Implement multiple layers of fallbacks
+   - Provide default recommendations when no data is available
+   - Use mock data as a last resort
+
+### Example Implementation
+
+```javascript
+// In Redux slice
+.addCase(getQuizResults.fulfilled, (state, action) => {
+  state.isLoading = false;
+  state.isError = false;
+  state.error = null;
+
+  // Handle the response with fallbacks
+  if (action.payload) {
+    // Store the results data
+    state.results = action.payload.data || {};
+
+    // Store recommendations with fallbacks
+    if (action.payload.recommendedPrograms && action.payload.recommendedPrograms.length > 0) {
+      state.recommendedPrograms = action.payload.recommendedPrograms;
+    } else if (action.payload.data?.recommendedPrograms && action.payload.data.recommendedPrograms.length > 0) {
+      state.recommendedPrograms = action.payload.data.recommendedPrograms;
+    } else {
+      // Fallback to empty array
+      state.recommendedPrograms = [];
+    }
+  } else {
+    // Provide fallbacks for missing payload
+    state.results = {};
+    state.recommendedPrograms = [];
+  }
+})
+
+// In UI component
+const hasAnyRecommendations =
+  (formattedRecommendations && Array.isArray(formattedRecommendations) && formattedRecommendations.length > 0) ||
+  (recommendedPrograms && Array.isArray(recommendedPrograms) && recommendedPrograms.length > 0) ||
+  (results?.recommendedPrograms && Array.isArray(results.recommendedPrograms) && results.recommendedPrograms.length > 0);
+
+// If no recommendations, show fallback UI
+if (!hasAnyRecommendations) {
+  // Show fallback UI or default recommendations
+}
+```
+
 ## Vector Search Service Issues
 
 ### Service Won't Start
@@ -21,7 +93,7 @@ This document provides solutions to common issues and debugging tips for the Vis
      ```powershell
      # Find the process
      netstat -ano | findstr :3006
-     
+
      # Kill the process (replace PID with the actual process ID)
      taskkill /F /PID PID
      ```
@@ -154,19 +226,19 @@ This document provides solutions to common issues and debugging tips for the Vis
    - Create a wrapper that uses the CLI instead of the API:
      ```javascript
      const { spawn } = require('child_process');
-     
+
      function runOllamaCLI(model, prompt) {
        return new Promise((resolve, reject) => {
          const ollamaProcess = spawn('ollama', ['run', model, prompt], {
            shell: true
          });
-         
+
          let fullOutput = '';
-         
+
          ollamaProcess.stdout.on('data', (data) => {
            fullOutput += data.toString();
          });
-         
+
          ollamaProcess.on('close', (code) => {
            if (code !== 0) {
              reject(new Error(`Ollama process exited with code ${code}`));

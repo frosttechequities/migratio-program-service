@@ -1,7 +1,25 @@
 {
   "dashboard": {
     "welcome": "Bienvenue, {{name}}!",
-    "title": "Votre Tableau de Bord"
+    "title": "Votre Tableau de Bord",
+    "recommendations": {
+      "title": "Meilleures Opportunités d'Immigration",
+      "viewDetails": "Voir Détails",
+      "emptyState": "Complétez votre évaluation pour voir les recommandations."
+    },
+    "tasks": {
+      "title": "Tâches à venir",
+      "markComplete": "Marquer comme terminée",
+      "markIncomplete": "Marquer comme non terminée",
+      "options": "Options de tâche",
+      "due": "Échéance",
+      "priority": {
+        "high": "Priorité haute",
+        "medium": "Priorité moyenne",
+        "low": "Priorité basse"
+      },
+      "emptyState": "Aucune tâche à venir."
+    }
   },
   "navigation": {
     "dashboard": "Tableau de Bord",

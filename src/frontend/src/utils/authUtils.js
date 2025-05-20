@@ -7,22 +7,28 @@ export const getTokenFromLocalStorage = () => {
     // First try to get token directly (Supabase stores it separately)
     const token = localStorage.getItem('token');
     if (token) {
-      // Check if token is expired
-      try {
-        const tokenData = parseJwt(token);
-        const currentTime = Math.floor(Date.now() / 1000);
+      // Check if this is a mock token
+      if (token.includes('mock-')) {
+        console.log('[authUtils] Mock token found, returning without validation');
+        return token;
+      }
 
-        // If token is expired, remove it and try to get a fresh one
-        if (tokenData.exp && tokenData.exp < currentTime) {
-          console.log('[authUtils] Token expired, removing from localStorage');
-          localStorage.removeItem('token');
-          // Continue to check other storage locations
-        } else {
-          return token;
-        }
-      } catch (parseError) {
-        console.error('[authUtils] Error parsing token', parseError);
+      // Check if token is expired
+      const tokenData = parseJwt(token);
+
+      // If parsing failed, return the token anyway
+      if (!tokenData) {
+        console.log('[authUtils] Invalid token format, returning token without validation');
+        return token;
+      }
+
+      const currentTime = Math.floor(Date.now() / 1000);
+      if (tokenData.exp && tokenData.exp < currentTime) {
+        console.log('[authUtils] Token expired, removing from localStorage');
+        localStorage.removeItem('token');
         // Continue to check other storage locations
+      } else {
+        return token;
       }
     }
 
@@ -33,23 +39,26 @@ export const getTokenFromLocalStorage = () => {
         const parsedSession = JSON.parse(supabaseSession);
         if (parsedSession?.access_token) {
           // Check if token is expired
-          try {
-            const tokenData = parseJwt(parsedSession.access_token);
-            const currentTime = Math.floor(Date.now() / 1000);
+          const tokenData = parseJwt(parsedSession.access_token);
 
-            // If token is expired, remove it
-            if (tokenData.exp && tokenData.exp < currentTime) {
-              console.log('[authUtils] Supabase token expired, removing from localStorage');
-              localStorage.removeItem('sb-qyvvrvthalxeibsmckep-auth-token');
-              // Continue to check other storage locations
-            } else {
-              // Store it in our standard location for future use
-              localStorage.setItem('token', parsedSession.access_token);
-              return parsedSession.access_token;
-            }
-          } catch (parseError) {
-            console.error('[authUtils] Error parsing Supabase token', parseError);
+          // If parsing failed, return the token anyway
+          if (!tokenData) {
+            console.log('[authUtils] Invalid Supabase token format, returning token without validation');
+            localStorage.setItem('token', parsedSession.access_token);
+            return parsedSession.access_token;
+          }
+
+          const currentTime = Math.floor(Date.now() / 1000);
+
+          // If token is expired, remove it
+          if (tokenData.exp && tokenData.exp < currentTime) {
+            console.log('[authUtils] Supabase token expired, removing from localStorage');
+            localStorage.removeItem('sb-qyvvrvthalxeibsmckep-auth-token');
             // Continue to check other storage locations
+          } else {
+            // Store it in our standard location for future use
+            localStorage.setItem('token', parsedSession.access_token);
+            return parsedSession.access_token;
           }
         }
       } catch (parseError) {
@@ -64,23 +73,24 @@ export const getTokenFromLocalStorage = () => {
         const user = JSON.parse(serializedUser);
         if (user?.token) {
           // Check if token is expired
-          try {
-            const tokenData = parseJwt(user.token);
-            const currentTime = Math.floor(Date.now() / 1000);
+          const tokenData = parseJwt(user.token);
 
-            // If token is expired, remove it
-            if (tokenData.exp && tokenData.exp < currentTime) {
-              console.log('[authUtils] User token expired, removing from localStorage');
-              removeUserFromLocalStorage();
-              return null;
-            } else {
-              // Store it in our standard location for future use
-              localStorage.setItem('token', user.token);
-              return user.token;
-            }
-          } catch (parseError) {
-            console.error('[authUtils] Error parsing user token', parseError);
-            // Continue but return the token anyway
+          // If parsing failed, return the token anyway
+          if (!tokenData) {
+            console.log('[authUtils] Invalid user token format, returning token without validation');
+            localStorage.setItem('token', user.token);
+            return user.token;
+          }
+
+          const currentTime = Math.floor(Date.now() / 1000);
+
+          // If token is expired, remove it
+          if (tokenData.exp && tokenData.exp < currentTime) {
+            console.log('[authUtils] User token expired, removing from localStorage');
+            removeUserFromLocalStorage();
+            return null;
+          } else {
+            // Store it in our standard location for future use
             localStorage.setItem('token', user.token);
             return user.token;
           }
@@ -101,11 +111,25 @@ export const getTokenFromLocalStorage = () => {
 /**
  * Parse a JWT token to get its payload
  * @param {string} token - JWT token to parse
- * @returns {object} Parsed token payload
+ * @returns {object} Parsed token payload or null if parsing fails
  */
 export const parseJwt = (token) => {
   try {
-    const base64Url = token.split('.')[1];
+    // Check if token is undefined or null
+    if (!token) {
+      console.error('[authUtils] Token is undefined or null');
+      return null;
+    }
+
+    // Check if token has the correct format (three parts separated by dots)
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      console.error('[authUtils] Invalid JWT format (not three parts)');
+      return null;
+    }
+
+    // Regular JWT parsing
+    const base64Url = parts[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const jsonPayload = decodeURIComponent(
       atob(base64)
@@ -115,8 +139,8 @@ export const parseJwt = (token) => {
     );
     return JSON.parse(jsonPayload);
   } catch (e) {
-    console.error('[authUtils] Error parsing JWT token', e);
-    throw e;
+    console.error('[authUtils] Error parsing JWT token:', e);
+    return null;
   }
 };
 

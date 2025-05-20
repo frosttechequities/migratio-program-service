@@ -1,0 +1,123 @@
+[
+  {
+    "_id": "roadmap-1",
+    "title": "Express Entry Application",
+    "description": "Step-by-step guide for Express Entry application process",
+    "targetCountry": "Canada",
+    "program": "Express Entry - Federal Skilled Worker",
+    "status": "active",
+    "completionPercentage": 35,
+    "startDate": "2023-11-01T00:00:00.000Z",
+    "targetCompletionDate": "2024-05-01T00:00:00.000Z",
+    "phases": [
+      {
+        "_id": "phase-1",
+        "phaseName": "Preparation",
+        "phaseOrder": 1,
+        "status": "in_progress",
+        "startDate": "2023-11-01T00:00:00.000Z",
+        "endDate": "2023-12-31T00:00:00.000Z",
+        "tasks": [
+          {
+            "_id": "task-1",
+            "title": "Take language test",
+            "description": "Schedule and complete IELTS or CELPIP test",
+            "status": "completed",
+            "dueDate": "2023-11-15T00:00:00.000Z",
+            "completedDate": "2023-11-20T00:00:00.000Z",
+            "priority": "high"
+          },
+          {
+            "_id": "task-2",
+            "title": "Get education credentials assessed",
+            "description": "Submit documents to WES or other designated organization",
+            "status": "in_progress",
+            "dueDate": "2023-12-15T00:00:00.000Z",
+            "priority": "high"
+          }
+        ]
+      },
+      {
+        "_id": "phase-2",
+        "phaseName": "Profile Creation",
+        "phaseOrder": 2,
+        "status": "pending",
+        "startDate": "2024-01-01T00:00:00.000Z",
+        "endDate": "2024-01-31T00:00:00.000Z",
+        "tasks": [
+          {
+            "_id": "task-3",
+            "title": "Create Express Entry profile",
+            "description": "Submit profile in IRCC portal",
+            "status": "pending",
+            "dueDate": "2024-01-15T00:00:00.000Z",
+            "priority": "high"
+          }
+        ]
+      },
+      {
+        "_id": "phase-3",
+        "phaseName": "Invitation and Application",
+        "phaseOrder": 3,
+        "status": "pending",
+        "startDate": "2024-02-01T00:00:00.000Z",
+        "endDate": "2024-04-01T00:00:00.000Z",
+        "tasks": [
+          {
+            "_id": "task-4",
+            "title": "Receive ITA",
+            "description": "Wait for Invitation to Apply",
+            "status": "pending",
+            "dueDate": "2024-03-01T00:00:00.000Z",
+            "priority": "medium"
+          },
+          {
+            "_id": "task-5",
+            "title": "Submit PR application",
+            "description": "Complete and submit permanent residence application",
+            "status": "pending",
+            "dueDate": "2024-04-01T00:00:00.000Z",
+            "priority": "high"
+          }
+        ]
+      }
+    ],
+    "milestones": [
+      {
+        "_id": "milestone-1",
+        "title": "Language Test Completed",
+        "description": "IELTS test completed with required scores",
+        "status": "completed",
+        "date": "2023-11-20T00:00:00.000Z"
+      },
+      {
+        "_id": "milestone-2",
+        "title": "ECA Received",
+        "description": "Education Credential Assessment received",
+        "status": "pending",
+        "date": "2023-12-15T00:00:00.000Z"
+      },
+      {
+        "_id": "milestone-3",
+        "title": "Profile Submitted",
+        "description": "Express Entry profile submitted",
+        "status": "pending",
+        "date": "2024-01-15T00:00:00.000Z"
+      },
+      {
+        "_id": "milestone-4",
+        "title": "ITA Received",
+        "description": "Invitation to Apply received",
+        "status": "pending",
+        "date": "2024-03-01T00:00:00.000Z"
+      },
+      {
+        "_id": "milestone-5",
+        "title": "PR Application Submitted",
+        "description": "Permanent Residence application submitted",
+        "status": "pending",
+        "date": "2024-04-01T00:00:00.000Z"
+      }
+    ]
+  }
+]

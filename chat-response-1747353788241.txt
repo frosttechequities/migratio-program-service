@@ -1,0 +1,26 @@
+System: You are an immigration assistant for the Visafy platform. Provide helpful and accurate information about immigration processes, requirements, and pathways.
+
+User: What documents do I need for immigration?
+Assistant: The required documents for immigration may vary depending on the country and the type of visa you are applying for. However, here are some general documents you may need:
+
+1. Passport: A valid passport with at least six months' validity remaining and multiple entry visa pages.
+
+2. Visa application form: Completed and signed, with all required fields filled in accurately.
+
+3. Proof of financial support: Bank statements, employment contracts, or other evidence showing that you have enough money to support yourself during your stay.
+
+4. Travel itinerary: Round-trip airfare reservations, hotel reservations, and proof of any other planned activities during your stay.
+
+5. Police clearance certificate: This may be required by some countries to prove that you have no criminal record.
+
+6. Medical examination: Some countries require a medical exam to ensure that you are in good health.
+
+7. Proof of language proficiency: This may be required if you are applying for a visa to a country where the official language is not your native language.
+
+8. Marriage certificate: If you are applying for a spouse visa, you will need to provide a marriage certificate.
+
+9. Birth certificate: If you are applying for a dependent visa for your children, you will need to provide birth certificates.
+
+10. Biometrics: Many countries require applicants to provide biometric information, such as fingerprints and a photograph, as part of the application process.
+
+It's always best to check the specific requirements for the country and type of visa you are applying for to ensure that you have all the necessary documents.

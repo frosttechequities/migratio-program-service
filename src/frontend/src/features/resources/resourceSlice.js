@@ -103,9 +103,9 @@ const resourceSlice = createSlice({
 export const { resetResources, clearCurrentResource } = resourceSlice.actions;
 
 // Selectors
-export const selectAllResources = (state) => state.resources.resources;
-export const selectCurrentResource = (state) => state.resources.currentResource;
-export const selectResourcesLoading = (state) => state.resources.isLoading;
-export const selectResourcesError = (state) => state.resources.error;
+export const selectAllResources = (state) => state.resources?.resources || [];
+export const selectCurrentResource = (state) => state.resources?.currentResource || null;
+export const selectResourcesLoading = (state) => state.resources?.isLoading || false;
+export const selectResourcesError = (state) => state.resources?.error || null;
 
 export default resourceSlice.reducer;

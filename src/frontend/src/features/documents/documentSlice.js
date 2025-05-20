@@ -11,7 +11,8 @@ const initialState = {
   documents: [],
   categories: [],
   currentDocument: null,
-  uploadProgress: 0
+  uploadProgress: 0,
+  ocrProcessing: false
 };
 
 // Get all documents
@@ -59,6 +60,28 @@ export const uploadDocument = createAsyncThunk(
       });
     } catch (error) {
       const message = error.response?.data?.message || error.message || 'Failed to upload document';
+      thunkAPI.dispatch(setMessage({
+        type: 'error',
+        text: message
+      }));
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Process document with OCR
+export const processDocumentOcr = createAsyncThunk(
+  'documents/processOcr',
+  async ({ id, engineType }, thunkAPI) => {
+    try {
+      const response = await documentService.processDocumentOcr(id, engineType);
+      thunkAPI.dispatch(setMessage({
+        type: 'success',
+        text: 'Document processed successfully'
+      }));
+      return response;
+    } catch (error) {
+      const message = error.response?.data?.message || error.message || 'Failed to process document';
       thunkAPI.dispatch(setMessage({
         type: 'error',
         text: message
@@ -178,7 +201,7 @@ const documentSlice = createSlice({
         state.isError = true;
         state.error = action.payload;
       })
-      
+
       // Get document by ID
       .addCase(getDocumentById.pending, (state) => {
         state.isLoading = true;
@@ -196,7 +219,7 @@ const documentSlice = createSlice({
         state.isError = true;
         state.error = action.payload;
       })
-      
+
       // Upload document
       .addCase(uploadDocument.pending, (state) => {
         state.isLoading = true;
@@ -217,7 +240,7 @@ const documentSlice = createSlice({
         state.error = action.payload;
         state.uploadProgress = 0;
       })
-      
+
       // Update document
       .addCase(updateDocument.pending, (state) => {
         state.isLoading = true;
@@ -228,8 +251,8 @@ const documentSlice = createSlice({
       .addCase(updateDocument.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.documents = state.documents.map(doc => 
-          doc._id === action.payload.data._id ? action.payload.data : doc
+        state.documents = state.documents.map(doc =>
+          doc.id === action.payload.data.id ? action.payload.data : doc
         );
         state.currentDocument = action.payload.data;
       })
@@ -238,7 +261,28 @@ const documentSlice = createSlice({
         state.isError = true;
         state.error = action.payload;
       })
-      
+
+      // Process document OCR
+      .addCase(processDocumentOcr.pending, (state) => {
+        state.isLoading = true;
+        state.ocrProcessing = true;
+        state.isSuccess = false;
+        state.isError = false;
+        state.error = null;
+      })
+      .addCase(processDocumentOcr.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.ocrProcessing = false;
+        state.isSuccess = true;
+        state.currentDocument = action.payload.document;
+      })
+      .addCase(processDocumentOcr.rejected, (state, action) => {
+        state.isLoading = false;
+        state.ocrProcessing = false;
+        state.isError = true;
+        state.error = action.payload;
+      })
+
       // Delete document
       .addCase(deleteDocument.pending, (state) => {
         state.isLoading = true;
@@ -249,8 +293,8 @@ const documentSlice = createSlice({
       .addCase(deleteDocument.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.documents = state.documents.filter(doc => doc._id !== action.payload);
-        if (state.currentDocument && state.currentDocument._id === action.payload) {
+        state.documents = state.documents.filter(doc => doc.id !== action.payload);
+        if (state.currentDocument && state.currentDocument.id === action.payload) {
           state.currentDocument = null;
         }
       })
@@ -259,7 +303,7 @@ const documentSlice = createSlice({
         state.isError = true;
         state.error = action.payload;
       })
-      
+
       // Get document categories
       .addCase(getDocumentCategories.fulfilled, (state, action) => {
         state.categories = action.payload.data;
@@ -274,10 +318,10 @@ const documentSlice = createSlice({
         state.isSuccess = true;
         // Update the document in the list and potentially the currentDocument
         state.documents = state.documents.map(doc =>
-          doc._id === action.payload.document._id ? action.payload.document : doc
+          doc.id === action.payload.id ? action.payload : doc
         );
-        if (state.currentDocument && state.currentDocument._id === action.payload.document._id) {
-          state.currentDocument = action.payload.document;
+        if (state.currentDocument && state.currentDocument.id === action.payload.id) {
+          state.currentDocument = action.payload;
         }
       })
       .addCase(updateDocumentVerification.rejected, (state, action) => {
@@ -288,14 +332,33 @@ const documentSlice = createSlice({
   }
 });
 
-export const { 
-  resetDocuments, 
-  clearDocuments, 
-  setUploadProgress, 
+export const {
+  resetDocuments,
+  clearDocuments,
+  setUploadProgress,
   resetUploadProgress
 } = documentSlice.actions;
 
 // Selector for the entire document state
 export const selectDocumentState = (state) => state.documents;
+
+// Selector for a specific document by ID
+export const selectDocumentById = (state, documentId) => {
+  if (!documentId) return null;
+
+  // First check currentDocument
+  if (state.documents.currentDocument && state.documents.currentDocument.id === documentId) {
+    return state.documents.currentDocument;
+  }
+
+  // Then check documents array
+  return state.documents.documents.find(doc => doc.id === documentId);
+};
+
+// Selector for loading state
+export const selectIsLoadingDocument = (state) => state.documents.isLoading;
+
+// Alias for getDocumentById to match naming convention in our new components
+export const fetchDocumentById = getDocumentById;
 
 export default documentSlice.reducer;

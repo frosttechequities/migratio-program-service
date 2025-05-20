@@ -1,34 +1,41 @@
 /**
- * Mock Auth Service
+ * Auth Service using Supabase
  *
- * This is a completely independent mock implementation that doesn't require any external dependencies.
+ * This service handles authentication using Supabase Auth.
  */
 
-console.log('[AuthService] Using completely independent mock implementation');
+import supabase from '../../utils/supabaseClient';
+
+console.log('[AuthService] Using Supabase authentication');
 
 // Register user
 const register = async (userData) => {
   try {
-    console.log('[AuthService] Mock register called with:', userData.email);
+    console.log('[AuthService] Registering user with Supabase:', userData.email);
 
-    // Mock successful registration
-    return {
-      user: {
-        id: 'mock-user-id',
-        email: userData.email,
-        user_metadata: {
+    const { data, error } = await supabase.auth.signUp({
+      email: userData.email,
+      password: userData.password,
+      options: {
+        data: {
           first_name: userData.firstName || '',
           last_name: userData.lastName || '',
         }
-      },
-      session: {
-        access_token: 'mock-access-token',
-        refresh_token: 'mock-refresh-token',
-        expires_at: Date.now() + 3600000 // 1 hour from now
       }
+    });
+
+    if (error) {
+      console.error('[AuthService] Registration error:', error.message);
+      throw new Error(error.message);
+    }
+
+    console.log('[AuthService] Registration successful');
+    return {
+      user: data.user,
+      session: data.session
     };
   } catch (error) {
-    console.error('Registration Service Error:', error.message);
+    console.error('[AuthService] Registration Service Error:', error.message);
     throw new Error(error.message);
   }
 };
@@ -36,27 +43,34 @@ const register = async (userData) => {
 // Login user
 const login = async (userData) => {
   try {
-    console.log('[AuthService] Mock login called with:', userData.email);
+    console.log('[AuthService] Logging in with Supabase:', userData.email);
 
-    // Mock successful login
-    const mockToken = 'mock-access-token-' + Date.now();
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: userData.email,
+      password: userData.password
+    });
 
-    // Store the session in localStorage
-    localStorage.setItem('token', mockToken);
+    if (error) {
+      console.error('[AuthService] Login error:', error.message);
+      throw new Error(error.message);
+    }
+
+    if (!data.session) {
+      console.error('[AuthService] Login failed: No session returned');
+      throw new Error('Login failed: No session returned');
+    }
+
+    console.log('[AuthService] Login successful');
+
+    // Store the token in localStorage for backward compatibility
+    localStorage.setItem('token', data.session.access_token);
 
     return {
-      user: {
-        id: 'mock-user-id',
-        email: userData.email,
-        user_metadata: {
-          first_name: 'Mock',
-          last_name: 'User',
-        }
-      },
-      token: mockToken
+      user: data.user,
+      token: data.session.access_token
     };
   } catch (error) {
-    console.error('Login Service Error:', error.message);
+    console.error('[AuthService] Login Service Error:', error.message);
     throw new Error(error.message);
   }
 };
@@ -64,27 +78,29 @@ const login = async (userData) => {
 // Logout user
 const logout = async () => {
   try {
-    console.log('[AuthService] Mock logout called - clearing all authentication data');
+    console.log('[AuthService] Logging out with Supabase');
 
-    // Clear all authentication-related data from localStorage
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.error('[AuthService] Logout error:', error.message);
+      throw error;
+    }
+
+    // Clear all authentication-related data from localStorage for backward compatibility
     localStorage.removeItem('user');
     localStorage.removeItem('token');
     localStorage.removeItem('auth');
-
-    // Clear any session cookies that might be persisting the session
-    document.cookie.split(';').forEach(cookie => {
-      const [name] = cookie.trim().split('=');
-      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
-    });
 
     // Force a reload of the page to ensure all state is cleared
     setTimeout(() => {
       window.location.href = '/';
     }, 100);
 
+    console.log('[AuthService] Logout successful');
     return { success: true };
   } catch (error) {
-    console.error('Logout Service Error:', error.message);
+    console.error('[AuthService] Logout Service Error:', error.message);
     return { success: false, message: error.message };
   }
 };
@@ -92,27 +108,36 @@ const logout = async () => {
 // Check Auth Status
 const checkAuth = async () => {
   try {
-    console.log('[AuthService] Mock checking authentication status');
+    console.log('[AuthService] Checking authentication status with Supabase');
 
-    // Check if there's a token in localStorage
-    const token = localStorage.getItem('token');
+    // Get the current session from Supabase
+    const { data, error } = await supabase.auth.getSession();
 
-    if (token) {
-      console.log('[AuthService] Mock token found, user is authenticated');
-
-      // Return a mock user
-      return {
-        id: 'mock-user-id',
-        email: 'mock@example.com',
-        user_metadata: {
-          first_name: 'Mock',
-          last_name: 'User',
-        }
-      };
+    if (error) {
+      console.error('[AuthService] Session check error:', error.message);
+      return null;
     }
 
-    console.log('[AuthService] No token found, user not authenticated');
-    return null;
+    if (!data.session) {
+      console.log('[AuthService] No active session found');
+      return null;
+    }
+
+    // Get the user data
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+
+    if (userError) {
+      console.error('[AuthService] Get user error:', userError.message);
+      return null;
+    }
+
+    if (!userData.user) {
+      console.log('[AuthService] No user found');
+      return null;
+    }
+
+    console.log('[AuthService] User is authenticated:', userData.user.id);
+    return userData.user;
   } catch (error) {
     console.error('[AuthService] Auth check failed:', error.message);
     return null;
@@ -120,10 +145,13 @@ const checkAuth = async () => {
 };
 
 // Email verification
-const verifyEmail = async (token) => {
+const verifyEmail = async () => {
   try {
-    console.log('[AuthService] Mock email verification called', token ? `(token: ${token})` : '');
-    return { success: true, message: 'Email verification successful (mock)' };
+    console.log('[AuthService] Verifying email with Supabase');
+
+    // Supabase handles email verification automatically
+    // This function is kept for API compatibility
+    return { success: true, message: 'Email verification handled by Supabase' };
   } catch (error) {
     console.error('[AuthService] Email verification error:', error.message);
     return { success: false, message: error.message };
@@ -133,29 +161,49 @@ const verifyEmail = async (token) => {
 // Forgot password
 const forgotPassword = async (email) => {
   try {
-    console.log('[AuthService] Mock forgot password called with:', email);
+    console.log('[AuthService] Sending password reset email with Supabase:', email);
 
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`
+    });
+
+    if (error) {
+      console.error('[AuthService] Forgot password error:', error.message);
+      throw error;
+    }
+
+    console.log('[AuthService] Password reset email sent successfully');
     return {
       success: true,
-      message: 'Password reset instructions sent to your email (mock)'
+      message: 'Password reset instructions sent to your email'
     };
   } catch (error) {
-    console.error('Forgot password error:', error.message);
+    console.error('[AuthService] Forgot password error:', error.message);
     return { success: false, message: error.message };
   }
 };
 
 // Reset password
-const resetPassword = async (token, password) => {
+const resetPassword = async (password) => {
   try {
-    console.log('[AuthService] Mock reset password called with token:', token, 'and password:', password ? '(password provided)' : '(no password)');
+    console.log('[AuthService] Resetting password with Supabase');
 
+    const { error } = await supabase.auth.updateUser({
+      password: password
+    });
+
+    if (error) {
+      console.error('[AuthService] Reset password error:', error.message);
+      throw error;
+    }
+
+    console.log('[AuthService] Password reset successful');
     return {
       success: true,
-      message: 'Password has been reset successfully (mock)'
+      message: 'Password has been reset successfully'
     };
   } catch (error) {
-    console.error('Reset password error:', error.message);
+    console.error('[AuthService] Reset password error:', error.message);
     return { success: false, message: error.message };
   }
 };
